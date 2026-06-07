@@ -209,7 +209,7 @@ const SelectionEngine = () => {
         <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-rose-100/50">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
             <span>选品中心</span>
-            <span>></span>
+            <span>{">"}</span>
             <span className="text-rose-500">AI选品</span>
           </div>
           <Button onClick={triggerExport} variant="outline" size="sm" className="border-rose-200 text-rose-600 hover:bg-rose-50/50">
@@ -562,12 +562,12 @@ const SelectionEngine = () => {
         <div className="flex justify-between items-center text-xs text-slate-500 bg-white p-4 rounded-xl border border-slate-100">
           <span>显示 1-{filteredProducts.length} / 共 1,234 条</span>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled><</Button>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled>{"<"}</Button>
             <Button size="sm" className="h-8 w-8 p-0 bg-rose-400 hover:bg-rose-500 text-white">1</Button>
             <Button variant="outline" size="sm" className="h-8 w-8 p-0">2</Button>
             <Button variant="outline" size="sm" className="h-8 w-8 p-0">3</Button>
             <Button variant="outline" size="sm" className="h-8 w-8 p-0">...</Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0">></Button>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0">{">"}</Button>
           </div>
         </div>
       </div>
