@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import SelectionEngine from "./pages/SelectionEngine";
 import ContentFactory from "./pages/ContentFactory";
 import SentimentAnalysis from "./pages/SentimentAnalysis";
+import DataCenter from "./pages/DataCenter";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
           <Route path="/selection" element={<SelectionEngine />} />
           <Route path="/content" element={<ContentFactory />} />
           <Route path="/sentiment" element={<SentimentAnalysis />} />
+          <Route path="/data" element={<DataCenter />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
