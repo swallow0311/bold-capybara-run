@@ -52,7 +52,7 @@ const SelectionEngine = () => {
               <Input className="pl-9" placeholder="搜索关键词或商品ID..." />
             </div>
 
-            <Button className="bg-indigo-600 hover:bg-indigo-700">开始爬取分析</Button>
+            <Button className="bg-rose-400 hover:bg-rose-500 text-white">开始爬取分析</Button>
           </CardContent>
         </Card>
 
@@ -78,7 +78,7 @@ const SelectionEngine = () => {
                   {products.map((p, i) => (
                     <TableRow 
                       key={p.id} 
-                      className={cn("cursor-pointer", selectedItem?.id === p.id && "bg-indigo-50/50")}
+                      className={cn("cursor-pointer", selectedItem?.id === p.id && "bg-rose-50/50")}
                       onClick={() => setSelectedItem(p)}
                     >
                       <TableCell className="font-medium text-slate-400">0{i+1}</TableCell>
@@ -94,7 +94,7 @@ const SelectionEngine = () => {
                       </TableCell>
                       <TableCell>{p.price}</TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" className="text-indigo-600">详情</Button>
+                        <Button variant="ghost" size="sm" className="text-rose-500 hover:text-rose-600">详情</Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -108,11 +108,11 @@ const SelectionEngine = () => {
             <CardHeader className="border-b border-slate-100">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-indigo-500" />
+                  <ShieldCheck className="w-5 h-5 text-rose-400" />
                   AI 研判报告
                 </CardTitle>
                 <Button variant="outline" size="icon" className="h-8 w-8">
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4 text-slate-600" />
                 </Button>
               </div>
             </CardHeader>
@@ -122,9 +122,9 @@ const SelectionEngine = () => {
                   <div>
                     <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">新品立项可行性</p>
                     <div className="mt-2 flex items-center gap-3">
-                      <div className="text-3xl font-bold text-indigo-600">高</div>
+                      <div className="text-3xl font-bold text-rose-500">高</div>
                       <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-500 w-[85%]"></div>
+                        <div className="h-full bg-rose-400 w-[85%]"></div>
                       </div>
                     </div>
                   </div>
@@ -162,7 +162,7 @@ const SelectionEngine = () => {
                     </p>
                   </div>
 
-                  <Button className="w-full bg-indigo-600">导出完整分析报告</Button>
+                  <Button className="w-full bg-rose-400 hover:bg-rose-500 text-white">导出完整分析报告</Button>
                 </div>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-2">

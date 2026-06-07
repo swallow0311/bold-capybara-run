@@ -86,7 +86,7 @@ const Settings = () => {
 
         <div className="flex justify-end gap-3">
           <Button variant="outline">重置默认</Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 px-6" onClick={handleSave}>保存配置</Button>
+          <Button className="bg-rose-400 hover:bg-rose-500 text-white px-6" onClick={handleSave}>保存配置</Button>
         </div>
       </div>
     </DashboardLayout>

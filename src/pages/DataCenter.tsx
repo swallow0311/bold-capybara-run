@@ -25,7 +25,7 @@ const DataCenter = () => {
           </div>
           <div className="flex gap-3">
             <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" /> 导出素材</Button>
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700"><Plus className="w-4 h-4 mr-2" /> 录入新品档案</Button>
+            <Button size="sm" className="bg-rose-400 hover:bg-rose-500 text-white"><Plus className="w-4 h-4 mr-2" /> 录入新品档案</Button>
           </div>
         </div>
 
@@ -46,7 +46,7 @@ const DataCenter = () => {
           <Card className="lg:col-span-2 border-none shadow-sm">
             <CardHeader>
               <CardTitle className="text-base font-bold flex items-center gap-2">
-                <Database className="w-4 h-4 text-indigo-500" />
+                <Database className="w-4 h-4 text-rose-400" />
                 多渠道获客效果对比
               </CardTitle>
             </CardHeader>
@@ -64,7 +64,7 @@ const DataCenter = () => {
                       <span>{item.value} ({item.pct}%)</span>
                     </div>
                     <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-rose-300 rounded-full" style={{ width: `${item.pct}%` }}></div>
+                      <div className="h-full bg-rose-400 rounded-full" style={{ width: `${item.pct}%` }}></div>
                     </div>
                   </div>
                 ))}
@@ -123,7 +123,7 @@ const DataCenter = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="text-indigo-600">更新素材</Button>
+                      <Button variant="ghost" size="sm" className="text-rose-400 hover:text-rose-500">更新素材</Button>
                     </TableCell>
                   </TableRow>
                 ))}

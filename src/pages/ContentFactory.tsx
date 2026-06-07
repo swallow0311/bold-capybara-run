@@ -93,7 +93,7 @@ const ContentFactory = () => {
                 </Select>
               </div>
               <Button 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 mt-4" 
+                className="w-full bg-rose-400 hover:bg-rose-500 text-white mt-4" 
                 onClick={handleGenerate}
                 disabled={isGenerating}
               >
@@ -116,13 +116,13 @@ const ContentFactory = () => {
           {results.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
               {results.map(res => (
-                <Card key={res.id} className="border-none shadow-sm hover:ring-1 ring-indigo-100 transition-all">
+                <Card key={res.id} className="border-none shadow-sm hover:ring-1 ring-rose-100 transition-all">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                    <CardTitle className="text-sm font-bold text-indigo-600">{res.title}</CardTitle>
+                    <CardTitle className="text-sm font-bold text-rose-500">{res.title}</CardTitle>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Copy className="w-4 h-4" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><RefreshCw className="w-4 h-4" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Save className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-rose-500"><Copy className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-rose-500"><RefreshCw className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-rose-500"><Save className="w-4 h-4" /></Button>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -135,7 +135,7 @@ const ContentFactory = () => {
             </div>
           ) : (
             <div className="h-[400px] bg-white rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
-              <Sparkles className="w-12 h-12 mb-4 opacity-20" />
+              <Sparkles className="w-12 h-12 mb-4 opacity-20 text-rose-300" />
               <p>配置左侧信息并点击生成按钮</p>
             </div>
           )}
@@ -158,7 +158,7 @@ const ContentFactory = () => {
                   <div key={i} className="p-4 hover:bg-slate-50 cursor-pointer transition-colors">
                     <div className="flex justify-between items-start mb-1">
                       <span className="text-sm font-medium text-slate-700">{item.title}</span>
-                      <Badge variant="outline" className="text-[10px]">{item.type}</Badge>
+                      <Badge variant="outline" className="text-[10px] text-rose-500 border-rose-100 bg-rose-50/30">{item.type}</Badge>
                     </div>
                     <p className="text-xs text-slate-400">{item.time}</p>
                   </div>

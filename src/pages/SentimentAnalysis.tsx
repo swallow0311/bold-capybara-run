@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { 
-  PieChart as PieChartIcon, 
   TrendingDown, 
   MessageSquare, 
   Lightbulb, 
@@ -21,10 +20,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const SentimentAnalysis = () => {
+  // Use warm coral colors for data representation
   const pieData = [
-    { name: '产品配方', value: 45, color: '#6366f1' },
-    { name: '包装问题', value: 30, color: '#f59e0b' },
-    { name: '物流服务', value: 25, color: '#ef4444' },
+    { name: '产品配方', value: 45, color: '#f5756c' },
+    { name: '包装问题', value: 30, color: '#fca39d' },
+    { name: '物流服务', value: 25, color: '#fedcd9' },
   ];
 
   const lineData = [
@@ -41,7 +41,7 @@ const SentimentAnalysis = () => {
     { 
       category: '产品配方', 
       icon: AlertCircle, 
-      color: 'text-indigo-600',
+      color: 'text-rose-500',
       points: [
         { text: '上脸有刺痛感，敏感肌不友好', level: '高', quote: '“用了两次脸就红了，刺痛感很明显，不敢再用了。”' },
         { text: '质地太厚重，容易闷痘', level: '中', quote: '“夏天用真的太油了，第二天就长了两个大痘。”' }
@@ -58,7 +58,7 @@ const SentimentAnalysis = () => {
     { 
       category: '物流问题', 
       icon: Truck, 
-      color: 'text-red-600',
+      color: 'text-red-500',
       points: [
         { text: '快递暴力，收到时外盒变形', level: '低', quote: '“盒子都扁了，还好里面的瓶子没碎。”' }
       ]
@@ -90,7 +90,7 @@ const SentimentAnalysis = () => {
                 <SelectItem value="dy">抖音小店</SelectItem>
               </SelectContent>
             </Select>
-            <Button className="bg-indigo-600">开始分析</Button>
+            <Button className="bg-rose-400 hover:bg-rose-500 text-white">开始分析</Button>
           </CardContent>
         </Card>
 
@@ -136,7 +136,7 @@ const SentimentAnalysis = () => {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#94a3b8'}} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#94a3b8'}} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={2} dot={{r: 4, fill: '#6366f1'}} activeDot={{r: 6}} />
+                  <Line type="monotone" dataKey="count" stroke="#f5756c" strokeWidth={2} dot={{r: 4, fill: '#f5756c'}} activeDot={{r: 6}} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -147,7 +147,7 @@ const SentimentAnalysis = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-lg font-bold flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-indigo-500" />
+              <MessageSquare className="w-5 h-5 text-rose-400" />
               AI 痛点提炼
             </h3>
             {painPoints.map((cat, i) => (
@@ -181,7 +181,7 @@ const SentimentAnalysis = () => {
               <Lightbulb className="w-5 h-5 text-amber-500" />
               迭代建议区
             </h3>
-            <Card className="border-none shadow-sm bg-indigo-600 text-white">
+            <Card className="border-none shadow-sm bg-rose-400 text-white">
               <CardContent className="p-6 space-y-6">
                 <div className="space-y-2">
                   <p className="text-xs opacity-80 uppercase font-bold">配方优化</p>
@@ -196,11 +196,11 @@ const SentimentAnalysis = () => {
                   </p>
                 </div>
                 <div className="pt-4 border-t border-white/20 flex flex-col gap-2">
-                  <Button variant="secondary" className="w-full text-indigo-600">
+                  <Button variant="secondary" className="w-full text-rose-500 bg-white hover:bg-rose-50">
                     同步至产品迭代工单
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
-                  <Button variant="outline" className="w-full bg-transparent border-white/40 hover:bg-white/10">
+                  <Button variant="outline" className="w-full bg-transparent border-white/40 hover:bg-white/10 text-white">
                     导出分析报告
                   </Button>
                 </div>

@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils";
 
 const Index = () => {
   const stats = [
-    { title: '爆款数据条数', value: '12,840', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { title: '今日生成内容', value: '156', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { title: '差评分析条数', value: '892', icon: MessageSquareWarning, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { title: '爆款数据条数', value: '12,840', icon: TrendingUp, color: 'text-rose-500', bg: 'bg-rose-50' },
+    { title: '今日生成内容', value: '156', icon: FileText, color: 'text-amber-500', bg: 'bg-amber-50' },
+    { title: '差评分析条数', value: '892', icon: MessageSquareWarning, color: 'text-orange-500', bg: 'bg-orange-50' },
   ];
 
   const quickActions = [
@@ -62,11 +62,11 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {quickActions.map((action, i) => (
             <Link key={i} to={action.path}>
-              <Card className="hover:border-indigo-200 transition-all cursor-pointer group border-slate-200">
+              <Card className="hover:border-rose-200 transition-all cursor-pointer group border-slate-200">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <action.icon className="w-8 h-8 text-slate-400 group-hover:text-indigo-500 transition-colors" />
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500" />
+                    <action.icon className="w-8 h-8 text-slate-400 group-hover:text-rose-500 transition-colors" />
+                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-rose-500" />
                   </div>
                   <CardTitle className="text-lg mt-4">{action.title}</CardTitle>
                 </CardHeader>
@@ -82,14 +82,14 @@ const Index = () => {
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg">近期任务列表</CardTitle>
-            <Button variant="ghost" size="sm" className="text-indigo-600">查看全部</Button>
+            <Button variant="ghost" size="sm" className="text-rose-500 hover:text-rose-600 hover:bg-rose-50">查看全部</Button>
           </CardHeader>
           <CardContent>
             <div className="divide-y divide-slate-100">
               {tasks.map((task) => (
                 <div key={task.id} className="py-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
+                    <div className="w-2 h-2 rounded-full bg-rose-400"></div>
                     <span className="text-sm font-medium text-slate-700">{task.title}</span>
                   </div>
                   <div className="flex items-center gap-6">
