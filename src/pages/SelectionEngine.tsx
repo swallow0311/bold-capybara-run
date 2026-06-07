@@ -1,3 +1,4 @@
+' 和 '<' 符号导致的编译报错问题">
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -195,7 +196,7 @@ const SelectionEngine = () => {
     showSuccess("已为您导出全量选品数据至Excel（共1,234条）");
   };
 
-  // 根据选择和搜索筛选数据
+  // 根据选择 and 搜索筛选数据
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.includes(searchKey) || p.shop.includes(searchKey) || p.category.includes(searchKey);
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
