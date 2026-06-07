@@ -18,6 +18,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend 
 } from 'recharts';
+import { cn } from "@/lib/utils";
 
 const SentimentAnalysis = () => {
   const pieData = [

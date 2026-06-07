@@ -11,6 +11,7 @@ import {
   Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const stats = [

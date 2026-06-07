@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Search, Download, AlertTriangle, TrendingUp, ShieldCheck } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const SelectionEngine = () => {
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -166,7 +167,7 @@ const SelectionEngine = () => {
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-2">
                   <Search className="w-12 h-12 opacity-20" />
-                  <p className="text-sm">请在左侧选择单品查看AI分析</p>
+                  <p className="text-sm">请在左侧选择单品查看AI analysis</p>
                 </div>
               )}
             </CardContent>
