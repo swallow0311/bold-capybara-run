@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const menuItems = [
   { name: '核心看板', sub: '数据统计与ROI指标', icon: LayoutDashboard, path: '/' },
-  { name: 'AI选品引擎', sub: '全网爆款趋势挖掘', icon: Search, path: '/selection' },
+  { name: 'AI选品', sub: '全网爆款趋势挖掘', icon: Search, path: '/selection' },
   { name: 'AIGC内容工厂', sub: '多版本内容快速生成', icon: PenTool, path: '/content' },
   { name: '评价NLP分析', sub: '用户口碑与痛点洞察', icon: BarChart3, path: '/sentiment' },
   { name: '数据中心', sub: '素材检索与快速复用', icon: Database, path: '/data' },

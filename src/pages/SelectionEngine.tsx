@@ -7,16 +7,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { 
   Search, Download, TrendingUp, Flame, Sparkles, Mic, SlidersHorizontal, 
-  ChevronDown, ChevronUp, Columns, Scale, Maximize2, Trash2, ArrowUpRight, HelpCircle
+  ChevronDown, ChevronUp, Columns, Scale, Maximize2, Trash2, ArrowUpRight, 
+  HelpCircle, Share2, Award, Zap, AlertCircle
 } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-// 模拟的高密度商品数据
+// 扩展后的高维度商品及商业决策数据
 const INITIAL_PRODUCTS = [
   { 
     id: 1, 
@@ -29,8 +31,11 @@ const INITIAL_PRODUCTS = [
     salesTrend: '+45%',
     influencers: 1234, 
     roi: '4.2',
-    tags: ['抗老紧致', '成分精简'],
-    aiReport: '该产品在35+精致妈妈人群中转化率极高。受早C晚A趋势红利带动，本月流量同比增长72%。',
+    commission: '25%',
+    convRate: '3.8%',
+    platform: 'dy', // 抖音
+    tags: ['抗老紧致', '高转化率', '早C晚A'],
+    aiReport: '该产品在35+精致妈妈人群中转化率极高。受早C晚A趋势红利带动，本月流量同比增长72%。推荐采用头部达人矩阵分发+自播配合。',
     historyData: [
       { date: '5-01', sales: 1200 },
       { date: '5-05', sales: 1900 },
@@ -50,8 +55,11 @@ const INITIAL_PRODUCTS = [
     salesTrend: '+32%',
     influencers: 892, 
     roi: '3.8',
-    tags: ['敏感肌', '屏障修护'],
-    aiReport: '随着季节交替，敏感修护心智大幅度爆发。建议搭配短视频“换季修护指南”展开达人引流投放。',
+    commission: '30%',
+    convRate: '2.9%',
+    platform: 'xhs', // 小红书
+    tags: ['敏感肌', '高佣金', '屏障修护'],
+    aiReport: '随着季节交替，敏感修护心智大幅度爆发。建议搭配短视频“换季修护指南”展开中腰部美妆达人纯佣合作。',
     historyData: [
       { date: '5-01', sales: 800 },
       { date: '5-05', sales: 1100 },
@@ -71,8 +79,11 @@ const INITIAL_PRODUCTS = [
     salesTrend: '+12%',
     influencers: 2145, 
     roi: '4.8',
-    tags: ['水光感', '国潮爆款'],
-    aiReport: '小红书夏日白开水妆容推荐单品，目前在彩妆榜霸榜TOP3，回购率达35%，是理想的跑量单品。',
+    commission: '20%',
+    convRate: '5.1%',
+    platform: 'tb', // 淘宝
+    tags: ['水光感', '国潮爆款', '平价亲民'],
+    aiReport: '小红书夏日白开水妆容推荐单品，目前在彩妆榜霸榜TOP3，回购率达35%，是理想的店播福利款与起盘破零品。',
     historyData: [
       { date: '5-01', sales: 3200 },
       { date: '5-05', sales: 4500 },
@@ -92,8 +103,11 @@ const INITIAL_PRODUCTS = [
     salesTrend: '+85%',
     influencers: 1540, 
     roi: '5.1',
-    tags: ['清爽不粘', '广谱防晒'],
-    aiReport: '进入夏季以来全网刚需，配合直播间“秒杀买赠”活动极易出单。需注意物流及时率的保障。',
+    commission: '22%',
+    convRate: '4.5%',
+    platform: 'dy', // 抖音
+    tags: ['夏日爆款', '广谱防晒', '防汗抗水'],
+    aiReport: '进入夏季以来全网刚需，配合直播间“秒杀买赠”活动极易爆单。注意快速跟进千川流量直投，缩短回本周期。',
     historyData: [
       { date: '5-01', sales: 1500 },
       { date: '5-05', sales: 2800 },
@@ -113,8 +127,11 @@ const INITIAL_PRODUCTS = [
     salesTrend: '-4%',
     influencers: 450, 
     roi: '2.9',
-    tags: ['深层清洁', '温和去角质'],
-    aiReport: '清洁泥膜竞争非常激烈，建议从小红书“一周局部清洁”细分痛点场景开展针对性投流。',
+    commission: '15%',
+    convRate: '1.8%',
+    platform: 'ks', // 快手
+    tags: ['深层清洁', '温和去角质', '日常护理'],
+    aiReport: '清洁泥膜竞争非常激烈，建议从小红书“一周局部清洁”细分痛点场景开展针对性投流，避免正面竞品价格战。',
     historyData: [
       { date: '5-01', sales: 900 },
       { date: '5-05', sales: 920 },
@@ -129,7 +146,8 @@ const SelectionEngine = () => {
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [searchKey, setSearchKey] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [selectedCommission, setSelectedCommission] = useState('all');
   
   // 交互控制
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
@@ -138,6 +156,12 @@ const SelectionEngine = () => {
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(true);
+
+  // 智能立项表单状态
+  const [projectName, setProjectName] = useState('');
+  const [projectChannel, setProjectChannel] = useState('dy');
+  const [initialStock, setInitialStock] = useState('1000');
+  const [projectNotes, setProjectNotes] = useState('');
 
   // 快捷入口Tab切换状态
   const [activeTab, setActiveTab] = useState<'recommend' | 'darkhorse' | 'new'>('recommend');
@@ -162,7 +186,7 @@ const SelectionEngine = () => {
   // 批量操作与对比功能
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedProductIds(products.map(p => p.id));
+      setSelectedProductIds(filteredProducts.map(p => p.id));
     } else {
       setSelectedProductIds([]);
     }
@@ -192,44 +216,60 @@ const SelectionEngine = () => {
   };
 
   const triggerExport = () => {
-    showSuccess("已为您导出全量选品数据至Excel（共1,234条）");
+    showSuccess("已为您导出筛选出的选品明细数据至 Excel");
   };
 
-  // 根据选择 and 搜索筛选数据
+  // 提交立项表单
+  const handleCreateProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!projectName.trim()) {
+      showError("请输入立项方案名称");
+      return;
+    }
+    showSuccess(`立项成功！方案「${projectName}」已同步至中后台工作流。`);
+    setDetailProduct(null);
+    // 重置表单
+    setProjectName('');
+    setProjectNotes('');
+  };
+
+  // 联合筛选逻辑
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.includes(searchKey) || p.shop.includes(searchKey) || p.category.includes(searchKey);
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesPlatform = selectedPlatform === 'all' || p.platform === selectedPlatform;
+    
+    let matchesCommission = true;
+    if (selectedCommission !== 'all') {
+      const rate = parseInt(p.commission);
+      if (selectedCommission === 'high') matchesCommission = rate >= 25;
+      if (selectedCommission === 'mid') matchesCommission = rate >= 15 && rate < 25;
+      if (selectedCommission === 'low') matchesCommission = rate < 15;
+    }
+
+    return matchesSearch && matchesCategory && matchesPlatform && matchesCommission;
   });
 
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24">
-        {/* Breadcrumb + Export */}
-        <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-rose-100/50">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-            <span>选品中心</span>
-            <span>{">"}</span>
-            <span className="text-rose-500">AI选品</span>
-          </div>
-          <Button onClick={triggerExport} variant="outline" size="sm" className="border-rose-200 text-rose-600 hover:bg-rose-50/50">
-            <Download className="w-4 h-4 mr-1.5" /> 导出数据
-          </Button>
-        </div>
-
+        
         {/* AI Search Assistant Block */}
         <Card className="border-none shadow-sm overflow-hidden bg-gradient-to-r from-rose-50/40 via-white to-rose-50/20">
           <CardContent className="p-6 md:p-8 space-y-4">
-            <div className="flex items-center gap-2 text-rose-600 font-bold text-base md:text-lg">
-              <Sparkles className="w-5 h-5 animate-pulse" />
-              <span>AI 选品助手</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-rose-600 font-bold text-base md:text-lg">
+                <Sparkles className="w-5 h-5 animate-pulse" />
+                <span>AI 选品助理</span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-medium">更新时间：今天 08:30 (每半小时智能同步)</span>
             </div>
             
             <div className="relative flex items-center bg-white border border-rose-200 rounded-2xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-rose-400 focus-within:border-transparent transition-all">
               <Search className="w-5 h-5 text-slate-400 ml-4 mr-2" />
               <input 
                 type="text" 
-                placeholder="请输入商品名称、爆款关键词或粘贴抖音/小红书商品链接..."
+                placeholder="探索美妆新商机：输入品类、核心功效或粘贴抖音/小红书分享链接..."
                 className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400 py-3"
                 value={searchKey}
                 onChange={(e) => setSearchKey(e.target.value)}
@@ -247,11 +287,11 @@ const SelectionEngine = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5 text-xs">
-              <span className="text-slate-400 font-semibold">热门搜索：</span>
-              {['防晒霜', '美白精华', '舒缓面膜', '早C晚A', '控油喷雾'].map(tag => (
+              <span className="text-slate-400 font-semibold">热门推荐词：</span>
+              {['防晒霜', '多肽精华', '敏感修护', '平价唇蜜', '深层泥膜'].map(tag => (
                 <button 
                   key={tag}
-                  onClick={() => handleSearchTag(tag)}
+                  onClick={() => handleSearchTag(tag.replace('平价', '').replace('深层', ''))}
                   className="px-3 py-1 bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-full transition-all"
                 >
                   {tag}
@@ -264,9 +304,9 @@ const SelectionEngine = () => {
         {/* Quick Entrance Tabs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { id: 'recommend', title: '📈 爆款推荐榜', desc: '根据近7天全网销量环比增速智能排序', style: 'hover:border-rose-300' },
-            { id: 'darkhorse', title: '🔥 潜力黑马榜', desc: '低粉丝高转化的自裂变潜力美妆好物', style: 'hover:border-amber-300' },
-            { id: 'new', title: '🆕 新品爆款榜', desc: '近30天内新上架并迅速破圈的美妆尖货', style: 'hover:border-indigo-300' }
+            { id: 'recommend', title: '📈 爆款推荐榜', desc: '根据近7天多渠道销售环比增速智能综合排序', style: 'hover:border-rose-300' },
+            { id: 'darkhorse', title: '🔥 潜力黑马榜', desc: '低佣高转化、社媒声量高频异动的潜力美妆', style: 'hover:border-amber-300' },
+            { id: 'new', title: '🆕 新品爆款榜', desc: '入驻30天内实现销售裂变并完成数据转化的新星', style: 'hover:border-indigo-300' }
           ].map(tab => {
             const isSelected = activeTab === tab.id;
             return (
@@ -274,7 +314,7 @@ const SelectionEngine = () => {
                 key={tab.id}
                 onClick={() => {
                   setActiveTab(tab.id as any);
-                  showSuccess(`切换至: ${tab.title}`);
+                  showSuccess(`已为您筛选：${tab.title}`);
                 }}
                 className={`cursor-pointer transition-all border ${isSelected ? 'border-rose-400 bg-rose-50/30' : 'border-slate-100 bg-white'} ${tab.style}`}
               >
@@ -292,7 +332,7 @@ const SelectionEngine = () => {
           <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <SlidersHorizontal className="w-4 h-4 text-slate-500" />
-              <CardTitle className="text-sm font-bold text-slate-800">商品筛选指标</CardTitle>
+              <CardTitle className="text-sm font-bold text-slate-800">多维度爆款指标筛选</CardTitle>
             </div>
             <Button 
               variant="ghost" 
@@ -324,6 +364,37 @@ const SelectionEngine = () => {
               </div>
 
               <div className="space-y-1.5 text-left">
+                <label className="text-xs font-semibold text-slate-500">数据来源平台</label>
+                <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                  <SelectTrigger className="bg-slate-50 border-slate-200">
+                    <SelectValue placeholder="全部平台" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部平台</SelectItem>
+                    <SelectItem value="dy">抖音电商 (DY)</SelectItem>
+                    <SelectItem value="xhs">小红书置换 (XHS)</SelectItem>
+                    <SelectItem value="tb">淘宝直通 (TB)</SelectItem>
+                    <SelectItem value="ks">快手电商 (KS)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5 text-left">
+                <label className="text-xs font-semibold text-slate-500">达人带货佣金率</label>
+                <Select value={selectedCommission} onValueChange={setSelectedCommission}>
+                  <SelectTrigger className="bg-slate-50 border-slate-200">
+                    <SelectValue placeholder="全部比例" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部比例</SelectItem>
+                    <SelectItem value="high">高佣金 (25%及以上)</SelectItem>
+                    <SelectItem value="mid">中佣金 (15%-25%)</SelectItem>
+                    <SelectItem value="low">低利润 (15%以下)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5 text-left">
                 <label className="text-xs font-semibold text-slate-500">价格区间 (¥)</label>
                 <Select defaultValue="all">
                   <SelectTrigger className="bg-slate-50 border-slate-200">
@@ -338,36 +409,6 @@ const SelectionEngine = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-1.5 text-left">
-                <label className="text-xs font-semibold text-slate-500">累计销量</label>
-                <Select defaultValue="all">
-                  <SelectTrigger className="bg-slate-50 border-slate-200">
-                    <SelectValue placeholder="不限" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">不限</SelectItem>
-                    <SelectItem value="10k+">1万+以上</SelectItem>
-                    <SelectItem value="50k+">5万+以上</SelectItem>
-                    <SelectItem value="100k+">10万+以上</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5 text-left">
-                <label className="text-xs font-semibold text-slate-500">带货达人数</label>
-                <Select defaultValue="all">
-                  <SelectTrigger className="bg-slate-50 border-slate-200">
-                    <SelectValue placeholder="不限" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">不限</SelectItem>
-                    <SelectItem value="100+">100人以上</SelectItem>
-                    <SelectItem value="500+">500人以上</SelectItem>
-                    <SelectItem value="1000+">1000人以上</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </CardContent>
           )}
         </Card>
@@ -376,7 +417,7 @@ const SelectionEngine = () => {
         <Card className="border-none shadow-sm overflow-hidden">
           <CardHeader className="pb-3 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-bold text-slate-800">爆款数据总表 ({filteredProducts.length} 条)</span>
+              <span className="text-sm font-bold text-slate-800">数据总表 ({filteredProducts.length} 条)</span>
               {selectedProductIds.length > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs bg-rose-50 text-rose-600 px-2 py-0.5 rounded border border-rose-100">
@@ -401,6 +442,9 @@ const SelectionEngine = () => {
               <Button variant="outline" size="sm" className="h-8 text-xs border-slate-200">
                 <Columns className="w-3.5 h-3.5 mr-1" /> 自定义列表
               </Button>
+              <Button onClick={triggerExport} variant="outline" size="sm" className="h-8 text-xs border-rose-200 text-rose-600 hover:bg-rose-50/50">
+                <Download className="w-3.5 h-3.5 mr-1" /> 导出数据
+              </Button>
             </div>
           </CardHeader>
 
@@ -415,12 +459,13 @@ const SelectionEngine = () => {
                     />
                   </TableHead>
                   <TableHead className="w-[60px] text-center font-bold">展开</TableHead>
-                  <TableHead className="min-w-[280px]">商品基本信息</TableHead>
-                  <TableHead className="text-right">均价</TableHead>
+                  <TableHead className="min-w-[260px]">爆款基本信息</TableHead>
+                  <TableHead className="text-right">主推均价</TableHead>
                   <TableHead className="text-right">累计销量</TableHead>
                   <TableHead className="text-right">周增速</TableHead>
-                  <TableHead className="text-right">带货达人</TableHead>
-                  <TableHead className="text-right">带货ROI</TableHead>
+                  <TableHead className="text-right">带货佣金率</TableHead>
+                  <TableHead className="text-right">主推ROI</TableHead>
+                  <TableHead className="text-right">转化率</TableHead>
                   <TableHead className="text-center w-[180px]">操作</TableHead>
                 </TableRow>
               </TableHeader>
@@ -461,7 +506,15 @@ const SelectionEngine = () => {
                               <h4 className="font-bold text-xs text-slate-800 line-clamp-1 hover:text-rose-500 transition-colors cursor-pointer" onClick={() => setDetailProduct(p)}>
                                 {p.name}
                               </h4>
-                              <p className="text-[10px] text-slate-400">{p.shop}</p>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.2 rounded-md uppercase">
+                                  {p.platform === 'dy' && '抖音'}
+                                  {p.platform === 'xhs' && '小红书'}
+                                  {p.platform === 'tb' && '淘宝'}
+                                  {p.platform === 'ks' && '快手'}
+                                </span>
+                                <span className="text-[10px] text-slate-400">{p.shop}</span>
+                              </div>
                               <div className="flex flex-wrap gap-1">
                                 {p.tags.map(t => (
                                   <Badge key={t} variant="secondary" className="text-[9px] px-1 py-0 bg-rose-50 text-rose-600 border border-rose-100">
@@ -488,9 +541,9 @@ const SelectionEngine = () => {
                           {p.salesTrend}
                         </TableCell>
 
-                        {/* Influencers */}
-                        <TableCell className="text-right text-xs font-semibold text-slate-700">
-                          {p.influencers.toLocaleString()}人
+                        {/* Commission */}
+                        <TableCell className="text-right font-semibold text-xs text-rose-600">
+                          {p.commission}
                         </TableCell>
 
                         {/* ROI */}
@@ -498,6 +551,11 @@ const SelectionEngine = () => {
                           <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 text-[10px] font-bold border-none">
                             ROI {p.roi}
                           </Badge>
+                        </TableCell>
+
+                        {/* Conversion Rate */}
+                        <TableCell className="text-right font-semibold text-slate-600">
+                          {p.convRate}
                         </TableCell>
 
                         {/* Action buttons */}
@@ -516,7 +574,7 @@ const SelectionEngine = () => {
                               size="sm" 
                               className="h-7 text-[11px] bg-rose-400 hover:bg-rose-500 text-white"
                             >
-                              <Maximize2 className="w-3 h-3 mr-1" /> 详情
+                              <Maximize2 className="w-3 h-3 mr-1" /> 立项详情
                             </Button>
                           </div>
                         </TableCell>
@@ -525,7 +583,7 @@ const SelectionEngine = () => {
                       {/* Expandable row */}
                       {isExpanded && (
                         <TableRow className="bg-rose-50/10 border-b border-rose-100/40">
-                          <TableCell colSpan={9} className="p-4">
+                          <TableCell colSpan={10} className="p-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left pl-14">
                               <div className="space-y-2">
                                 <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider block">AI 选品研判</span>
@@ -627,7 +685,7 @@ const SelectionEngine = () => {
               商品同框多维度对比
             </DialogTitle>
             <DialogDescription>
-              核心指标直接对照，帮助发掘最高投流回报潜力。
+              核心指标直接对照，辅助决策最佳投流推广方案。
             </DialogDescription>
           </DialogHeader>
 
@@ -638,10 +696,11 @@ const SelectionEngine = () => {
               {/* Dimensions Labels Column */}
               <div className="col-span-1 bg-slate-50/80 font-bold border-r border-b border-slate-100 flex flex-col justify-between p-3 space-y-6">
                 <div></div>
-                <div className="text-left font-semibold text-slate-500">主推均价</div>
-                <div className="text-left font-semibold text-slate-500">累计销售额</div>
-                <div className="text-left font-semibold text-slate-500">投放ROI</div>
-                <div className="text-left font-semibold text-slate-500">达人数</div>
+                <div className="text-left font-semibold text-slate-500">价格 (¥)</div>
+                <div className="text-left font-semibold text-slate-500">累计销量</div>
+                <div className="text-left font-semibold text-slate-500">佣金比例</div>
+                <div className="text-left font-semibold text-slate-500">行业转化率</div>
+                <div className="text-left font-semibold text-slate-500">带货ROI</div>
                 <div className="text-left font-semibold text-slate-500">AI研判简评</div>
                 <div className="text-left font-semibold text-slate-500">操作</div>
               </div>
@@ -665,10 +724,11 @@ const SelectionEngine = () => {
                     </div>
                     <div className="text-center font-bold text-rose-500">¥{item.price}</div>
                     <div className="text-center font-semibold text-slate-700">{(item.sales / 10000).toFixed(1)}万</div>
+                    <div className="text-center font-semibold text-rose-600">{item.commission}</div>
+                    <div className="text-center font-semibold text-slate-600">{item.convRate}</div>
                     <div className="text-center">
                       <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 border-none font-bold text-[10px]">{item.roi}</Badge>
                     </div>
-                    <div className="text-center font-medium text-slate-600">{item.influencers}人</div>
                     <div className="text-center text-[9px] text-slate-500 leading-normal line-clamp-4 bg-slate-50 p-2 rounded-lg">
                       {item.aiReport}
                     </div>
@@ -696,19 +756,19 @@ const SelectionEngine = () => {
           {detailProduct && (
             <>
               <SheetHeader>
-                <SheetTitle className="text-left flex items-center gap-2">
-                  <ArrowUpRight className="w-5 h-5 text-rose-500" />
-                  爆款商品研判大盘
+                <SheetTitle className="text-left flex items-center gap-2 text-rose-600">
+                  <ArrowUpRight className="w-5 h-5" />
+                  AI 智能诊断与立项表
                 </SheetTitle>
-                <SheetDescription className="text-left">
-                  深度AI剖析：提供商品多渠道数据表现及未来发展研判报告
+                <SheetDescription className="text-left text-xs">
+                  深度AI诊断该商品的市场红利、营销策略，并直接发起立项流转。
                 </SheetDescription>
               </SheetHeader>
 
               <div className="mt-6 space-y-6 text-left text-xs">
                 {/* Visual Section */}
-                <div className="flex gap-4 p-4 bg-slate-50 rounded-xl">
-                  <img src={detailProduct.img} alt={detailProduct.name} className="w-20 h-20 object-cover rounded-lg shadow-md" />
+                <div className="flex gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <img src={detailProduct.img} alt={detailProduct.name} className="w-20 h-20 object-cover rounded-lg shadow-sm" />
                   <div className="space-y-1">
                     <h3 className="font-bold text-sm text-slate-800 leading-snug">{detailProduct.name}</h3>
                     <p className="text-slate-400">{detailProduct.shop}</p>
@@ -723,69 +783,104 @@ const SelectionEngine = () => {
                 </div>
 
                 {/* Key Indicators */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 border border-slate-100 rounded-lg text-center bg-white shadow-sm">
-                    <span className="text-[10px] text-slate-400 block mb-1">主推均价</span>
-                    <span className="text-base font-bold text-rose-500">¥{detailProduct.price}</span>
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="p-2.5 border border-slate-100 rounded-lg bg-white shadow-sm">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">主推均价</span>
+                    <span className="text-sm font-bold text-rose-500">¥{detailProduct.price}</span>
                   </div>
-                  <div className="p-3 border border-slate-100 rounded-lg text-center bg-white shadow-sm">
-                    <span className="text-[10px] text-slate-400 block mb-1">累计销量</span>
-                    <span className="text-base font-bold text-slate-800">{(detailProduct.sales / 10000).toFixed(1)}万</span>
+                  <div className="p-2.5 border border-slate-100 rounded-lg bg-white shadow-sm">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">带货佣金率</span>
+                    <span className="text-sm font-bold text-rose-600">{detailProduct.commission}</span>
                   </div>
-                  <div className="p-3 border border-slate-100 rounded-lg text-center bg-white shadow-sm">
-                    <span className="text-[10px] text-slate-400 block mb-1">带货达人</span>
-                    <span className="text-base font-bold text-slate-800">{detailProduct.influencers}人</span>
+                  <div className="p-2.5 border border-slate-100 rounded-lg bg-white shadow-sm">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">引流转化率</span>
+                    <span className="text-sm font-bold text-slate-700">{detailProduct.convRate}</span>
                   </div>
-                </div>
-
-                {/* Trend line */}
-                <div className="space-y-2">
-                  <span className="text-[11px] font-bold text-slate-400 block">近期销量爬升率</span>
-                  <div className="h-48 bg-white border border-slate-100 rounded-xl p-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={detailProduct.historyData}>
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="sales" stroke="#f5756c" strokeWidth={3} dot={{ r: 4 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                  <div className="p-2.5 border border-slate-100 rounded-lg bg-white shadow-sm">
+                    <span className="text-[10px] text-slate-400 block mb-0.5">主推ROI</span>
+                    <span className="text-sm font-bold text-slate-700">{detailProduct.roi}</span>
                   </div>
                 </div>
 
-                {/* AI report */}
-                <div className="space-y-2 bg-gradient-to-br from-rose-50/30 to-rose-50/10 border border-rose-100 p-4 rounded-xl">
+                {/* AI diagnosis */}
+                <div className="space-y-2 bg-gradient-to-br from-rose-50/40 to-rose-50/10 border border-rose-100 p-4 rounded-xl">
                   <span className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" /> AI 诊断报告
+                    <Sparkles className="w-4 h-4" /> AI 选品诊断研判
                   </span>
                   <p className="text-slate-600 leading-relaxed text-xs">
                     {detailProduct.aiReport}
                   </p>
                 </div>
 
-                {/* Button Action */}
-                <div className="flex gap-3 pt-4 border-t border-slate-100">
-                  <Button 
-                    className="flex-1 bg-rose-400 hover:bg-rose-500 text-white rounded-xl"
-                    onClick={() => {
-                      handleAddToCompare(detailProduct);
-                      setDetailProduct(null);
-                      setIsCompareOpen(true);
-                    }}
-                  >
-                    加入对比池
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50"
-                    onClick={() => {
-                      showSuccess("已将此选品同步至待立项工单中");
-                      setDetailProduct(null);
-                    }}
-                  >
-                    同步立项建议
-                  </Button>
-                </div>
+                {/* Interactive Project Initiation Form */}
+                <form onSubmit={handleCreateProject} className="space-y-4 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                    <Award className="w-4 h-4 text-rose-400" />
+                    <span>智能立项配置</span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-500 font-medium">新品方案名称</Label>
+                    <Input 
+                      placeholder="例：2026夏日新选品-[紧致面霜]快速测试计划" 
+                      value={projectName}
+                      onChange={(e) => setProjectName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-slate-500 font-medium">主推广平台</Label>
+                      <Select value={projectChannel} onValueChange={setProjectChannel}>
+                        <SelectTrigger className="bg-slate-50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="dy">抖音直播/千川</SelectItem>
+                          <SelectItem value="xhs">小红书置换KOL</SelectItem>
+                          <SelectItem value="tb">淘宝直播</SelectItem>
+                          <SelectItem value="ks">快手挂车</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-slate-500 font-medium">预估首批备货 (件)</Label>
+                      <Input 
+                        type="number"
+                        placeholder="1000" 
+                        value={initialStock}
+                        onChange={(e) => setInitialStock(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-500 font-medium">研发/投流备注（选填）</Label>
+                    <Input 
+                      placeholder="添加对研发方向、主打卖点、预算的要求..." 
+                      value={projectNotes}
+                      onChange={(e) => setProjectNotes(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50"
+                      onClick={() => handleAddToCompare(detailProduct)}
+                    >
+                      加入对比池
+                    </Button>
+                    <Button 
+                      type="submit"
+                      className="flex-1 bg-rose-400 hover:bg-rose-500 text-white rounded-xl"
+                    >
+                      一键同步立项
+                    </Button>
+                  </div>
+                </form>
               </div>
             </>
           )}
