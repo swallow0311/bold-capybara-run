@@ -13,6 +13,7 @@ import {
   Layers, Settings2, SlidersHorizontal, ListFilter
 } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
+import { cn } from "@/lib/utils";
 
 interface ProductItem {
   id: string;
@@ -326,7 +327,7 @@ const ProductManagement = () => {
                             <Edit3 className="w-3 h-3 mr-1" /> 编辑
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)} className="h-7 text-[10px] text-rose-500 hover:bg-rose-50 p-0 px-2 rounded">
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-3" />
                           </Button>
                         </div>
                       </TableCell>
