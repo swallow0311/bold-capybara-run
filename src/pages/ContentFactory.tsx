@@ -3,16 +3,16 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Copy, RefreshCw, Sparkles, 
   Wand2, CheckCircle2, AlertTriangle, LayoutList, 
-  Sparkle, ShieldAlert, Check, ChevronsUpDown, Search
+  Sparkle, Check, ChevronsUpDown, Search
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -117,35 +117,23 @@ const ContentFactory = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto text-left pb-12">
-        
-        {/* Top Compliance Info */}
-        <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 text-xs">
-            <ShieldAlert className="w-4 h-4 text-rose-500" />
-            <span className="font-bold text-slate-800">营销风控安全锁已开启</span>
-            <span className="text-[10px] text-slate-400">自动拦截违法词，保障店铺合规上架</span>
-          </div>
-          <div className="ml-auto">
-            <Button 
-              onClick={handleExtractPoints} 
-              variant="outline" 
-              className="border-rose-200 text-rose-600 hover:bg-rose-50 text-xs h-8"
-            >
-              <Sparkle className="w-3.5 h-3.5 mr-1 text-rose-400" />
-              卖点智能提取
-            </Button>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Left panel (5 columns) - Params */}
           <Card className="lg:col-span-5 border-none shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100">
+            <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <Wand2 className="w-4 h-4 text-rose-400" />
                 文案参数配置面板
               </CardTitle>
+              <Button 
+                onClick={handleExtractPoints} 
+                variant="outline" 
+                className="border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] h-7 px-2"
+              >
+                <Sparkle className="w-3 h-3 mr-1 text-rose-400" />
+                卖点智能提取
+              </Button>
             </CardHeader>
 
             <CardContent className="p-6 space-y-4 text-xs text-slate-700">
