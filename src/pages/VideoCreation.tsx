@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { 
   Play, Pause, Upload, Sparkles, Scissors, Music, 
   Volume2, Download, RefreshCw, Layers, Sliders,
-  Video, Eye, Film, AlertCircle, Type, Send
+  Eye, Film, AlertCircle, Type, Send
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -87,6 +87,13 @@ const VideoCreation = () => {
     if (!isPlaying) {
       showSuccess("正在拉取预览...");
     }
+  };
+
+  const handleGenerateScript = () => {
+    setSubtitleText(
+      "【画面1】夏季肌肤出油暗沉不用怕！\n【画面2】中达多肽面霜，30%浓度酵母精粹深入肌底\n【画面3】28天实测面部细纹明显减淡，水润发光"
+    );
+    showSuccess("AI 智能脚本生成成功！");
   };
 
   return (
@@ -197,18 +204,45 @@ const VideoCreation = () => {
             </Card>
 
             <Card className="border-none shadow-sm bg-white">
-              <CardHeader className="pb-3 border-b border-slate-100">
+              <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <Layers className="w-4 h-4 text-rose-400" />
                   AI 智能脚本
                 </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleGenerateScript}
+                  className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 h-7"
+                >
+                  {subtitleText.trim() ? "重新生成" : "生成智能脚本"}
+                </Button>
               </CardHeader>
-              <CardContent className="p-5 space-y-3">
+              <CardContent className="p-5 space-y-4">
                 <textarea 
                   value={subtitleText}
                   onChange={(e) => setSubtitleText(e.target.value)}
+                  placeholder="请输入脚本内容或点击右上方智能生成..."
                   className="w-full text-xs text-slate-600 bg-slate-50/50 rounded-xl p-3 border border-slate-200 h-24 resize-none leading-relaxed" 
                 />
+                
+                <Button 
+                  onClick={startRender}
+                  disabled={isRendering}
+                  className="w-full bg-rose-400 hover:bg-rose-500 text-white font-bold h-10 rounded-xl shadow-sm"
+                >
+                  {isRendering ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      视频合成渲染中 {renderProgress}%
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      开始渲染生成
+                    </>
+                  )}
+                </Button>
               </CardContent>
             </Card>
           </div>
