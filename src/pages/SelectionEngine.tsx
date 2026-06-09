@@ -312,7 +312,7 @@ const SelectionEngine = () => {
 
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                <span className="text-slate-400 font-semibold">热门推荐词：</span>
+                <span className="text-slate-400 font-semibold w-20 text-right">热门推荐词：</span>
                 {['防晒霜', '多肽精华', '敏感修护', '平价唇蜜', '深层泥膜'].map(tag => (
                   <button 
                     key={tag}
@@ -326,9 +326,7 @@ const SelectionEngine = () => {
               
               {searchHistory.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                  <span className="text-slate-400 font-semibold flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> 历史搜索：
-                  </span>
+                  <span className="text-slate-400 font-semibold w-20 text-right">历史搜索：</span>
                   {searchHistory.map((tag, idx) => (
                     <button 
                       key={idx}
@@ -722,59 +720,116 @@ const SelectionEngine = () => {
           {compareProducts.length === 0 ? (
             <div className="py-8 text-center text-slate-400 text-xs">对比池中暂无商品</div>
           ) : (
-            <div className="grid grid-cols-5 border border-slate-100 rounded-xl overflow-hidden mt-4 text-xs">
-              {/* Dimensions Labels Column */}
-              <div className="col-span-1 bg-slate-50/80 font-bold border-r border-b border-slate-100 flex flex-col justify-between p-3 space-y-6">
-                <div></div>
-                <div className="text-left font-semibold text-slate-500">价格 (¥)</div>
-                <div className="text-left font-semibold text-slate-500">累计销量</div>
-                <div className="text-left font-semibold text-slate-500">佣金比例</div>
-                <div className="text-left font-semibold text-slate-500">行业转化率</div>
-                <div className="text-left font-semibold text-slate-500">带货ROI</div>
-                <div className="text-left font-semibold text-slate-500">AI研判简评</div>
-                <div className="text-left font-semibold text-slate-500">操作</div>
-              </div>
-
-              {/* Compare Items Columns */}
-              {Array.from({ length: 4 }).map((_, idx) => {
-                const item = compareProducts[idx];
-                if (!item) {
+            <div className="border border-slate-100 rounded-xl overflow-hidden mt-4 text-xs">
+              {/* Header Row */}
+              <div className="grid grid-cols-5 bg-slate-50/80 border-b border-slate-100">
+                <div className="p-4 font-bold text-slate-500 flex items-center">对比维度</div>
+                {Array.from({ length: 4 }).map((_, idx) => {
+                  const item = compareProducts[idx];
                   return (
-                    <div key={idx} className="col-span-1 border-r border-b border-slate-100 bg-slate-50/20 p-4 flex flex-col items-center justify-center text-slate-300">
-                      <HelpCircle className="w-8 h-8 mb-2 opacity-50" />
-                      <span>待添加对比</span>
+                    <div key={idx} className="p-4 border-l border-slate-100 flex flex-col items-center justify-center text-center gap-2">
+                      {item ? (
+                        <>
+                          <img src={item.img} alt={item.name} className="w-10 h-10 object-cover rounded-lg shadow-sm" />
+                          <div className="font-bold text-[10px] text-slate-800 line-clamp-1">{item.name}</div>
+                        </>
+                      ) : (
+                        <div className="text-slate-300 flex flex-col items-center gap-1">
+                          <HelpCircle className="w-6 h-6 opacity-50" />
+                          <span>待添加</span>
+                        </div>
+                      )}
                     </div>
                   );
-                }
-                return (
-                  <div key={item.id} className="col-span-1 border-r border-b border-slate-100 p-3 flex flex-col justify-between space-y-6">
-                    <div className="text-center space-y-2">
-                      <img src={item.img} alt={item.name} className="w-12 h-12 object-cover rounded-lg mx-auto shadow-sm" />
-                      <div className="font-bold text-[10px] text-slate-800 line-clamp-2">{item.name}</div>
-                    </div>
-                    <div className="text-center font-bold text-rose-500">¥{item.price}</div>
-                    <div className="text-center font-semibold text-slate-700">{(item.sales / 10000).toFixed(1)}万</div>
-                    <div className="text-center font-semibold text-rose-600">{item.commission}</div>
-                    <div className="text-center font-semibold text-slate-600">{item.convRate}</div>
-                    <div className="text-center">
-                      <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 border-none font-bold text-[10px]">{item.roi}</Badge>
-                    </div>
-                    <div className="text-center text-[9px] text-slate-500 leading-normal line-clamp-4 bg-slate-50 p-2 rounded-lg">
-                      {item.aiReport}
-                    </div>
-                    <div className="text-center">
+                })}
+              </div>
+
+              {/* Price Row */}
+              <div className="grid grid-cols-5 border-b border-slate-100">
+                <div className="p-4 bg-slate-50/30 font-semibold text-slate-500 flex items-center">价格 (¥)</div>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="p-4 border-l border-slate-100 flex items-center justify-center font-bold text-rose-500">
+                    {compareProducts[idx] ? `¥${compareProducts[idx].price}` : '-'}
+                  </div>
+                ))}
+              </div>
+
+              {/* Sales Row */}
+              <div className="grid grid-cols-5 border-b border-slate-100">
+                <div className="p-4 bg-slate-50/30 font-semibold text-slate-500 flex items-center">累计销量</div>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="p-4 border-l border-slate-100 flex items-center justify-center font-semibold text-slate-700">
+                    {compareProducts[idx] ? `${(compareProducts[idx].sales / 10000).toFixed(1)}万` : '-'}
+                  </div>
+                ))}
+              </div>
+
+              {/* Commission Row */}
+              <div className="grid grid-cols-5 border-b border-slate-100">
+                <div className="p-4 bg-slate-50/30 font-semibold text-slate-500 flex items-center">佣金比例</div>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="p-4 border-l border-slate-100 flex items-center justify-center font-semibold text-rose-600">
+                    {compareProducts[idx] ? compareProducts[idx].commission : '-'}
+                  </div>
+                ))}
+              </div>
+
+              {/* ConvRate Row */}
+              <div className="grid grid-cols-5 border-b border-slate-100">
+                <div className="p-4 bg-slate-50/30 font-semibold text-slate-500 flex items-center">行业转化率</div>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="p-4 border-l border-slate-100 flex items-center justify-center font-semibold text-slate-600">
+                    {compareProducts[idx] ? compareProducts[idx].convRate : '-'}
+                  </div>
+                ))}
+              </div>
+
+              {/* ROI Row */}
+              <div className="grid grid-cols-5 border-b border-slate-100">
+                <div className="p-4 bg-slate-50/30 font-semibold text-slate-500 flex items-center">带货ROI</div>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="p-4 border-l border-slate-100 flex items-center justify-center">
+                    {compareProducts[idx] ? (
+                      <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 border-none font-bold text-[10px]">
+                        {compareProducts[idx].roi}
+                      </Badge>
+                    ) : '-'}
+                  </div>
+                ))}
+              </div>
+
+              {/* AI Report Row */}
+              <div className="grid grid-cols-5 border-b border-slate-100">
+                <div className="p-4 bg-slate-50/30 font-semibold text-slate-500 flex items-center">AI研判简评</div>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="p-4 border-l border-slate-100 flex items-start justify-start text-left text-[9px] text-slate-500 leading-normal">
+                    {compareProducts[idx] ? (
+                      <div className="bg-slate-50 p-2 rounded-lg w-full">
+                        {compareProducts[idx].aiReport}
+                      </div>
+                    ) : '-'}
+                  </div>
+                ))}
+              </div>
+
+              {/* Action Row */}
+              <div className="grid grid-cols-5">
+                <div className="p-4 bg-slate-50/30 font-semibold text-slate-500 flex items-center">操作</div>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="p-4 border-l border-slate-100 flex items-center justify-center">
+                    {compareProducts[idx] ? (
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         className="text-xs text-rose-500 hover:bg-rose-50"
-                        onClick={() => handleRemoveFromCompare(item.id)}
+                        onClick={() => handleRemoveFromCompare(compareProducts[idx].id)}
                       >
                         移除
                       </Button>
-                    </div>
+                    ) : '-'}
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
           )}
         </DialogContent>
