@@ -13,6 +13,7 @@ import {
   Trash2, ShieldCheck, Settings, Server, Plus, Code, Download
 } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
+import { cn } from "@/lib/utils";
 
 interface ApiConfig {
   id: string;
@@ -99,7 +100,6 @@ const ApiSettings = () => {
                 <Table>
                   <TableHeader className="bg-slate-50/60">
                     <TableRow>
-                      <TableRow className="hover:bg-transparent" />
                       <TableHead className="text-xs">通道名称</TableHead>
                       <TableHead className="text-xs">类别/类型</TableHead>
                       <TableHead className="text-xs">APP KEY</TableHead>

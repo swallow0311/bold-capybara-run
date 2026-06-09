@@ -292,42 +292,27 @@ const SentimentAnalysis = () => {
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-500">数据源</span>
                 <Select value={dataSource} onValueChange={setDataSource}>
-                  <SelectTrigger className="w-[140px] h-9 bg-slate-50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sync">本店商品同步</SelectItem>
-                    <SelectItem value="manual">手动导入文本</SelectItem>
-                  </SelectContent>
+                  <option value="sync">本店商品同步</option>
+                  <option value="manual">手动导入文本</option>
                 </Select>
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-500">所属产品</span>
                 <Select value={productFilter} onValueChange={setProductFilter}>
-                  <SelectTrigger className="w-[200px] h-9 bg-slate-50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部产品</SelectItem>
-                    {PRODUCTS_DATA.map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
+                  <option value="all">全部产品</option>
+                  {PRODUCTS_DATA.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
                 </Select>
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-500">时间段</span>
                 <Select value={timeRange} onValueChange={setTimeRange}>
-                  <SelectTrigger className="w-[110px] h-9 bg-slate-50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">近 7 天</SelectItem>
-                    <SelectItem value="30">近 30 天</SelectItem>
-                    <SelectItem value="all">全部评价</SelectItem>
-                  </SelectContent>
+                  <option value="7">近 7 天</option>
+                  <option value="30">近 30 天</option>
+                  <option value="all">全部评价</option>
                 </Select>
               </div>
             </div>
@@ -839,15 +824,10 @@ const SentimentAnalysis = () => {
                     <div className="flex items-center gap-2 pt-1">
                       <span className="text-[10px] text-slate-500">过滤低于</span>
                       <Select value={rules.shortLength.toString()} onValueChange={(val) => setRules(prev => ({ ...prev, shortLength: parseInt(val) }))}>
-                        <SelectTrigger className="w-[60px] h-7 bg-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="2">2</SelectItem>
-                          <SelectItem value="3">3</SelectItem>
-                          <SelectItem value="4">4</SelectItem>
-                          <SelectItem value="5">5</SelectItem>
-                        </SelectContent>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
                       </Select>
                       <span className="text-[10px] text-slate-500">个字的评价</span>
                     </div>
@@ -911,10 +891,5 @@ const Select = ({ children, value, onValueChange }: any) => (
     <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
   </div>
 );
-
-const SelectTrigger = ({ children, className }: any) => <div className={className}>{children}</div>;
-const SelectValue = ({ placeholder }: any) => <span>{placeholder}</span>;
-const SelectContent = ({ children }: any) => <>{children}</>;
-const SelectItem = ({ value, children }: any) => <option value={value}>{children}</option>;
 
 export default SentimentAnalysis;
