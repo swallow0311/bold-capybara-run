@@ -13,7 +13,9 @@ import {
   Cpu, Sparkles, ShieldCheck, Settings,
   RotateCcw, BarChart3, Database, Zap, 
   Search, PenTool, ShieldAlert, Info,
-  Layers, Sliders, Filter, Clock, Activity
+  Layers, Sliders, Filter, Clock, Activity,
+  FileText, Image as ImageIcon, Video as VideoIcon,
+  FileSpreadsheet, Globe
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 
