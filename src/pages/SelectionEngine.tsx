@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { 
   Search, Download, TrendingUp, Flame, Sparkles, Mic, SlidersHorizontal, 
   ChevronDown, ChevronUp, Columns, Scale, Maximize2, Trash2, ArrowUpRight, 
-  HelpCircle, Share2, Award, Zap, AlertCircle
+  HelpCircle, Award, Clock
 } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -33,8 +33,9 @@ const INITIAL_PRODUCTS = [
     roi: '4.2',
     commission: '25%',
     convRate: '3.8%',
-    platform: 'dy', // 抖音
+    platform: 'dy',
     tags: ['抗老紧致', '高转化率', '早C晚A'],
+    type: 'recommend',
     aiReport: '该产品在35+精致妈妈人群中转化率极高。受早C晚A趋势红利带动，本月流量同比增长72%。推荐采用头部达人矩阵分发+自播配合。',
     historyData: [
       { date: '5-01', sales: 1200 },
@@ -57,8 +58,9 @@ const INITIAL_PRODUCTS = [
     roi: '3.8',
     commission: '30%',
     convRate: '2.9%',
-    platform: 'xhs', // 小红书
+    platform: 'xhs',
     tags: ['敏感肌', '高佣金', '屏障修护'],
+    type: 'darkhorse',
     aiReport: '随着季节交替，敏感修护心智大幅度爆发。建议搭配短视频“换季修护指南”展开中腰部美妆达人纯佣合作。',
     historyData: [
       { date: '5-01', sales: 800 },
@@ -81,8 +83,9 @@ const INITIAL_PRODUCTS = [
     roi: '4.8',
     commission: '20%',
     convRate: '5.1%',
-    platform: 'tb', // 淘宝
+    platform: 'tb',
     tags: ['水光感', '国潮爆款', '平价亲民'],
+    type: 'recommend',
     aiReport: '小红书夏日白开水妆容推荐单品，目前在彩妆榜霸榜TOP3，回购率达35%，是理想的店播福利款与起盘破零品。',
     historyData: [
       { date: '5-01', sales: 3200 },
@@ -105,8 +108,9 @@ const INITIAL_PRODUCTS = [
     roi: '5.1',
     commission: '22%',
     convRate: '4.5%',
-    platform: 'dy', // 抖音
+    platform: 'dy',
     tags: ['夏日爆款', '广谱防晒', '防汗抗水'],
+    type: 'new',
     aiReport: '进入夏季以来全网刚需，配合直播间“秒杀买赠”活动极易爆单。注意快速跟进千川流量直投，缩短回本周期。',
     historyData: [
       { date: '5-01', sales: 1500 },
@@ -129,8 +133,9 @@ const INITIAL_PRODUCTS = [
     roi: '2.9',
     commission: '15%',
     convRate: '1.8%',
-    platform: 'ks', // 快手
+    platform: 'ks',
     tags: ['深层清洁', '温和去角质', '日常护理'],
+    type: 'darkhorse',
     aiReport: '清洁泥膜竞争非常激烈，建议从小红书“一周局部清洁”细分痛点场景开展针对性投流，避免正面竞品价格战。',
     historyData: [
       { date: '5-01', sales: 900 },
@@ -145,6 +150,7 @@ const INITIAL_PRODUCTS = [
 const SelectionEngine = () => {
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [searchKey, setSearchKey] = useState('');
+  const [searchHistory, setSearchHistory] = useState<string[]>(['面霜', '精华', '防晒']);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [selectedCommission, setSelectedCommission] = useState('all');
@@ -166,10 +172,12 @@ const SelectionEngine = () => {
   // 快捷入口Tab切换状态
   const [activeTab, setActiveTab] = useState<'recommend' | 'darkhorse' | 'new'>('recommend');
 
-  // 模拟搜索推荐
-  const handleSearchTag = (keyword: string) => {
-    setSearchKey(keyword);
-    showSuccess(`已为您筛选关键词：${keyword}`);
+  // 搜索逻辑
+  const handleSearch = (val: string) => {
+    setSearchKey(val);
+    if (val.trim() && !searchHistory.includes(val)) {
+      setSearchHistory(prev => [val, ...prev].slice(0, 10));
+    }
   };
 
   const handleVoiceSearch = () => {
@@ -183,43 +191,47 @@ const SelectionEngine = () => {
     );
   };
 
-  // 批量操作与对比功能
+  // 核心对比逻辑：复选框勾选即对比
+  const handleSelectItem = (id: number, checked: boolean) => {
+    if (checked) {
+      if (compareProducts.length >= 4) {
+        showError("最多同时选中4件商品进行对比");
+        return;
+      }
+      const product = products.find(p => p.id === id);
+      if (product) {
+        setCompareProducts(prev => [...prev, product]);
+        setSelectedProductIds(prev => [...prev, id]);
+      }
+    } else {
+      setCompareProducts(prev => prev.filter(p => p.id !== id));
+      setSelectedProductIds(prev => prev.filter(p => p.id !== id));
+    }
+  };
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedProductIds(filteredProducts.map(p => p.id));
+      const toSelect = filteredProducts.slice(0, 4);
+      if (filteredProducts.length > 4) {
+        showError("最多同时选中4件商品进行对比，已为您选中前4项");
+      }
+      setSelectedProductIds(toSelect.map(p => p.id));
+      setCompareProducts(toSelect);
     } else {
       setSelectedProductIds([]);
+      setCompareProducts([]);
     }
-  };
-
-  const handleSelectItem = (id: number, checked: boolean) => {
-    setSelectedProductIds(prev => 
-      checked ? [...prev, id] : prev.filter(itemId => itemId !== id)
-    );
-  };
-
-  const handleAddToCompare = (product: any) => {
-    if (compareProducts.some(p => p.id === product.id)) {
-      showError("该商品已在对比列表中");
-      return;
-    }
-    if (compareProducts.length >= 4) {
-      showError("最多只能同时对比 4 个商品");
-      return;
-    }
-    setCompareProducts(prev => [...prev, product]);
-    showSuccess(`已添加 ${product.name} 到对比池`);
   };
 
   const handleRemoveFromCompare = (id: number) => {
     setCompareProducts(prev => prev.filter(p => p.id !== id));
+    setSelectedProductIds(prev => prev.filter(pId => pId !== id));
   };
 
   const triggerExport = () => {
     showSuccess("已为您导出筛选出的选品明细数据至 Excel");
   };
 
-  // 提交立项表单
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectName.trim()) {
@@ -228,13 +240,13 @@ const SelectionEngine = () => {
     }
     showSuccess(`立项成功！方案「${projectName}」已同步至中后台工作流。`);
     setDetailProduct(null);
-    // 重置表单
     setProjectName('');
     setProjectNotes('');
   };
 
   // 联合筛选逻辑
   const filteredProducts = products.filter(p => {
+    const matchesTab = p.type === activeTab;
     const matchesSearch = p.name.includes(searchKey) || p.shop.includes(searchKey) || p.category.includes(searchKey);
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
     const matchesPlatform = selectedPlatform === 'all' || p.platform === selectedPlatform;
@@ -247,8 +259,18 @@ const SelectionEngine = () => {
       if (selectedCommission === 'low') matchesCommission = rate < 15;
     }
 
-    return matchesSearch && matchesCategory && matchesPlatform && matchesCommission;
+    return matchesTab && matchesSearch && matchesCategory && matchesPlatform && matchesCommission;
   });
+
+  // 计算各榜单数据量
+  const tabCounts = {
+    recommend: products.filter(p => p.type === 'recommend').length,
+    darkhorse: products.filter(p => p.type === 'darkhorse').length,
+    new: products.filter(p => p.type === 'new').length,
+  };
+
+  // 动态表头标题
+  const dynamicInfoTitle = activeTab === 'recommend' ? '爆款基本信息' : activeTab === 'darkhorse' ? '潜力黑马基本信息' : '新品基本信息';
 
   return (
     <DashboardLayout>
@@ -273,6 +295,7 @@ const SelectionEngine = () => {
                 className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400 py-3"
                 value={searchKey}
                 onChange={(e) => setSearchKey(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchKey)}
               />
               <button 
                 onClick={handleVoiceSearch}
@@ -281,22 +304,41 @@ const SelectionEngine = () => {
               >
                 <Mic className="w-5 h-5" />
               </button>
-              <Button className="bg-rose-400 hover:bg-rose-500 text-white rounded-xl px-6 py-2">
+              <Button onClick={() => handleSearch(searchKey)} className="bg-rose-400 hover:bg-rose-500 text-white rounded-xl px-6 py-2">
                 智能检索
               </Button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5 text-xs">
-              <span className="text-slate-400 font-semibold">热门推荐词：</span>
-              {['防晒霜', '多肽精华', '敏感修护', '平价唇蜜', '深层泥膜'].map(tag => (
-                <button 
-                  key={tag}
-                  onClick={() => handleSearchTag(tag.replace('平价', '').replace('深层', ''))}
-                  className="px-3 py-1 bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-full transition-all"
-                >
-                  {tag}
-                </button>
-              ))}
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2.5 text-xs">
+                <span className="text-slate-400 font-semibold">热门推荐词：</span>
+                {['防晒霜', '多肽精华', '敏感修护', '平价唇蜜', '深层泥膜'].map(tag => (
+                  <button 
+                    key={tag}
+                    onClick={() => handleSearch(tag)}
+                    className="px-3 py-1 bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-full transition-all"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+              
+              {searchHistory.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2.5 text-xs">
+                  <span className="text-slate-400 font-semibold flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> 历史搜索：
+                  </span>
+                  {searchHistory.map((tag, idx) => (
+                    <button 
+                      key={idx}
+                      onClick={() => setSearchKey(tag)}
+                      className="px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-full transition-all"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -304,22 +346,24 @@ const SelectionEngine = () => {
         {/* Quick Entrance Tabs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { id: 'recommend', title: '📈 爆款推荐榜', desc: '根据近7天多渠道销售环比增速智能综合排序', style: 'hover:border-rose-300' },
-            { id: 'darkhorse', title: '🔥 潜力黑马榜', desc: '低佣高转化、社媒声量高频异动的潜力美妆', style: 'hover:border-amber-300' },
-            { id: 'new', title: '🆕 新品爆款榜', desc: '入驻30天内实现销售裂变并完成数据转化的新星', style: 'hover:border-indigo-300' }
+            { id: 'recommend', title: '📈 爆款推荐榜', count: tabCounts.recommend, desc: '根据近7天多渠道销售环比增速智能综合排序', style: 'hover:border-rose-300' },
+            { id: 'darkhorse', title: '🔥 潜力黑马榜', count: tabCounts.darkhorse, desc: '低佣高转化、社媒声量高频异动的潜力美妆', style: 'hover:border-amber-300' },
+            { id: 'new', title: '🆕 新品爆款榜', count: tabCounts.new, desc: '入驻30天内实现销售裂变并完成数据转化的新星', style: 'hover:border-indigo-300' }
           ].map(tab => {
             const isSelected = activeTab === tab.id;
             return (
               <Card 
                 key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id as any);
-                  showSuccess(`已为您筛选：${tab.title}`);
-                }}
+                onClick={() => setActiveTab(tab.id as any)}
                 className={`cursor-pointer transition-all border ${isSelected ? 'border-rose-400 bg-rose-50/30' : 'border-slate-100 bg-white'} ${tab.style}`}
               >
                 <CardContent className="p-5 flex flex-col gap-1 text-left">
-                  <span className={`font-bold text-sm ${isSelected ? 'text-rose-600' : 'text-slate-800'}`}>{tab.title}</span>
+                  <div className="flex justify-between items-center">
+                    <span className={`font-bold text-sm ${isSelected ? 'text-rose-600' : 'text-slate-800'}`}>{tab.title}</span>
+                    <Badge variant="secondary" className={cn("text-[10px]", isSelected ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500")}>
+                      {tab.count} 条
+                    </Badge>
+                  </div>
                   <span className="text-xs text-slate-400 leading-relaxed">{tab.desc}</span>
                 </CardContent>
               </Card>
@@ -421,20 +465,8 @@ const SelectionEngine = () => {
               {selectedProductIds.length > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs bg-rose-50 text-rose-600 px-2 py-0.5 rounded border border-rose-100">
-                    已选 {selectedProductIds.length} 项
+                    已选 {selectedProductIds.length} 项对比
                   </span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-xs text-rose-500 hover:bg-rose-50 h-7"
-                    onClick={() => {
-                      const selectedItems = products.filter(p => selectedProductIds.includes(p.id));
-                      selectedItems.forEach(item => handleAddToCompare(item));
-                      setIsCompareOpen(true);
-                    }}
-                  >
-                    <Scale className="w-3.5 h-3.5 mr-1" /> 批量对比
-                  </Button>
                 </div>
               )}
             </div>
@@ -459,14 +491,14 @@ const SelectionEngine = () => {
                     />
                   </TableHead>
                   <TableHead className="w-[60px] text-center font-bold">展开</TableHead>
-                  <TableHead className="min-w-[260px]">爆款基本信息</TableHead>
+                  <TableHead className="min-w-[260px]">{dynamicInfoTitle}</TableHead>
                   <TableHead className="text-right">主推均价</TableHead>
                   <TableHead className="text-right">累计销量</TableHead>
                   <TableHead className="text-right">周增速</TableHead>
                   <TableHead className="text-right">带货佣金率</TableHead>
                   <TableHead className="text-right">主推ROI</TableHead>
                   <TableHead className="text-right">转化率</TableHead>
-                  <TableHead className="text-center w-[180px]">操作</TableHead>
+                  <TableHead className="text-center w-[120px]">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -475,8 +507,12 @@ const SelectionEngine = () => {
                   const isChecked = selectedProductIds.includes(p.id);
                   return (
                     <React.Fragment key={p.id}>
-                      <TableRow className={`${isExpanded ? 'bg-rose-50/20' : 'hover:bg-slate-50/50'} transition-all`}>
-                        {/* Checkbox */}
+                      <TableRow className={cn(
+                        "transition-all",
+                        isExpanded ? 'bg-rose-50/20' : 'hover:bg-slate-50/50',
+                        isChecked && "bg-rose-50/40"
+                      )}>
+                        {/* Checkbox - 勾选即对比 */}
                         <TableCell className="text-center">
                           <Checkbox 
                             checked={isChecked} 
@@ -560,23 +596,13 @@ const SelectionEngine = () => {
 
                         {/* Action buttons */}
                         <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <Button 
-                              onClick={() => handleAddToCompare(p)} 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-7 text-[11px] border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50/50"
-                            >
-                              <Scale className="w-3 h-3 mr-1" /> 对比
-                            </Button>
-                            <Button 
-                              onClick={() => setDetailProduct(p)} 
-                              size="sm" 
-                              className="h-7 text-[11px] bg-rose-400 hover:bg-rose-500 text-white"
-                            >
-                              <Maximize2 className="w-3 h-3 mr-1" /> 立项详情
-                            </Button>
-                          </div>
+                          <Button 
+                            onClick={() => setDetailProduct(p)} 
+                            size="sm" 
+                            className="h-7 text-[11px] bg-rose-400 hover:bg-rose-500 text-white"
+                          >
+                            <Maximize2 className="w-3 h-3 mr-1" /> 立项详情
+                          </Button>
                         </TableCell>
                       </TableRow>
 
@@ -638,7 +664,7 @@ const SelectionEngine = () => {
               <Scale className="w-4 h-4 text-rose-500" />
               对比池 ({compareProducts.length}/4)
             </span>
-            <span className="text-[10px] text-slate-400">选择最多4件商品进行核心多维度数据对照</span>
+            <span className="text-[10px] text-slate-400">勾选列表复选框即可加入对比，最多4件</span>
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
@@ -658,7 +684,10 @@ const SelectionEngine = () => {
 
           <div className="flex items-center gap-2">
             <Button 
-              onClick={() => setCompareProducts([])}
+              onClick={() => {
+                setCompareProducts([]);
+                setSelectedProductIds([]);
+              }}
               variant="ghost" 
               size="sm" 
               className="text-xs text-slate-500 hover:text-rose-500"
@@ -869,7 +898,7 @@ const SelectionEngine = () => {
                       type="button"
                       variant="outline"
                       className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50"
-                      onClick={() => handleAddToCompare(detailProduct)}
+                      onClick={() => handleSelectItem(detailProduct.id, true)}
                     >
                       加入对比池
                     </Button>
