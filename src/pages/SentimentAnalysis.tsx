@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   TrendingDown, TrendingUp, MessageSquare, Lightbulb, ArrowRight,
   AlertCircle, Package, Truck, Filter, Download, Plus, Copy,
@@ -144,13 +143,15 @@ const SentimentAnalysis = () => {
     qa: true,
     wordCloud: true,
     spamFilter: true,
-    shortFilter: true
+    spamKeywords: '刷单、返现',
+    shortFilter: true,
+    shortLength: 3
   });
 
   // 选中的产品（默认选中第一个）
   const [selectedProduct, setSelectedProduct] = useState<typeof PRODUCTS_DATA[0]>(PRODUCTS_DATA[0]);
 
-  // 穿透查看明细弹窗状态
+  // 穿透查看明细抽屉状态
   const [drillDownMetric, setDrillDownMetric] = useState<string | null>(null);
   const [drillDownProduct, setDrillDownProduct] = useState<typeof PRODUCTS_DATA[0] | null>(null);
   const [wordFilter, setWordFilter] = useState<string | null>(null);
@@ -161,37 +162,32 @@ const SentimentAnalysis = () => {
       const reviews = product.reviews;
       
       // 过滤规则
-      const spamReviews = reviews.filter(r => r.isSpam);
-      const shortReviews = reviews.filter(r => r.length < 3);
+      const keywords = rules.spamKeywords.split(/[、,，\s]+/).filter(k => k.trim());
       
       let validReviews = [...reviews];
       if (rules.spamFilter) {
-        validReviews = validReviews.filter(r => !r.isSpam);
+        validReviews = validReviews.filter(r => !keywords.some(k => r.text.includes(k)));
       }
       if (rules.shortFilter) {
-        validReviews = validReviews.filter(r => r.length >= 3);
+        validReviews = validReviews.filter(r => r.text.length >= rules.shortLength);
       }
 
       const validGood = validReviews.filter(r => r.polarity === '好评').length;
       const validBad = validReviews.filter(r => r.polarity === '差评').length;
+      const neutralCount = validReviews.filter(r => r.polarity === '中性').length;
       
       const invalidReviews = reviews.filter(r => 
-        (rules.spamFilter && r.isSpam) || (rules.shortFilter && r.length < 3)
+        (rules.spamFilter && keywords.some(k => r.text.includes(k))) || 
+        (rules.shortFilter && r.text.length < rules.shortLength)
       );
       const invalidCount = invalidReviews.length;
-
-      const good = reviews.filter(r => r.polarity === '好评').length;
-      const bad = reviews.filter(r => r.polarity === '差评').length;
-      const total = reviews.length;
 
       return {
         ...product,
         validGood,
         validBad,
-        invalid: invalidCount,
-        good,
-        bad,
-        total
+        neutralCount,
+        invalid: invalidCount
       };
     });
   }, [rules]);
@@ -206,22 +202,26 @@ const SentimentAnalysis = () => {
   const drillDownReviews = useMemo(() => {
     if (!drillDownProduct || !drillDownMetric) return [];
     let list = [...drillDownProduct.reviews];
+    const keywords = rules.spamKeywords.split(/[、,，\s]+/).filter(k => k.trim());
 
     // 基础过滤
     if (drillDownMetric === 'validGood') {
       list = list.filter(r => r.polarity === '好评');
-      if (rules.spamFilter) list = list.filter(r => !r.isSpam);
-      if (rules.shortFilter) list = list.filter(r => r.length >= 3);
+      if (rules.spamFilter) list = list.filter(r => !keywords.some(k => r.text.includes(k)));
+      if (rules.shortFilter) list = list.filter(r => r.text.length >= rules.shortLength);
     } else if (drillDownMetric === 'validBad') {
       list = list.filter(r => r.polarity === '差评');
-      if (rules.spamFilter) list = list.filter(r => !r.isSpam);
-      if (rules.shortFilter) list = list.filter(r => r.length >= 3);
+      if (rules.spamFilter) list = list.filter(r => !keywords.some(k => r.text.includes(k)));
+      if (rules.shortFilter) list = list.filter(r => r.text.length >= rules.shortLength);
+    } else if (drillDownMetric === 'neutralCount') {
+      list = list.filter(r => r.polarity === '中性');
+      if (rules.spamFilter) list = list.filter(r => !keywords.some(k => r.text.includes(k)));
+      if (rules.shortFilter) list = list.filter(r => r.text.length >= rules.shortLength);
     } else if (drillDownMetric === 'invalid') {
-      list = list.filter(r => (rules.spamFilter && r.isSpam) || (rules.shortFilter && r.length < 3));
-    } else if (drillDownMetric === 'good') {
-      list = list.filter(r => r.polarity === '好评');
-    } else if (drillDownMetric === 'bad') {
-      list = list.filter(r => r.polarity === '差评');
+      list = list.filter(r => 
+        (rules.spamFilter && keywords.some(k => r.text.includes(k))) || 
+        (rules.shortFilter && r.text.length < rules.shortLength)
+      );
     }
 
     // 词云点击穿透过滤
@@ -232,16 +232,14 @@ const SentimentAnalysis = () => {
     return list;
   }, [drillDownProduct, drillDownMetric, wordFilter, rules]);
 
-  // 穿透弹窗标题
+  // 穿透抽屉标题
   const drillDownTitle = useMemo(() => {
     if (!drillDownProduct || !drillDownMetric) return '';
     const metricNames: any = {
       validGood: '有效好评明细',
       validBad: '有效差评明细',
-      invalid: '无效评论明细',
-      good: '好评明细',
-      bad: '差评明细',
-      total: '总评论明细'
+      neutralCount: '中性评论明细',
+      invalid: '无效评论明细'
     };
     return `${drillDownProduct.name} - ${metricNames[drillDownMetric]}${wordFilter ? ` (包含关键词: ${wordFilter})` : ''}`;
   }, [drillDownProduct, drillDownMetric, wordFilter]);
@@ -277,7 +275,7 @@ const SentimentAnalysis = () => {
     ];
   }, [selectedProduct]);
 
-  const handleWordClick = (word: string, metric: 'good' | 'bad') => {
+  const handleWordClick = (word: string, metric: 'validGood' | 'validBad') => {
     setWordFilter(word);
     setDrillDownProduct(selectedProduct);
     setDrillDownMetric(metric);
@@ -380,10 +378,8 @@ const SentimentAnalysis = () => {
                     <TableHead className="text-xs">所属产品</TableHead>
                     <TableHead className="text-xs text-right">有效好评数</TableHead>
                     <TableHead className="text-xs text-right">有效差评数</TableHead>
+                    <TableHead className="text-xs text-right">中性评论数</TableHead>
                     <TableHead className="text-xs text-right">无效评论数</TableHead>
-                    <TableHead className="text-xs text-right">好评数</TableHead>
-                    <TableHead className="text-xs text-right">差评数</TableHead>
-                    <TableHead className="text-xs text-right">总评论数</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -428,6 +424,21 @@ const SentimentAnalysis = () => {
                         </span>
                       </TableCell>
 
+                      {/* 中性评论数 */}
+                      <TableCell className="text-right">
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDrillDownProduct(p);
+                            setDrillDownMetric('neutralCount');
+                            setWordFilter(null);
+                          }}
+                          className="text-rose-500 hover:underline font-semibold cursor-pointer"
+                        >
+                          {p.neutralCount}
+                        </span>
+                      </TableCell>
+
                       {/* 无效评论数 */}
                       <TableCell className="text-right">
                         <span 
@@ -440,51 +451,6 @@ const SentimentAnalysis = () => {
                           className="text-rose-500 hover:underline font-semibold cursor-pointer"
                         >
                           {p.invalid}
-                        </span>
-                      </TableCell>
-
-                      {/* 好评数 */}
-                      <TableCell className="text-right">
-                        <span 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDrillDownProduct(p);
-                            setDrillDownMetric('good');
-                            setWordFilter(null);
-                          }}
-                          className="text-rose-500 hover:underline font-semibold cursor-pointer"
-                        >
-                          {p.good}
-                        </span>
-                      </TableCell>
-
-                      {/* 差评数 */}
-                      <TableCell className="text-right">
-                        <span 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDrillDownProduct(p);
-                            setDrillDownMetric('bad');
-                            setWordFilter(null);
-                          }}
-                          className="text-rose-500 hover:underline font-semibold cursor-pointer"
-                        >
-                          {p.bad}
-                        </span>
-                      </TableCell>
-
-                      {/* 总评论数 */}
-                      <TableCell className="text-right">
-                        <span 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDrillDownProduct(p);
-                            setDrillDownMetric('total');
-                            setWordFilter(null);
-                          }}
-                          className="text-rose-500 hover:underline font-semibold cursor-pointer"
-                        >
-                          {p.total}
                         </span>
                       </TableCell>
                     </TableRow>
@@ -512,7 +478,7 @@ const SentimentAnalysis = () => {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center">
                         <span className="text-[10px] text-slate-400 block mb-1">总评价数</span>
-                        <span className="text-lg font-bold text-slate-800">{selectedProduct.total}</span>
+                        <span className="text-lg font-bold text-slate-800">{selectedProduct.reviews.length}</span>
                       </div>
                       <div className="p-3 bg-emerald-50/40 rounded-xl border border-emerald-100/50 text-center">
                         <span className="text-[10px] text-emerald-600 block mb-1">好评率</span>
@@ -618,7 +584,7 @@ const SentimentAnalysis = () => {
                           {selectedProduct.wordCloud.positive.map((w, idx) => (
                             <span 
                               key={idx} 
-                              onClick={() => handleWordClick(w.text, 'good')}
+                              onClick={() => handleWordClick(w.text, 'validGood')}
                               className={cn("cursor-pointer hover:underline transition-all", w.color)}
                               style={{ fontSize: `${w.size}px` }}
                             >
@@ -635,7 +601,7 @@ const SentimentAnalysis = () => {
                           {selectedProduct.wordCloud.negative.map((w, idx) => (
                             <span 
                               key={idx} 
-                              onClick={() => handleWordClick(w.text, 'bad')}
+                              onClick={() => handleWordClick(w.text, 'validBad')}
                               className={cn("cursor-pointer hover:underline transition-all", w.color)}
                               style={{ fontSize: `${w.size}px` }}
                             >
@@ -723,18 +689,18 @@ const SentimentAnalysis = () => {
         </div>
       </div>
 
-      {/* 穿透查看明细弹窗 */}
-      <Dialog open={!!drillDownMetric} onOpenChange={() => { setDrillDownMetric(null); setWordFilter(null); }}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-rose-600">
+      {/* 穿透查看明细抽屉 */}
+      <Sheet open={!!drillDownMetric} onOpenChange={() => { setDrillDownMetric(null); setWordFilter(null); }}>
+        <SheetContent side="right" className="w-full sm:max-w-4xl overflow-hidden flex flex-col">
+          <SheetHeader className="pb-4 border-b border-slate-100 shrink-0">
+            <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-rose-500" />
-              {drillDownTitle}
-            </DialogTitle>
-            <DialogDescription>
+              <SheetTitle>{drillDownTitle}</SheetTitle>
+            </div>
+            <SheetDescription>
               穿透查看该指标下的原始评价明细，并按每条分析对应的“情感、分类、实体”。
-            </DialogDescription>
-          </DialogHeader>
+            </SheetDescription>
+          </SheetHeader>
 
           <ScrollArea className="flex-1 mt-4 border border-slate-100 rounded-xl">
             <Table>
@@ -760,7 +726,8 @@ const SentimentAnalysis = () => {
                       <TableCell className="text-center">
                         <Badge className={cn(
                           "border-none text-[10px] font-bold",
-                          r.polarity === '好评' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                          r.polarity === '好评' ? 'bg-emerald-100 text-emerald-700' : 
+                          r.polarity === '差评' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
                         )}>
                           {r.polarity}
                         </Badge>
@@ -783,8 +750,8 @@ const SentimentAnalysis = () => {
               </TableBody>
             </Table>
           </ScrollArea>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* 规则设置抽屉 */}
       <Sheet open={isRulesOpen} onOpenChange={setIsRulesOpen}>
@@ -870,27 +837,64 @@ const SentimentAnalysis = () => {
                 <Filter className="w-4 h-4 text-rose-500" />
                 过滤规则配置
               </h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100/60">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-slate-700">开启水军过滤</p>
-                    <p className="text-[10px] text-slate-400">自动拦截“刷单”、“返现”等无价值水军评价</p>
+              <div className="space-y-4">
+                {/* 过滤短评 */}
+                <div className="space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-100/60">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-slate-700">过滤短评</p>
+                      <p className="text-[10px] text-slate-400">自动剔除无实质分析价值的极短评</p>
+                    </div>
+                    <Switch 
+                      checked={rules.shortFilter} 
+                      onCheckedChange={(checked) => setRules(prev => ({ ...prev, shortFilter: checked }))} 
+                    />
                   </div>
-                  <Switch 
-                    checked={rules.spamFilter} 
-                    onCheckedChange={(checked) => setRules(prev => ({ ...prev, spamFilter: checked }))} 
-                  />
+                  {rules.shortFilter && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <span className="text-[10px] text-slate-500">过滤低于</span>
+                      <Select value={rules.shortLength.toString()} onValueChange={(val) => setRules(prev => ({ ...prev, shortLength: parseInt(val) }))}>
+                        <SelectTrigger className="w-[60px] h-7 bg-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2">2</SelectItem>
+                          <SelectItem value="3">3</SelectItem>
+                          <SelectItem value="4">4</SelectItem>
+                          <SelectItem value="5">5</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span className="text-[10px] text-slate-500">个字的评价</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100/60">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-slate-700">过滤低于 3 个字短评</p>
-                    <p className="text-[10px] text-slate-400">自动剔除“好用”、“不错”等无实质分析价值的极短评</p>
+                {/* 水军过滤 */}
+                <div className="space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-100/60">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-slate-700">开启水军过滤</p>
+                      <p className="text-[10px] text-slate-400">自动拦截无价值水军评价</p>
+                    </div>
+                    <Switch 
+                      checked={rules.spamFilter} 
+                      onCheckedChange={(checked) => setRules(prev => ({ ...prev, spamFilter: checked }))} 
+                    />
                   </div>
-                  <Switch 
-                    checked={rules.shortFilter} 
-                    onCheckedChange={(checked) => setRules(prev => ({ ...prev, shortFilter: checked }))} 
-                  />
+                  {rules.spamFilter && (
+                    <div className="space-y-1.5 pt-1">
+                      <Label className="text-[10px] text-slate-500">水军关键词设置 (用“、”或逗号隔开)</Label>
+                      <textarea
+                        value={rules.spamKeywords}
+                        onChange={(e) => setRules(prev => ({ ...prev, spamKeywords: e.target.value.slice(0, 1000) }))}
+                        placeholder="例如：刷单、返现、加微信"
+                        className="w-full text-[11px] text-slate-600 bg-white rounded-lg p-2 border border-slate-200 h-20 resize-none focus:outline-none focus:ring-1 focus:ring-rose-300"
+                      />
+                      <div className="text-right text-[9px] text-slate-400 font-mono">
+                        {rules.spamKeywords.length}/1000
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
