@@ -211,91 +211,91 @@ const SentimentAnalysis = () => {
           </div>
 
           <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full shrink-0">
-              <TabsList className="bg-slate-100/50 p-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full shrink-0 flex flex-col flex-1 overflow-hidden">
+              <TabsList className="bg-slate-100/50 p-1 w-fit">
                 <TabsTrigger value="details" className="text-xs gap-2"><FileText className="w-3.5 h-3.5" />分析明细</TabsTrigger>
                 <TabsTrigger value="dashboard" className="text-xs gap-2"><BarChart3 className="w-3.5 h-3.5" />图表看板</TabsTrigger>
               </TabsList>
-            </Tabs>
 
-            <TabsContent value="details" className="m-0 flex-1 flex flex-col overflow-hidden">
-              <Card className="flex-1 border-none shadow-sm overflow-hidden flex flex-col">
-                <ScrollArea className="flex-1">
-                  <Table>
-                    <TableHeader className="bg-slate-50/50 sticky top-0 z-10">
-                      <TableRow>
-                        <TableHead className="w-[40px] text-center">
-                          <Checkbox checked={selectedIds.length > 0} onCheckedChange={(c) => setSelectedIds(c ? cleanAndClassifyReviews.map(i => i.id) : [])} />
-                        </TableHead>
-                        <TableHead className="text-xs">评价原文</TableHead>
-                        <TableHead className="text-xs">情感</TableHead>
-                        <TableHead className="text-xs">分类</TableHead>
-                        <TableHead className="text-xs">实体</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {cleanAndClassifyReviews.map((item) => (
-                        <TableRow 
-                          key={item.id} 
-                          className={cn(
-                            "cursor-pointer transition-colors text-xs",
-                            detailItem?.id === item.id ? "bg-rose-50/30" : "hover:bg-slate-50/50"
-                          )}
-                          onClick={() => setDetailItem(item)}
-                        >
-                          <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                            <Checkbox checked={selectedIds.includes(item.id)} onCheckedChange={(c) => handleSelectItem(item.id, !!c)} />
-                          </TableCell>
-                          <TableCell className="max-w-[280px] truncate">{item.text}</TableCell>
-                          <TableCell>{getPolarityBadge(item.polarity)}</TableCell>
-                          <TableCell>{item.category}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-wrap gap-1">
-                              {item.entities.map(e => (
-                                <Badge key={e} className="bg-rose-50 text-rose-600 border border-rose-100 text-[9px]">{e}</Badge>
-                              ))}
-                            </div>
-                          </TableCell>
+              <TabsContent value="details" className="m-0 flex-1 flex flex-col overflow-hidden mt-4">
+                <Card className="flex-1 border-none shadow-sm overflow-hidden flex flex-col">
+                  <ScrollArea className="flex-1">
+                    <Table>
+                      <TableHeader className="bg-slate-50/50 sticky top-0 z-10">
+                        <TableRow>
+                          <TableHead className="w-[40px] text-center">
+                            <Checkbox checked={selectedIds.length > 0} onCheckedChange={(c) => setSelectedIds(c ? cleanAndClassifyReviews.map(i => i.id) : [])} />
+                          </TableHead>
+                          <TableHead className="text-xs">评价原文</TableHead>
+                          <TableHead className="text-xs">情感</TableHead>
+                          <TableHead className="text-xs">分类</TableHead>
+                          <TableHead className="text-xs">实体</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </Card>
-            </TabsContent>
+                      </TableHeader>
+                      <TableBody>
+                        {cleanAndClassifyReviews.map((item) => (
+                          <TableRow 
+                            key={item.id} 
+                            className={cn(
+                              "cursor-pointer transition-colors text-xs",
+                              detailItem?.id === item.id ? "bg-rose-50/30" : "hover:bg-slate-50/50"
+                            )}
+                            onClick={() => setDetailItem(item)}
+                          >
+                            <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                              <Checkbox checked={selectedIds.includes(item.id)} onCheckedChange={(c) => handleSelectItem(item.id, !!c)} />
+                            </TableCell>
+                            <TableCell className="max-w-[280px] truncate">{item.text}</TableCell>
+                            <TableCell>{getPolarityBadge(item.polarity)}</TableCell>
+                            <TableCell>{item.category}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {item.entities.map(e => (
+                                  <Badge key={e} className="bg-rose-50 text-rose-600 border border-rose-100 text-[9px]">{e}</Badge>
+                                ))}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                </Card>
+              </TabsContent>
 
-            <TabsContent value="dashboard" className="m-0 flex-1 flex flex-col gap-4 overflow-y-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <Card className="border-none shadow-sm bg-white h-[250px]">
-                  <CardHeader className="pb-2"><CardTitle className="text-xs font-bold">情感分布</CardTitle></CardHeader>
-                  <CardContent className="h-[180px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={pieData} innerRadius={45} outerRadius={65} paddingAngle={4} dataKey="value">
-                          {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                        </Pie>
-                        <Tooltip />
-                        <Legend verticalAlign="bottom" height={24} wrapperStyle={{ fontSize: 9 }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-                <Card className="border-none shadow-sm bg-white h-[250px]">
-                  <CardHeader className="pb-2"><CardTitle className="text-xs font-bold">差评归因</CardTitle></CardHeader>
-                  <CardContent className="h-[180px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={attributionBarData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8' }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8' }} />
-                        <Tooltip />
-                        <Bar dataKey="频次" fill="#f5756c" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+              <TabsContent value="dashboard" className="m-0 flex-1 flex flex-col gap-4 overflow-y-auto mt-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card className="border-none shadow-sm bg-white h-[250px]">
+                    <CardHeader className="pb-2"><CardTitle className="text-xs font-bold">情感分布</CardTitle></CardHeader>
+                    <CardContent className="h-[180px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={pieData} innerRadius={45} outerRadius={65} paddingAngle={4} dataKey="value">
+                            {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                          </Pie>
+                          <Tooltip />
+                          <Legend verticalAlign="bottom" height={24} wrapperStyle={{ fontSize: 9 }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-none shadow-sm bg-white h-[250px]">
+                    <CardHeader className="pb-2"><CardTitle className="text-xs font-bold">差评归因</CardTitle></CardHeader>
+                    <CardContent className="h-[180px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={attributionBarData}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                          <Tooltip />
+                          <Bar dataKey="频次" fill="#f5756c" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
           <Card className="w-full lg:w-[400px] border-none shadow-sm shrink-0 flex flex-col overflow-hidden bg-white">
