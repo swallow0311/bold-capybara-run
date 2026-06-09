@@ -136,6 +136,7 @@ const ContentFactory = () => {
 
   const handleExtractPoints = () => {
     setIsExtracting(true);
+    setExtractedPoints([]);
     setTimeout(() => {
       setExtractedPoints([
         "30% 酵母多肽精粹：靶向抗老淡纹",
@@ -188,6 +189,12 @@ const ContentFactory = () => {
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     showSuccess("复制到剪贴板成功！");
+  };
+
+  const handleCopyAllPoints = () => {
+    const allText = extractedPoints.join('\n');
+    navigator.clipboard.writeText(allText);
+    showSuccess("所有卖点已一键复制！");
   };
 
   const filteredProducts = PRODUCTS.filter(p => 
@@ -578,22 +585,41 @@ const ContentFactory = () => {
           ) : (
             <div className="space-y-3 mt-2 text-xs text-left">
               {extractedPoints.map((point, idx) => (
-                <div key={idx} className="p-3 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-between">
-                  <span className="font-semibold text-slate-700">{point}</span>
-                  <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-[9px] hover:bg-rose-100">
-                    转化率 +28%
-                  </Badge>
+                <div key={idx} className="p-3 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-between group">
+                  <span className="font-semibold text-slate-700 flex-1">{point}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-[9px] hover:bg-rose-100">
+                      转化率 +28%
+                    </Badge>
+                    <button 
+                      onClick={() => handleCopy(point)}
+                      className="p-1 text-slate-400 hover:text-rose-500 transition-colors"
+                      title="复制此卖点"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          <DialogFooter className="mt-4">
-            <Button variant="ghost" onClick={() => setIsExtracting(false)} className="text-xs">取消</Button>
-            <Button onClick={() => {
-              setIsExtracting(false);
-              showSuccess("已自动填充至文案主打卖点！");
-            }} className="bg-rose-400 hover:bg-rose-500 text-white text-xs">填充至配置区</Button>
+          <DialogFooter className="mt-4 flex items-center justify-between sm:justify-between w-full">
+            <button 
+              onClick={handleCopyAllPoints}
+              disabled={extractedPoints.length === 0}
+              className="text-rose-500 hover:text-rose-600 text-xs font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              一键复制
+            </button>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => setIsExtracting(false)} className="text-xs">取消</Button>
+              <Button onClick={() => {
+                setIsExtracting(false);
+                showSuccess("已自动填充至文案主打卖点！");
+              }} className="bg-rose-400 hover:bg-rose-500 text-white text-xs">填充至配置区</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
