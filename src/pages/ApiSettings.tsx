@@ -33,7 +33,7 @@ const ApiSettings = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isLogOpen, setIsLogOpen] = useState(false);
   const [editingApi, setEditingApi] = useState<any>(null);
-  const [userRole] = useState<'admin' | 'staff'>('admin'); // 模拟权限
+  const [userRole] = useState<'admin' | 'staff'>('admin');
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedIds(checked ? apis.map(a => a.id) : []);
