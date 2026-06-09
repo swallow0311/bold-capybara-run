@@ -5,12 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { 
   Copy, RefreshCw, Sparkles, 
   Wand2, CheckCircle2, AlertTriangle, LayoutList, 
@@ -55,6 +53,7 @@ const ContentFactory = () => {
   const [lengthLimit, setLengthLimit] = useState(300);
   const [includeKeys, setIncludeKeys] = useState('补水, 舒缓, 敏感肌');
   const [excludeKeys, setExcludeKeys] = useState('特效, 根除');
+  const [searchTerm, setSearchTerm] = useState('');
   
   // Dialog state
   const [isExtracting, setIsExtracting] = useState(false);
@@ -111,12 +110,16 @@ const ContentFactory = () => {
     showSuccess("复制到剪贴板成功！");
   };
 
+  const filteredProducts = PRODUCTS.filter(p => 
+    p.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-[1600px] mx-auto text-left">
+      <div className="space-y-6 max-w-[1600px] mx-auto text-left pb-12">
         
         {/* Top Compliance Info */}
-        <div className="flex items-center gap-3 bg-white/50 p-3 rounded-xl border border-slate-100">
+        <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-2 text-xs">
             <ShieldAlert className="w-4 h-4 text-rose-500" />
             <span className="font-bold text-slate-800">营销风控安全锁已开启</span>
@@ -136,7 +139,7 @@ const ContentFactory = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* Left panel (4 columns) - Params */}
+          {/* Left panel (5 columns) - Params */}
           <Card className="lg:col-span-5 border-none shadow-sm bg-white">
             <CardHeader className="pb-3 border-b border-slate-100">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -164,34 +167,40 @@ const ContentFactory = () => {
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0">
-                    <Command>
-                      <CommandInput placeholder="搜索商品名称..." className="h-9" />
-                      <CommandList>
-                        <CommandEmpty>未找到相关商品</CommandEmpty>
-                        <CommandGroup>
-                          {PRODUCTS.map((p) => (
-                            <CommandItem
-                              key={p.value}
-                              value={p.value}
-                              onSelect={(currentValue) => {
-                                setProductValue(currentValue === productValue ? "" : currentValue);
-                                setOpen(false);
-                              }}
-                              className="text-xs"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  productValue === p.value ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              {p.label}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
+                  <PopoverContent className="w-[400px] p-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50">
+                    <div className="flex items-center gap-2 px-2 pb-2 border-b border-slate-100">
+                      <Search className="w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="搜索商品名称..."
+                        className="w-full text-xs bg-transparent border-none outline-none py-1.5"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    <div className="max-h-[200px] overflow-y-auto pt-1 space-y-0.5">
+                      {filteredProducts.length === 0 ? (
+                        <div className="text-[11px] text-slate-400 text-center py-4">未找到相关商品</div>
+                      ) : (
+                        filteredProducts.map((p) => (
+                          <button
+                            key={p.value}
+                            type="button"
+                            onClick={() => {
+                              setProductValue(p.value);
+                              setOpen(false);
+                            }}
+                            className={cn(
+                              "w-full flex items-center justify-between px-2 py-2 rounded-lg text-left text-xs transition-colors hover:bg-rose-50/50",
+                              productValue === p.value ? "bg-rose-50 text-rose-700 font-bold" : "text-slate-600"
+                            )}
+                          >
+                            <span>{p.label}</span>
+                            {productValue === p.value && <Check className="w-3.5 h-3.5 text-rose-500" />}
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
