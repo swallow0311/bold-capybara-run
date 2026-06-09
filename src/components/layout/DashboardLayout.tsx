@@ -184,6 +184,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 静态素材一键生成电商短视频，无需剪辑基础。
               </span>
             )}
+            {location.pathname === '/asset-library' && (
+              <span className="text-[11px] text-slate-400 font-medium">
+                所有AI生成内容（文案/图片/视频）统一归档管理，支持检索、复用和二次发布。
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-5">
