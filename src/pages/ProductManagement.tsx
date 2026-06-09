@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,7 @@ const INITIAL_PRODUCTS: ProductItem[] = [
 ];
 
 const ProductManagement = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
   const [statusTab, setStatusTab] = useState<'all' | '出售中' | '已售罄' | '仓库中' | '草稿箱'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -183,9 +185,9 @@ const ProductManagement = () => {
               <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", isSyncing && "animate-spin")} />
               拉取多平台在线商品
             </Button>
-            <Button onClick={() => showSuccess("正在拉取全新商品主档建档模板...")} variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs h-9">
+            <Button onClick={() => navigate('/products/create')} variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs h-9">
               <Plus className="w-3.5 h-3.5 mr-1.5" />
-              手工发布新商品
+              新建商品
             </Button>
           </div>
         </div>

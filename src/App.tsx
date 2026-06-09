@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ProductManagement from "./pages/ProductManagement";
+import CreateProduct from "./pages/CreateProduct";
 import SelectionEngine from "./pages/SelectionEngine";
 import ContentFactory from "./pages/ContentFactory";
 import ImageDesign from "./pages/ImageDesign";
@@ -27,6 +28,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/products" element={<ProductManagement />} />
+          <Route path="/products/create" element={<CreateProduct />} />
           <Route path="/selection" element={<SelectionEngine />} />
           <Route path="/content" element={<ContentFactory />} />
           <Route path="/image-design" element={<ImageDesign />} />
