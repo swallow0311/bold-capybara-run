@@ -281,9 +281,8 @@ const ApiSettings = () => {
         open={isLogOpen} 
         onOpenChange={setIsLogOpen} 
       />
-    </div>
-  </DashboardLayout>
-);
+    </DashboardLayout>
+  );
 };
 
 export default ApiSettings;
