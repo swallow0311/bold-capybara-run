@@ -6,15 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import SelectionEngine from "./pages/SelectionEngine";
 import ContentFactory from "./pages/ContentFactory";
-import Image<dyad-write path="src/App.tsx" description="更新 App.tsx 路由系统，移除 BatchTasks（批量任务）路由，并保留其余页面路由。">
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import SelectionEngine from "./pages/SelectionEngine";
-import ContentFactory from "./pages/ContentFactory";
 import ImageDesign from "./pages/ImageDesign";
 import VideoCreation from "./pages/VideoCreation";
 import AssetLibrary from "./pages/AssetLibrary";
