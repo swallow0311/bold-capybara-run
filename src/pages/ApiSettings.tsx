@@ -66,7 +66,7 @@ const ApiSettings = () => {
             onClick={() => { setEditingApi(null); setIsConfigOpen(true); }}
             className="bg-rose-400 hover:bg-rose-500 text-white text-xs h-9"
           >
-            <Plus className="w-3.5 h-3.5 mr-1.5" /> 新增 API 接口连接
+            <Plus className="w-3.5 h-3.5 mr-1.5" /> 新增 API 接口
           </Button>
         </div>
 
@@ -235,37 +235,6 @@ const ApiSettings = () => {
             </Table>
           </CardContent>
         </Card>
-
-        {/* 联动规则说明卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-none shadow-sm bg-gradient-to-br from-rose-50/50 to-white">
-            <CardContent className="p-4 flex gap-3">
-              <div className="bg-rose-100 p-2 rounded-xl h-fit"><Database className="w-4 h-4 text-rose-500" /></div>
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-slate-800">数据自动流转</h4>
-                <p className="text-[10px] text-slate-500 leading-relaxed">拉取的商品与评价数据将自动流入「评价 NLP 分析」模块进行情感与卖点解析。</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm bg-gradient-to-br from-amber-50/50 to-white">
-            <CardContent className="p-4 flex gap-3">
-              <div className="bg-amber-100 p-2 rounded-xl h-fit"><Zap className="w-4 h-4 text-amber-500" /></div>
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-slate-800">驱动 AIGC 生产</h4>
-                <p className="text-[10px] text-slate-500 leading-relaxed">解析后的结构化洞察将作为文案、图片、视频生成的底层输入，确保内容高度贴合市场。</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm bg-gradient-to-br from-blue-50/50 to-white">
-            <CardContent className="p-4 flex gap-3">
-              <div className="bg-blue-100 p-2 rounded-xl h-fit"><ShieldCheck className="w-4 h-4 text-blue-500" /></div>
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-slate-800">失效自动保护</h4>
-                <p className="text-[10px] text-slate-500 leading-relaxed">接口失效时 AI 选品任务将自动暂停并触发告警，防止因数据断流导致模型预测偏差。</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       {/* 配置与调试抽屉 */}
