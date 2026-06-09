@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { 
   Copy, RefreshCw, Save, Download, History, Sparkles, 
   Video, FileText, MessageSquare, Share2, Wand2, 
-  CheckCircle2, AlertCircle, Trash2, ChevronRight
+  CheckCircle2, AlertCircle, Trash2, ChevronRight, Clock
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
