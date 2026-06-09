@@ -208,12 +208,21 @@ const ImageDesign = () => {
           {/* Right Area (7 cols) - Visual View & Tuning tools */}
           <div className="xl:col-span-7 space-y-6">
             
-            {/* Visual View (Split View) */}
+            {/* Visual View (Split View or Single View when tuning) */}
             <Card className="border-none shadow-sm bg-white">
               <CardHeader className="pb-3 border-b border-slate-100 flex flex-row justify-between items-center">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <ArrowLeftRight className="w-4 h-4 text-rose-400" />
-                  效果智能比照预览
+                  {activeTool ? (
+                    <>
+                      <Wand2 className="w-4 h-4 text-rose-400" />
+                      AI 智能微调画布
+                    </>
+                  ) : (
+                    <>
+                      <ArrowLeftRight className="w-4 h-4 text-rose-400" />
+                      效果智能比照预览
+                    </>
+                  )}
                 </CardTitle>
                 <div className="flex gap-2">
                   <Button 
@@ -228,34 +237,41 @@ const ImageDesign = () => {
               </CardHeader>
               
               <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Left - Original */}
-                  <div className="space-y-2 text-center">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">上传商品原图</span>
-                    <div 
-                      className={cn(
-                        "aspect-square relative rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center cursor-pointer group",
-                        isZoomed && "overflow-auto"
-                      )}
-                      onClick={() => setPreviewImg(originalImg)}
-                    >
-                      <img 
-                        src={originalImg} 
-                        alt="Original product" 
+                <div className={cn(
+                  "grid gap-6",
+                  activeTool ? "grid-cols-1 max-w-2xl mx-auto" : "grid-cols-1 md:grid-cols-2"
+                )}>
+                  {/* Left - Original (Hidden when tuning) */}
+                  {!activeTool && (
+                    <div className="space-y-2 text-center">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">上传商品原图</span>
+                      <div 
                         className={cn(
-                          "max-h-full max-w-full object-contain transition-transform duration-300",
-                          isZoomed ? "scale-[2] origin-center" : "group-hover:scale-105"
-                        )} 
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
-                        <Search className="text-white opacity-0 group-hover:opacity-100 w-6 h-6" />
+                          "aspect-square relative rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center cursor-pointer group",
+                          isZoomed && "overflow-auto"
+                        )}
+                        onClick={() => setPreviewImg(originalImg)}
+                      >
+                        <img 
+                          src={originalImg} 
+                          alt="Original product" 
+                          className={cn(
+                            "max-h-full max-w-full object-contain transition-transform duration-300",
+                            isZoomed ? "scale-[2] origin-center" : "group-hover:scale-105"
+                          )} 
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                          <Search className="text-white opacity-0 group-hover:opacity-100 w-6 h-6" />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Right - Generated */}
+                  {/* Right - Generated (Always shown, centered when tuning) */}
                   <div className="space-y-2 text-center">
-                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">AI 效果融合图</span>
+                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">
+                      {activeTool ? "AI 实时微调预览" : "AI 效果融合图"}
+                    </span>
                     <div className="space-y-4">
                       <div 
                         className={cn(
