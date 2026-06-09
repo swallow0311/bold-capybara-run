@@ -66,6 +66,7 @@ const CreateProduct = () => {
   const [brand, setBrand] = useState('');
   const [platform, setPlatform] = useState('Taobao');
   const [shopName, setShopName] = useState('');
+  const [status, setStatus] = useState('出售中');
   
   // 三级类目级联选择
   const [catL1, setCatL1] = useState<keyof typeof CATEGORIES_TREE | ''>('');
@@ -101,6 +102,11 @@ const CreateProduct = () => {
 
   // --- 联动逻辑 ---
 
+  // 动态生成 SPU 编码 (必须在 generatedSkus 之前定义)
+  const spuCode = useMemo(() => {
+    return `SPU-${brand ? brand.slice(0, 3).toUpperCase() : 'SKIN'}-${catL3 ? catL3.slice(0, 3).toUpperCase() : 'GEN'}`;
+  }, [brand, catL3]);
+
   // 动态生成 Cartesian Product 笛卡尔积 SKU 清单
   const generatedSkus = useMemo(() => {
     if (specAttrs.length === 0) return [];
@@ -117,7 +123,6 @@ const CreateProduct = () => {
 
     const combinations = generateCombinations(0, {});
     return combinations.map((combo, idx) => {
-      const specString = Object.values(combo).join('-');
       return {
         specs: combo,
         skuCode: `SKU-${spuCode || 'PRODUCT'}-${idx + 1}`,
@@ -133,11 +138,6 @@ const CreateProduct = () => {
   React.useEffect(() => {
     setSkuList(generatedSkus);
   }, [generatedSkus]);
-
-  // 动态生成 SPU 编码
-  const spuCode = useMemo(() => {
-    return `SPU-${brand ? brand.slice(0, 3).toUpperCase() : 'SKIN'}-${catL3 ? catL3.slice(0, 3).toUpperCase() : 'GEN'}`;
-  }, [brand, catL3]);
 
   // --- 操作函数 ---
 
@@ -883,6 +883,21 @@ const CreateProduct = () => {
                     placeholder="例：中达彩妆官方店"
                     className="bg-slate-50/50 border-slate-200 text-xs h-9"
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-slate-500 font-semibold">在架销售状态</Label>
+                  <Select value={status} onValueChange={(val: any) => setStatus(val)}>
+                    <SelectTrigger className="bg-slate-50/50 h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="出售中">出售中</SelectItem>
+                      <SelectItem value="已售罄">已售罄</SelectItem>
+                      <SelectItem value="仓库中">仓库中</SelectItem>
+                      <SelectItem value="草稿箱">草稿箱</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="h-[1px] bg-slate-100 my-2" />
