@@ -14,7 +14,6 @@ import {
   FileText,
   Image as ImageIcon,
   Video as VideoIcon,
-  Layers,
   FolderOpen,
   ShieldAlert
 } from 'lucide-react';
@@ -33,7 +32,6 @@ const menuItems = [
       { name: '文案生成', path: '/content', icon: FileText },
       { name: '图片设计', path: '/image-design', icon: ImageIcon },
       { name: '视频创作', path: '/video-creation', icon: VideoIcon },
-      { name: '批量任务', path: '/batch-tasks', icon: Layers },
       { name: '素材库', path: '/asset-library', icon: FolderOpen },
       { name: '合规质检', path: '/compliance-qa', icon: ShieldAlert },
     ]
@@ -47,9 +45,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const [isAIGCOpen, setIsAIGCOpen] = useState(true);
 
-  // Auto expand AIGC menu if active path is one of the sub-pages
   useEffect(() => {
-    const isSubPath = ['/content', '/image-design', '/video-creation', '/batch-tasks', '/asset-library', '/compliance-qa'].includes(location.pathname);
+    const isSubPath = ['/content', '/image-design', '/video-creation', '/asset-library', '/compliance-qa'].includes(location.pathname);
     if (isSubPath) {
       setIsAIGCOpen(true);
     }
@@ -57,9 +54,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex h-screen bg-[#FFFBFB] text-slate-900 font-sans">
-      {/* Sidebar - Soft warm coral gradient */}
       <aside className="w-72 bg-gradient-to-b from-[#FFF2F0] to-[#FFE3E0] border-r border-[#FAD0CC] flex flex-col shrink-0">
-        {/* Sidebar Header */}
         <div className="p-5 flex items-center gap-2 border-b border-[#FAD0CC]/50 bg-white/20">
           <div className="bg-rose-400 p-2 rounded-xl shadow-sm">
             <Sparkles className="text-white w-4 h-4" />
@@ -69,7 +64,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
         
-        {/* Sidebar Navigation */}
         <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             if (item.isParent) {
@@ -100,7 +94,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     )}
                   </button>
 
-                  {/* Submenu rendering */}
                   {isAIGCOpen && item.children && (
                     <div className="pl-6 space-y-1 border-l-2 border-rose-200/50 ml-6 mt-1">
                       {item.children.map((child) => {
@@ -156,9 +149,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-bold text-slate-800">
@@ -167,28 +158,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                location.pathname === '/content' ? '文案生成' :
                location.pathname === '/image-design' ? '图片设计' :
                location.pathname === '/video-creation' ? '视频创作' :
-               location.pathname === '/batch-tasks' ? '批量任务' :
                location.pathname === '/asset-library' ? '素材库' :
                location.pathname === '/compliance-qa' ? '合规质检' :
                location.pathname === '/sentiment' ? '评价NLP分析' :
                location.pathname === '/data' ? '数据中心' :
                location.pathname === '/settings' ? '系统设置' : '系统中心'}
             </h2>
-            {location.pathname === '/image-design' && (
-              <span className="text-[11px] text-slate-400 font-medium">
-                主图、海报、详情页、场景图智能创作，上传商品图片一键合成电商海报。
-              </span>
-            )}
-            {location.pathname === '/video-creation' && (
-              <span className="text-[11px] text-slate-400 font-medium">
-                静态素材一键生成电商短视频，无需剪辑基础。
-              </span>
-            )}
-            {location.pathname === '/asset-library' && (
-              <span className="text-[11px] text-slate-400 font-medium">
-                所有AI生成内容（文案/图片/视频）统一归档管理，支持检索、复用和二次发布。
-              </span>
-            )}
           </div>
           
           <div className="flex items-center gap-5">
@@ -196,10 +171,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-400 rounded-full border border-white"></span>
             </button>
-            
             <div className="h-5 w-[1px] bg-slate-200"></div>
-            
-            {/* User Profile Card */}
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center font-bold text-xs shadow-sm border border-rose-100">
                 张
@@ -212,7 +184,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {/* Page Body */}
         <main className="flex-1 overflow-y-auto p-8 bg-slate-50">
           {children}
         </main>
