@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ShieldAlert, CheckCircle2, 
   RefreshCw, Check, Sparkles, AlertCircle,
@@ -19,7 +20,7 @@ import {
   Filter, Download, Trash2, Eye, 
   FileSpreadsheet, ShieldCheck, ChevronRight,
   Play, Info, ChevronDown, Layers, Settings2,
-  Search, Calendar
+  Search, Calendar, X
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -532,27 +533,5 @@ const ComplianceQA = () => {
     </DashboardLayout>
   );
 };
-
-const X = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-);
-
-const Select = ({ children, defaultValue, onValueChange }: any) => (
-  <div className="relative">
-    <select 
-      defaultValue={defaultValue} 
-      onChange={(e) => onValueChange?.(e.target.value)}
-      className="w-full h-9 px-3 text-xs bg-slate-50 border border-slate-200 rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-rose-300"
-    >
-      {children}
-    </select>
-    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-  </div>
-);
-
-const SelectTrigger = ({ children, className }: any) => <div className={className}>{children}</div>;
-const SelectValue = ({ placeholder }: any) => <span>{placeholder}</span>;
-const SelectContent = ({ children }: any) => <>{children}</>;
-const SelectItem = ({ value, children }: any) => <option value={value}>{children}</option>;
 
 export default ComplianceQA;

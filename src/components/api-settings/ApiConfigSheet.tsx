@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   ShieldCheck, Database, Sliders, Filter, Zap, 
   Play, Code, AlertCircle, CheckCircle2, RefreshCw,
-  Plus, Trash2, Info, Lock, Unlock
+  Plus, Trash2, Info, Lock, Unlock, Settings2, ArrowRight
 } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -410,9 +410,5 @@ const ApiConfigSheet = ({ open, onOpenChange, api, isAdmin }: ApiConfigSheetProp
     </Sheet>
   );
 };
-
-const Settings2 = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
-);
 
 export default ApiConfigSheet;
