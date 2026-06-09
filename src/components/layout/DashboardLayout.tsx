@@ -158,7 +158,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header - Slimmed height */}
+        {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-bold text-slate-800">
@@ -174,12 +174,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                location.pathname === '/data' ? '数据中心' :
                location.pathname === '/settings' ? '系统设置' : '系统中心'}
             </h2>
-            {location.pathname === '/content' && (
-              <div className="flex items-center gap-1 bg-rose-50 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-100 text-[10px] font-semibold">
-                <ShieldAlert className="w-3 h-3 text-rose-500" />
-                <span>营销风控安全锁已开启：自动拦截违法词，保障店铺合规上架</span>
-              </div>
-            )}
           </div>
           
           <div className="flex items-center gap-5">

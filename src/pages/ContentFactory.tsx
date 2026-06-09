@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Copy, RefreshCw, Sparkles, 
   Wand2, CheckCircle2, AlertTriangle, LayoutList, 
-  Sparkle, Check, ChevronsUpDown, Search
+  Sparkle, Check, ChevronsUpDown, Search, Edit3, ShieldAlert
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -27,13 +28,16 @@ const PRODUCTS = [
 
 const ContentFactory = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLockEnabled, setIsLockEnabled] = useState(true);
+
+  // Results state
   const [results, setResults] = useState<any[]>([
     {
       id: 1,
       title: '版本 A：专业科学种草',
       score: 95,
       content: '【敏感肌换季救星】中达修护舒缓多肽精华液真的绝了！里面添加了核心的多肽修护成分，能够快速建立皮肤屏障。很多姐妹担心上脸刺激，但它非常温和。用了一周，脸上的红血丝明显淡了，干燥脱皮都得到了极大改善，妥妥的国货之光！',
-      advices: '建议搭配“防晒喷雾”进行联合营销组合，转化率可提升20%。'
+      advices: '文字流畅，卖点覆盖全面，合规检测通过率100%。'
     },
     {
       id: 2,
@@ -55,10 +59,80 @@ const ContentFactory = () => {
   const [excludeKeys, setExcludeKeys] = useState('特效, 根除');
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Edit states for AI results
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState<string>('');
+
   // Dialog state
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedPoints, setExtractedPoints] = useState<string[]>([]);
   const [promoTags, setPromoTags] = useState<string[]>(['618', '双十一']);
+
+  // Dynamic evaluation function
+  const evaluateText = (text: string, lockEnabled: boolean) => {
+    let score = 95;
+    let advices = "文字流畅，卖点覆盖全面，合规检测通过率100%。";
+    
+    const foundWords = DEFAULT_FORBIDDEN_WORDS.filter(word => text.includes(word));
+    if (foundWords.length > 0) {
+      if (lockEnabled) {
+        score = Math.max(50, 95 - foundWords.length * 15);
+        advices = `包含高危违禁极限词: ${foundWords.join('、')}。已开启风控，将在上架前自动拦截/平替。`;
+      } else {
+        score = Math.max(40, 90 - foundWords.length * 20);
+        advices = `警报！检测到违禁词: ${foundWords.join('、')}，当前风控锁未开启，可能存在广告法违规处罚风险！`;
+      }
+    } else {
+      if (text.length < 80) {
+        score -= 10;
+        advices = "生成内容偏短，建议补充更多细节场景化词汇。";
+      } else if (text.length > 500) {
+        score -= 5;
+        advices = "篇幅适中但稍微偏长，建议提炼核心卖点，方便用户快速阅读。";
+      }
+    }
+    return { score, advices };
+  };
+
+  // Re-evaluate list whenever safety lock toggles
+  useEffect(() => {
+    setResults(prev => prev.map(item => {
+      const { score, advices } = evaluateText(item.content, isLockEnabled);
+      return {
+        ...item,
+        score,
+        advices
+      };
+    }));
+  }, [isLockEnabled]);
+
+  const handleStartEdit = (id: number, content: string) => {
+    setEditingId(id);
+    setEditingText(content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingText('');
+  };
+
+  const handleSaveEdit = (id: number) => {
+    const { score, advices } = evaluateText(editingText, isLockEnabled);
+    setResults(prev => prev.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          content: editingText,
+          score,
+          advices
+        };
+      }
+      return item;
+    }));
+    setEditingId(null);
+    setEditingText('');
+    showSuccess("修改已保存，优化建议已重新评估！");
+  };
 
   const handleExtractPoints = () => {
     setIsExtracting(true);
@@ -75,20 +149,26 @@ const ContentFactory = () => {
   const handleGenerate = () => {
     setIsGenerating(true);
     setTimeout(() => {
+      const v1Content = `【大促必入】中达酵母御龄紧致面霜来了！主打30%高浓度酵母多肽与玻尿酸配合，专为敏感肌淡纹研发。轻薄乳霜质地，夏日用也无负担。${promoTags.join(' & ')}期间限时直降，心动的姐妹快冲！`;
+      const v2Content = `深度测评国货抗老面霜！中达这瓶面霜的核心是多肽与深层补水配方，极其温和，敏感肌换季抗衰首选。实测28天细纹改善明显。`;
+      
+      const v1Eval = evaluateText(v1Content, isLockEnabled);
+      const v2Eval = evaluateText(v2Content, isLockEnabled);
+
       setResults([
         {
           id: 1,
           title: '生成版本 1：高转化带货风',
-          score: 94,
-          content: `【大促必入】中达酵母御龄紧致面霜来了！主打30%高浓度酵母多肽与玻尿酸配合，专为敏感肌淡纹研发。轻薄乳霜质地，夏日用也无负担。${promoTags.join(' & ')}期间限时直降，心动的姐妹快冲！`,
-          advices: '文字流畅，卖点覆盖全面，合规检测通过率100%。'
+          score: v1Eval.score,
+          content: v1Content,
+          advices: v1Eval.advices
         },
         {
           id: 2,
           title: '生成版本 2：深度成分测评',
-          score: 91,
-          content: '深度测评国货抗老面霜！中达这瓶面霜的核心是多肽与深层补水配方，摒弃了传统厚重质地，敏感肌换季抗衰首选。实测28天细纹改善明显，适合搭配短视频脚本分发。',
-          advices: '科普度高，建议搭配成分分析图表发布以增强说服力。'
+          score: v2Eval.score,
+          content: v2Content,
+          advices: v2Eval.advices
         }
       ]);
       setIsGenerating(false);
@@ -117,23 +197,62 @@ const ContentFactory = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto text-left pb-12">
+        
+        {/* Top Compliance Info Bar */}
+        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex-wrap gap-3">
+          <div className="flex items-center gap-2 text-xs">
+            <ShieldAlert className={cn("w-4 h-4", isLockEnabled ? "text-emerald-500" : "text-red-500")} />
+            <span className={cn("font-bold text-sm", isLockEnabled ? "text-emerald-600" : "text-red-600")}>
+              {isLockEnabled ? "营销风控安全锁已开启" : "营销风控安全锁已关闭"}
+            </span>
+            <span className={cn("text-[11px] ml-1 hidden md:inline-block", isLockEnabled ? "text-emerald-500" : "text-red-500")}>
+              {isLockEnabled ? "自动拦截违法词，保障店铺合规上架" : "未开启违法词过滤，可能会导致违规风险"}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs text-slate-600 font-semibold bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+              <span>开关风控：</span>
+              <button 
+                type="button"
+                onClick={() => {
+                  setIsLockEnabled(!isLockEnabled);
+                  showSuccess(isLockEnabled ? "已关闭风控安全锁" : "已开启风控安全锁");
+                }}
+                className={cn(
+                  "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                  isLockEnabled ? "bg-emerald-500" : "bg-red-500"
+                )}
+              >
+                <span
+                  className={cn(
+                    "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                    isLockEnabled ? "translate-x-4" : "translate-x-0"
+                  )}
+                />
+              </button>
+            </div>
+            
+            <Button 
+              onClick={handleExtractPoints} 
+              variant="outline" 
+              className="border-rose-200 text-rose-600 hover:bg-rose-50 text-xs h-8"
+            >
+              <Sparkle className="w-3.5 h-3.5 mr-1 text-rose-400" />
+              卖点智能提取
+            </Button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Left panel (5 columns) - Params */}
           <Card className="lg:col-span-5 border-none shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
+            <CardHeader className="pb-3 border-b border-slate-100">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <Wand2 className="w-4 h-4 text-rose-400" />
                 文案参数配置面板
               </CardTitle>
-              <Button 
-                onClick={handleExtractPoints} 
-                variant="outline" 
-                className="border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] h-7 px-2"
-              >
-                <Sparkle className="w-3 h-3 mr-1 text-rose-400" />
-                卖点智能提取
-              </Button>
             </CardHeader>
 
             <CardContent className="p-6 space-y-4 text-xs text-slate-700">
@@ -193,36 +312,35 @@ const ContentFactory = () => {
                 </Popover>
               </div>
 
-              {/* Scene & Platform */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-slate-500 font-semibold">文案创作场景</Label>
-                  <Select value={scene} onValueChange={setScene}>
-                    <SelectTrigger className="bg-slate-50/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="xhs">小红书种草长文</SelectItem>
-                      <SelectItem value="dy">短视频口播脚本</SelectItem>
-                      <SelectItem value="live">直播间憋单话术</SelectItem>
-                      <SelectItem value="detail">详情页卖点提炼</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* Scene - Single Line */}
+              <div className="space-y-1.5">
+                <Label className="text-slate-500 font-semibold">文案创作场景</Label>
+                <Select value={scene} onValueChange={setScene}>
+                  <SelectTrigger className="bg-slate-50/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="xhs">小红书种草长文</SelectItem>
+                    <SelectItem value="dy">短视频口播脚本</SelectItem>
+                    <SelectItem value="live">直播间憋单话术</SelectItem>
+                    <SelectItem value="detail">详情页卖点提炼</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-slate-500 font-semibold">目标投放平台</Label>
-                  <Select value={platform} onValueChange={setPlatform}>
-                    <SelectTrigger className="bg-slate-50/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="xhs">小红书 (XHS)</SelectItem>
-                      <SelectItem value="dy">抖音电商 (DY)</SelectItem>
-                      <SelectItem value="tb">淘宝直播 (TB)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* Platform - Single Line */}
+              <div className="space-y-1.5">
+                <Label className="text-slate-500 font-semibold">目标投放平台</Label>
+                <Select value={platform} onValueChange={setPlatform}>
+                  <SelectTrigger className="bg-slate-50/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="xhs">小红书 (XHS)</SelectItem>
+                    <SelectItem value="dy">抖音电商 (DY)</SelectItem>
+                    <SelectItem value="tb">淘宝直播 (TB)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Tone style selection */}
@@ -262,26 +380,32 @@ const ContentFactory = () => {
                 />
               </div>
 
-              {/* Advanced constraints */}
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="space-y-1.5">
+              {/* Include Keys - Single Line */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
                   <Label className="text-slate-500 font-semibold">强化关键词</Label>
-                  <Input 
-                    value={includeKeys}
-                    onChange={(e) => setIncludeKeys(e.target.value)}
-                    placeholder="例如：提亮, 熬夜救星" 
-                    className="bg-slate-50/50 text-xs"
-                  />
+                  <span className="text-[10px] text-slate-400">（多个值用“,”隔开）</span>
                 </div>
-                <div className="space-y-1.5">
+                <Input 
+                  value={includeKeys}
+                  onChange={(e) => setIncludeKeys(e.target.value)}
+                  placeholder="例如：提亮, 熬夜救星" 
+                  className="bg-slate-50/50 text-xs"
+                />
+              </div>
+
+              {/* Exclude Keys - Single Line */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
                   <Label className="text-slate-500 font-semibold text-rose-600">屏蔽关键词</Label>
-                  <Input 
-                    value={excludeKeys}
-                    onChange={(e) => setExcludeKeys(e.target.value)}
-                    placeholder="例如：第一, 全网最" 
-                    className="bg-slate-50/50 text-xs"
-                  />
+                  <span className="text-[10px] text-slate-400">（多个值用“,”隔开）</span>
                 </div>
+                <Input 
+                  value={excludeKeys}
+                  onChange={(e) => setExcludeKeys(e.target.value)}
+                  placeholder="例如：第一, 全网最" 
+                  className="bg-slate-50/50 text-xs"
+                />
               </div>
 
               {/* Promotion Tags */}
@@ -344,6 +468,7 @@ const ContentFactory = () => {
               <CardContent className="p-6 space-y-6">
                 {results.map((res) => {
                   const hasWarning = res.score < 80;
+                  const isEditing = editingId === res.id;
                   return (
                     <div key={res.id} className={cn(
                       "p-5 rounded-xl border transition-all space-y-3",
@@ -371,18 +496,46 @@ const ContentFactory = () => {
                             <Copy className="w-3 h-3 mr-1" /> 复制
                           </Button>
                           <Button 
+                            onClick={() => handleStartEdit(res.id, res.content)}
                             variant="ghost" 
                             size="sm" 
                             className="h-7 text-[10px] text-slate-500 hover:text-rose-500"
                           >
-                            <RefreshCw className="w-3 h-3 mr-1" /> 改写
+                            <Edit3 className="w-3 h-3 mr-1" /> 编辑
                           </Button>
                         </div>
                       </div>
 
-                      <div className="text-xs text-slate-600 leading-relaxed bg-white p-3 rounded-lg border border-slate-100 font-mono whitespace-pre-wrap">
-                        {highlightForbiddenWords(res.content)}
-                      </div>
+                      {isEditing ? (
+                        <div className="space-y-3">
+                          <Textarea
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            className="w-full text-xs text-slate-600 bg-white border border-rose-300 rounded-xl p-3 h-32 leading-relaxed focus-visible:ring-rose-400"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-7 text-[10px]"
+                              onClick={handleCancelEdit}
+                            >
+                              取消
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              className="h-7 text-[10px] bg-rose-400 hover:bg-rose-500 text-white rounded-lg"
+                              onClick={() => handleSaveEdit(res.id)}
+                            >
+                              保存
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-slate-600 leading-relaxed bg-white p-3 rounded-lg border border-slate-100 font-mono whitespace-pre-wrap">
+                          {highlightForbiddenWords(res.content)}
+                        </div>
+                      )}
 
                       <div className="flex items-start gap-2 text-[10px] bg-white p-2.5 rounded-lg border border-slate-100/60">
                         {hasWarning ? (
