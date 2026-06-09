@@ -132,7 +132,6 @@ const SentimentAnalysis = () => {
   const [dataSource, setDataSource] = useState('sync');
   const [productFilter, setProductFilter] = useState('all');
   const [timeRange, setTimeRange] = useState('30');
-  const [polarityFilter, setPolarityFilter] = useState('all');
 
   // 规则设置状态
   const [isRulesOpen, setIsRulesOpen] = useState(false);
@@ -331,20 +330,6 @@ const SentimentAnalysis = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-500">极性筛选</span>
-                <Select value={polarityFilter} onValueChange={setPolarityFilter}>
-                  <SelectTrigger className="w-[110px] h-9 bg-slate-50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部极性</SelectItem>
-                    <SelectItem value="好评">仅看好评</SelectItem>
-                    <SelectItem value="差评">仅看差评</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -481,11 +466,11 @@ const SentimentAnalysis = () => {
                         <span className="text-lg font-bold text-slate-800">{selectedProduct.reviews.length}</span>
                       </div>
                       <div className="p-3 bg-emerald-50/40 rounded-xl border border-emerald-100/50 text-center">
-                        <span className="text-[10px] text-emerald-600 block mb-1">好评率</span>
+                        <span className="text-[10px] text-emerald-600 block mb-1">有效好评率</span>
                         <span className="text-lg font-bold text-emerald-600">{selectedProduct.goodRate}</span>
                       </div>
                       <div className="p-3 bg-rose-50/40 rounded-xl border border-rose-100/50 text-center">
-                        <span className="text-[10px] text-rose-600 block mb-1">差评率</span>
+                        <span className="text-[10px] text-rose-600 block mb-1">有效差评率</span>
                         <span className="text-lg font-bold text-rose-600">{selectedProduct.badRate}</span>
                       </div>
                     </div>
@@ -842,7 +827,7 @@ const SentimentAnalysis = () => {
                 <div className="space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-100/60">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <p className="text-xs font-bold text-slate-700">过滤短评</p>
+                      <p className="text-xs font-bold text-slate-700">过滤低于 3 个字短评</p>
                       <p className="text-[10px] text-slate-400">自动剔除无实质分析价值的极短评</p>
                     </div>
                     <Switch 
@@ -883,7 +868,7 @@ const SentimentAnalysis = () => {
                   </div>
                   {rules.spamFilter && (
                     <div className="space-y-1.5 pt-1">
-                      <Label className="text-[10px] text-slate-500">水军关键词设置 (用“、”或逗号隔开)</Label>
+                      <Label className="text-[10px] text-slate-500">水军关键词设置 (用“、”或逗号隔开，最多1000字符)</Label>
                       <textarea
                         value={rules.spamKeywords}
                         onChange={(e) => setRules(prev => ({ ...prev, spamKeywords: e.target.value.slice(0, 1000) }))}

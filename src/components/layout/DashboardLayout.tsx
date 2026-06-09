@@ -5,22 +5,25 @@ import {
   Search, 
   PenTool, 
   BarChart3, 
-  Database, 
   Settings, 
   Bell, 
   Sparkles,
   ChevronDown,
   ChevronRight,
   FileText,
-  Image as ImageIcon,
-  Video as VideoIcon,
+  ImageIcon,
+  VideoIcon,
   FolderOpen,
-  ShieldAlert
+  ShieldAlert,
+  ShoppingBag,
+  Link2,
+  Cpu
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 const menuItems = [
   { name: '核心看板', sub: '数据统计与ROI指标', icon: LayoutDashboard, path: '/' },
+  { name: '商品管理', sub: '店铺SPU/SKU一体化管控', icon: ShoppingBag, path: '/products' },
   { name: 'AI选品', sub: '全网爆款趋势挖掘', icon: Search, path: '/selection' },
   { 
     name: 'AIGC内容工厂', 
@@ -37,18 +40,40 @@ const menuItems = [
     ]
   },
   { name: '评价NLP分析', sub: '用户口碑与痛点洞察', icon: BarChart3, path: '/sentiment' },
-  { name: '数据中心', sub: '素材检索与快速复用', icon: Database, path: '/data' },
-  { name: '系统设置', sub: '模型参数与风险审查', icon: Settings, path: '/settings' },
+  { 
+    name: '系统设置', 
+    sub: '开放接口与大模型配置', 
+    icon: Settings, 
+    path: '/settings/api',
+    isParent: true,
+    children: [
+      { name: 'API接口', path: '/settings/api', icon: Link2 },
+      { name: '模型配置', path: '/settings/model', icon: Cpu },
+    ]
+  },
 ];
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const location = useLocation();
+  const location = locationHook();
   const [isAIGCOpen, setIsAIGCOpen] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(true);
+
+  function locationHook() {
+    try {
+      return useLocation();
+    } catch (e) {
+      return { pathname: '/' };
+    }
+  }
 
   useEffect(() => {
     const isSubPath = ['/content', '/image-design', '/video-creation', '/asset-library', '/compliance-qa'].includes(location.pathname);
     if (isSubPath) {
       setIsAIGCOpen(true);
+    }
+    const isSettingsSub = ['/settings/api', '/settings/model'].includes(location.pathname);
+    if (isSettingsSub) {
+      setIsSettingsOpen(true);
     }
   }, [location.pathname]);
 
@@ -67,11 +92,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             if (item.isParent) {
+              const isAigcMenu = item.name === 'AIGC内容工厂';
+              const isOpen = isAigcMenu ? isAIGCOpen : isSettingsOpen;
+              const setIsOpen = isAigcMenu ? setIsAIGCOpen : setIsSettingsOpen;
+              
               const hasActiveChild = item.children?.some(child => location.pathname === child.path);
               return (
                 <div key={item.name} className="space-y-1">
                   <button
-                    onClick={() => setIsAIGCOpen(!isAIGCOpen)}
+                    onClick={() => setIsOpen(!isOpen)}
                     className={cn(
                       "w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 group text-slate-600 hover:bg-white/40 hover:text-slate-900",
                       hasActiveChild && "bg-white/25 text-rose-800 font-bold"
@@ -87,14 +116,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                         <span className="text-[10px] text-slate-400 mt-0.5 font-medium">{item.sub}</span>
                       </div>
                     </div>
-                    {isAIGCOpen ? (
+                    {isOpen ? (
                       <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                     ) : (
                       <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                     )}
                   </button>
 
-                  {isAIGCOpen && item.children && (
+                  {isOpen && item.children && (
                     <div className="pl-6 space-y-1 border-l-2 border-rose-200/50 ml-6 mt-1">
                       {item.children.map((child) => {
                         const isChildActive = location.pathname === child.path;
@@ -154,6 +183,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-bold text-slate-800">
               {location.pathname === '/' ? '核心看板' : 
+               location.pathname === '/products' ? '商品管理' : 
                location.pathname === '/selection' ? 'AI选品' :
                location.pathname === '/content' ? '文案生成' :
                location.pathname === '/image-design' ? '图片设计' :
@@ -161,8 +191,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                location.pathname === '/asset-library' ? '素材库' :
                location.pathname === '/compliance-qa' ? '合规质检' :
                location.pathname === '/sentiment' ? '评价NLP分析' :
-               location.pathname === '/data' ? '数据中心' :
-               location.pathname === '/settings' ? '系统设置' : '系统中心'}
+               location.pathname === '/settings/api' ? 'API接口设置' :
+               location.pathname === '/settings/model' ? '大模型配置' : '系统中心'}
             </h2>
           </div>
           
