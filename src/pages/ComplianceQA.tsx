@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,30 +8,42 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { 
-  ShieldAlert, CheckCircle2, AlertTriangle, Upload, 
-  RefreshCw, Check, Sparkles, BookOpen, AlertCircle,
+  ShieldAlert, CheckCircle2, AlertTriangle, 
+  RefreshCw, Check, Sparkles, AlertCircle,
   FileText, Image as ImageIcon, Video as VideoIcon,
-  Search, Filter, Download, Trash2, Eye, Edit3,
-  History, FileSpreadsheet, ShieldCheck, Ban, ChevronRight,
-  Play, Clock, Info, ChevronDown, Layers
+  Filter, Download, Trash2, Eye, 
+  FileSpreadsheet, ShieldCheck, ChevronRight,
+  Play, Info, ChevronDown, Layers, Settings2,
+  Search, Calendar
 } from 'lucide-react';
-import { showSuccess, showError } from '@/utils/toast';
+import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
 
-// 模拟质检数据
+// 扩展后的模拟质检数据
 const MOCK_DATA = {
   text: [
-    { id: 'T1', name: '中达面霜大促文案', type: '文本', status: '重度违规', riskCount: 2, time: '10:30', content: '中达这款防晒绝对是全网“最强”的防晒喷雾！能够“第一”速度成膜，彻底根除紫外线。', risks: [{ word: '最强', type: '极限词', rule: '广告法第九条' }, { word: '第一', type: '极限词', rule: '广告法第九条' }] },
-    { id: 'T2', name: '精华液种草笔记', type: '文本', status: '轻度风险', riskCount: 1, time: '11:15', content: '这款精华液具有“美白治病”的神奇功效，三天见效。', risks: [{ word: '治病', type: '虚假宣传', rule: '化妆品监督管理条例' }] },
-    { id: 'T3', name: '唇蜜营销话术', type: '文本', status: '合规通过', riskCount: 0, time: '12:00', content: '夏日清爽水光感，温和修护唇部肌肤。', risks: [] }
+    { id: 'T1', name: '中达面霜大促文案_版本A', type: '文本', status: '重度违规', riskCount: 2, time: '2026-05-20 10:30', content: '中达这款防晒绝对是全网“最强”的防晒喷雾！能够“第一”速度成膜，彻底根除紫外线。', risks: [{ word: '最强', type: '极限词', rule: '广告法第九条' }, { word: '第一', type: '极限词', rule: '广告法第九条' }] },
+    { id: 'T2', name: '精华液种草笔记_小红书', type: '文本', status: '轻度风险', riskCount: 1, time: '2026-05-20 11:15', content: '这款精华液具有“美白治病”的神奇功效，三天见效。', risks: [{ word: '治病', type: '虚假宣传', rule: '化妆品监督管理条例' }] },
+    { id: 'T3', name: '唇蜜营销话术_直播间', type: '文本', status: '合规通过', riskCount: 0, time: '2026-05-20 12:00', content: '夏日清爽水光感，温和修护唇部肌肤，打造果冻嘟嘟唇。', risks: [] },
+    { id: 'T4', name: '防晒喷雾详情页文案', type: '文本', status: '重度违规', riskCount: 1, time: '2026-05-20 14:20', content: '全网“最低价”，错过再等一年，绝对“根除”晒黑烦恼。', risks: [{ word: '最低价', type: '价格违规', rule: '价格法' }] },
+    { id: 'T5', name: '新品面霜预热推文', type: '文本', status: '待人工复核', riskCount: 1, time: '2026-05-20 15:45', content: '这款面霜含有“诺贝尔奖”成分，让你的肌肤重回18岁。', risks: [{ word: '诺贝尔奖', type: '虚假背书', rule: '广告法' }] }
   ],
   image: [
-    { id: 'I1', name: '面霜主图海报', type: '图片', status: '重度违规', riskCount: 1, url: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400', risks: [{ area: '左上角', type: '侵权LOGO', rule: '知识产权法' }] },
-    { id: 'I2', name: '防晒详情页', type: '图片', status: '轻度风险', riskCount: 1, url: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400', risks: [{ area: '文案区', type: '极限词', rule: '广告法' }] }
+    { id: 'I1', name: '面霜主图海报_618版', type: '图片', status: '重度违规', riskCount: 1, url: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400', risks: [{ area: '左上角', type: '侵权LOGO', rule: '知识产权法' }] },
+    { id: 'I2', name: '防晒详情页_场景图', type: '图片', status: '轻度风险', riskCount: 1, url: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400', risks: [{ area: '文案区', type: '极限词', rule: '广告法' }] },
+    { id: 'I3', name: '唇蜜模特试色图', type: '图片', status: '合规通过', riskCount: 0, url: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400', risks: [] },
+    { id: 'I4', name: '精华液成分拆解图', type: '图片', status: '重度违规', riskCount: 2, url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400', risks: [{ area: '底部', type: '导流二维码', rule: '平台规范' }, { area: '中部', type: '未授权LOGO', rule: '商标法' }] }
   ],
   video: [
-    { id: 'V1', name: '唇蜜卡点短视频', type: '视频', status: '重度违规', riskCount: 1, timeNode: '00:05', risks: [{ node: '00:05', type: '违规字幕', rule: '广告法' }] }
+    { id: 'V1', name: '唇蜜卡点短视频_抖音', type: '视频', status: '重度违规', riskCount: 1, timeNode: '00:05', risks: [{ node: '00:05', type: '违规字幕', rule: '广告法' }] },
+    { id: 'V2', name: '面霜使用教程视频', type: '视频', status: '轻度风险', riskCount: 1, timeNode: '00:12', risks: [{ node: '00:12', type: '背景侵权音乐', rule: '版权法' }] },
+    { id: 'V3', name: '防晒喷雾测评视频', type: '视频', status: '合规通过', riskCount: 0, timeNode: '-', risks: [] }
   ]
 };
 
@@ -39,25 +51,8 @@ const ComplianceQA = () => {
   const [activeModule, setActiveModule] = useState('text');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [detailItem, setDetailItem] = useState<any>(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
-
-  // 启动扫描
-  const startScan = () => {
-    setIsScanning(true);
-    setScanProgress(0);
-    const interval = setInterval(() => {
-      setScanProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsScanning(false);
-          showSuccess("全量合规质检扫描完成！");
-          return 100;
-        }
-        return prev + 20;
-      });
-    }, 300);
-  };
+  const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false);
 
   const handleSelectItem = (id: string, checked: boolean) => {
     setSelectedIds(prev => checked ? [...prev, id] : prev.filter(i => i !== id));
@@ -99,27 +94,81 @@ const ComplianceQA = () => {
                     <SelectItem value="all">全部风险等级</SelectItem>
                     <SelectItem value="high">重度违规</SelectItem>
                     <SelectItem value="low">轻度风险</SelectItem>
+                    <SelectItem value="pass">合规通过</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="sm" className="h-9 text-xs"><Filter className="w-3.5 h-3.5 mr-1.5" />高级筛选</Button>
+
+                {/* 高级筛选 Popover */}
+                <Popover open={isAdvancedFilterOpen} onOpenChange={setIsAdvancedFilterOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 text-xs">
+                      <Filter className="w-3.5 h-3.5 mr-1.5" />高级筛选
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4 space-y-4">
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-sm">高级筛选条件</h4>
+                      <p className="text-[10px] text-slate-400">组合多个维度精准定位质检结果</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[11px]">关键词搜索</Label>
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
+                          <Input className="h-8 pl-7 text-xs" placeholder="搜索任务名称或SKU..." />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[11px]">质检时间范围</Label>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" className="h-8 text-[10px] flex-1 justify-start">
+                            <Calendar className="w-3 h-3 mr-1.5" /> 开始日期
+                          </Button>
+                          <span className="text-slate-300">-</span>
+                          <Button variant="outline" size="sm" className="h-8 text-[10px] flex-1 justify-start">
+                            <Calendar className="w-3 h-3 mr-1.5" /> 结束日期
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[11px]">关联商品品类</Label>
+                        <Select defaultValue="all">
+                          <SelectTrigger className="h-8 text-[10px] bg-slate-50">
+                            <SelectValue placeholder="全部品类" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">全部品类</SelectItem>
+                            <SelectItem value="cream">面霜</SelectItem>
+                            <SelectItem value="sun">防晒</SelectItem>
+                            <SelectItem value="lip">彩妆</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button variant="ghost" size="sm" className="flex-1 text-xs" onClick={() => setIsAdvancedFilterOpen(false)}>重置</Button>
+                      <Button size="sm" className="flex-1 text-xs bg-rose-400 hover:bg-rose-500 text-white" onClick={() => {
+                        setIsAdvancedFilterOpen(false);
+                        showSuccess("已应用高级筛选条件");
+                      }}>应用筛选</Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="h-9 text-xs"><History className="w-3.5 h-3.5 mr-1.5" />历史记录</Button>
               <Button 
-                onClick={startScan}
-                disabled={isScanning}
-                className="bg-rose-400 hover:bg-rose-500 text-white h-9 text-xs font-bold"
+                onClick={() => setIsRulesOpen(true)}
+                variant="outline" 
+                size="sm" 
+                className="h-9 text-xs border-rose-200 text-rose-600 hover:bg-rose-50"
               >
-                {isScanning ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <ShieldAlert className="w-3.5 h-3.5 mr-1.5" />}
-                {isScanning ? `正在扫描 ${scanProgress}%` : '一键启动合规扫描'}
+                <Settings2 className="w-3.5 h-3.5 mr-1.5" />质检规则
               </Button>
             </div>
           </CardContent>
         </Card>
-
-        {isScanning && <Progress value={scanProgress} className="h-1 bg-slate-100 shrink-0" />}
 
         {/* 中部列表 + 右侧详情 */}
         <div className="flex-1 flex gap-4 overflow-hidden">
@@ -220,9 +269,11 @@ const ComplianceQA = () => {
                     {activeModule === 'image' && (
                       <div className="relative aspect-square bg-slate-900 rounded-xl overflow-hidden border border-slate-100">
                         <img src={detailItem.url} className="w-full h-full object-cover opacity-80" alt="preview" />
-                        <div className="absolute top-4 left-4 w-20 h-20 border-2 border-rose-500 bg-rose-500/20 animate-pulse flex items-center justify-center">
-                          <Badge className="bg-rose-500 text-white text-[8px] absolute -top-2 -left-2">风险点</Badge>
-                        </div>
+                        {detailItem.risks.map((risk: any, idx: number) => (
+                          <div key={idx} className="absolute top-4 left-4 w-20 h-20 border-2 border-rose-500 bg-rose-500/20 animate-pulse flex items-center justify-center">
+                            <Badge className="bg-rose-500 text-white text-[8px] absolute -top-2 -left-2">风险点</Badge>
+                          </div>
+                        ))}
                       </div>
                     )}
                     {activeModule === 'video' && (
@@ -231,7 +282,9 @@ const ComplianceQA = () => {
                         <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-700">
                           <div className="absolute left-[30%] w-2 h-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]" />
                         </div>
-                        <Badge className="absolute bottom-4 left-4 bg-rose-500 text-white text-[9px]">00:05 违规字幕</Badge>
+                        {detailItem.timeNode !== '-' && (
+                          <Badge className="absolute bottom-4 left-4 bg-rose-500 text-white text-[9px]">{detailItem.timeNode} 违规节点</Badge>
+                        )}
                       </div>
                     )}
                   </div>
@@ -318,6 +371,138 @@ const ComplianceQA = () => {
           </div>
         </div>
       </div>
+
+      {/* 质检规则配置 Dialog */}
+      <Dialog open={isRulesOpen} onOpenChange={setIsRulesOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-rose-600">
+              <Settings2 className="w-5 h-5" />
+              合规质检规则配置中心
+            </DialogTitle>
+            <DialogDescription>
+              配置各模块的AI质检维度与拦截阈值，确保生成内容符合国家法律法规及电商平台规范。
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="flex-1 pr-4">
+            <div className="space-y-8 py-4">
+              {/* 文案质检规则 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <FileText className="w-4 h-4 text-rose-400" />
+                  <h3 className="text-sm font-bold text-slate-800">文案质检规则配置</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { label: '广告法极限词拦截', desc: '拦截“第一”、“顶级”、“全网最低”等绝对化用词', checked: true },
+                    { label: '虚假宣传检测', desc: '识别绝对效果承诺、医疗功效、美白治病等话术', checked: true },
+                    { label: '价格违规审查', desc: '检测虚标原价、虚假折扣、违规比价等价格敏感词', checked: true },
+                    { label: '敏感内容过滤', desc: '过滤政治、色情、暴力等社会敏感类文本内容', checked: true },
+                    { label: '侵权话术识别', desc: '自动规避未授权品牌背书、他人肖像权描述', checked: false },
+                    { label: '平台规则适配', desc: '根据淘宝/京东/拼多多不同平台规则动态调整', checked: true }
+                  ].map((rule, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-bold text-slate-700">{rule.label}</p>
+                        <p className="text-[10px] text-slate-400">{rule.desc}</p>
+                      </div>
+                      <Switch defaultChecked={rule.checked} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 图片质检规则 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <ImageIcon className="w-4 h-4 text-rose-400" />
+                  <h3 className="text-sm font-bold text-slate-800">图片质检规则配置</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                      <p className="text-xs font-bold text-slate-700">画面拦截维度</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['低俗', '裸露', '暴力', '政治敏感', '违规医疗'].map(tag => (
+                          <Badge key={tag} variant="outline" className="text-[9px] bg-white">{tag}</Badge>
+                        ))}
+                      </div>
+                      <div className="flex justify-end"><Switch defaultChecked /></div>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                      <p className="text-xs font-bold text-slate-700">素材拦截维度</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['网络侵权图', '明星肖像', '未授权LOGO', '盗图相似度'].map(tag => (
+                          <Badge key={tag} variant="outline" className="text-[9px] bg-white">{tag}</Badge>
+                        ))}
+                      </div>
+                      <div className="flex justify-end"><Switch defaultChecked /></div>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                      <p className="text-xs font-bold text-slate-700">文案拦截维度</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['内嵌极限词', '违规促销语', '虚假功效文字'].map(tag => (
+                          <Badge key={tag} variant="outline" className="text-[9px] bg-white">{tag}</Badge>
+                        ))}
+                      </div>
+                      <div className="flex justify-end"><Switch defaultChecked /></div>
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                      <p className="text-xs font-bold text-slate-700">瑕疵拦截维度</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['残留水印', '第三方LOGO', '违规二维码', '导流信息'].map(tag => (
+                          <Badge key={tag} variant="outline" className="text-[9px] bg-white">{tag}</Badge>
+                        ))}
+                      </div>
+                      <div className="flex justify-end"><Switch defaultChecked /></div>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-slate-700">贴纸拦截维度</p>
+                      <p className="text-[10px] text-slate-400">拦截违规绝对化营销标、不合规权益话术贴纸</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+
+              {/* 视频质检规则 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <VideoIcon className="w-4 h-4 text-rose-400" />
+                  <h3 className="text-sm font-bold text-slate-800">视频质检规则配置</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { label: '视频帧画面检测', desc: '同图片合规标准，拦截敏感、侵权、违规画面', checked: true },
+                    { label: '字幕文本检测', desc: '全文检测极限词、虚假宣传，与文本规则对齐', checked: true },
+                    { label: '音频人声检测', desc: '检测口播违规话术、敏感词汇、侵权配音内容', checked: true },
+                    { label: '动态元素拦截', desc: '拦截违规动态贴纸、营销动效、第三方素材', checked: true }
+                  ].map((rule, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-bold text-slate-700">{rule.label}</p>
+                        <p className="text-[10px] text-slate-400">{rule.desc}</p>
+                      </div>
+                      <Switch defaultChecked={rule.checked} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="pt-4 border-t border-slate-100">
+            <Button variant="ghost" size="sm" onClick={() => setIsRulesOpen(false)}>取消</Button>
+            <Button size="sm" className="bg-rose-400 hover:bg-rose-500 text-white" onClick={() => {
+              setIsRulesOpen(false);
+              showSuccess("质检规则配置已更新，将应用于后续所有检测任务");
+            }}>保存配置</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
