@@ -174,6 +174,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                location.pathname === '/data' ? '数据中心' :
                location.pathname === '/settings' ? '系统设置' : '系统中心'}
             </h2>
+            {location.pathname === '/image-design' && (
+              <span className="text-[11px] text-slate-400 font-medium">
+                主图、海报、详情页、场景图智能创作，上传商品图片一键合成电商海报。
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-5">

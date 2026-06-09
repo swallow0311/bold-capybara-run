@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Upload, Image as ImageIcon, Sliders, RefreshCw, 
-  Download, ArrowLeftRight, Grid, Maximize2, Sparkles, 
-  Wand2, Scissors, Paintbrush, Tags, Save, CheckCircle
+  Download, ArrowLeftRight, Maximize2, Sparkles, 
+  Wand2, Scissors, Paintbrush, Tags, CheckCircle,
+  Search, ZoomIn, Send
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -28,6 +29,8 @@ const ImageDesign = () => {
   const [resolution, setResolution] = useState('hd');
   const [showMarketingTag, setShowMarketingTag] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [previewImg, setPreviewImg] = useState<string | null>(null);
   
   // Image comparison mock urls
   const [originalImg, setOriginalImg] = useState('https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&auto=format&fit=crop&q=60');
@@ -47,22 +50,11 @@ const ImageDesign = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left">
+      <div className="space-y-6 max-w-[1600px] mx-auto pb-12 text-left">
         
-        {/* Top Header */}
-        <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">AI 智能图片设计空间</h1>
-            <p className="text-xs text-slate-500">主图、海报、详情页、场景图智能创作，上传商品图片一键合成电商海报。</p>
-          </div>
-          <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-xs py-1 px-3">
-            算力余额：1,240点
-          </Badge>
-        </div>
-
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
           
-          {/* Left Area (4 cols) - Inputs, templates & configs */}
+          {/* Left Area (5 cols) - Inputs, templates & configs */}
           <div className="xl:col-span-5 space-y-6">
             
             {/* Upload Area */}
@@ -209,7 +201,7 @@ const ImageDesign = () => {
             </Card>
           </div>
 
-          {/* Right Area (8 cols) - Visual View & Tuning tools */}
+          {/* Right Area (7 cols) - Visual View & Tuning tools */}
           <div className="xl:col-span-7 space-y-6">
             
             {/* Visual View (Split View) */}
@@ -220,11 +212,13 @@ const ImageDesign = () => {
                   效果智能比照预览
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="h-7 text-xs text-slate-500">
-                    <Grid className="w-3.5 h-3.5 mr-1" /> 矩阵网格
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-7 text-xs text-slate-500">
-                    <Maximize2 className="w-3.5 h-3.5 mr-1" /> 细节放大
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn("h-7 text-xs", isZoomed ? "text-rose-500 bg-rose-50" : "text-slate-500")}
+                    onClick={() => setIsZoomed(!isZoomed)}
+                  >
+                    <ZoomIn className="w-3.5 h-3.5 mr-1" /> 细节放大
                   </Button>
                 </div>
               </CardHeader>
@@ -234,21 +228,82 @@ const ImageDesign = () => {
                   {/* Left - Original */}
                   <div className="space-y-2 text-center">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">上传商品原图</span>
-                    <div className="aspect-square relative rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
-                      <img src={originalImg} alt="Original product" className="max-h-full max-w-full object-contain" />
+                    <div 
+                      className={cn(
+                        "aspect-square relative rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center cursor-pointer group",
+                        isZoomed && "overflow-auto"
+                      )}
+                      onClick={() => setPreviewImg(originalImg)}
+                    >
+                      <img 
+                        src={originalImg} 
+                        alt="Original product" 
+                        className={cn(
+                          "max-h-full max-w-full object-contain transition-transform duration-300",
+                          isZoomed ? "scale-[2] origin-center" : "group-hover:scale-105"
+                        )} 
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                        <Search className="text-white opacity-0 group-hover:opacity-100 w-6 h-6" />
+                      </div>
                     </div>
                   </div>
 
                   {/* Right - Generated */}
                   <div className="space-y-2 text-center">
                     <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">AI 效果融合图</span>
-                    <div className="aspect-square relative rounded-xl overflow-hidden border border-rose-100 bg-slate-50 flex items-center justify-center">
-                      <img src={generatedImg} alt="Generated design" className="max-h-full max-w-full object-contain" />
-                      {showMarketingTag && (
-                        <div className="absolute top-4 left-4 bg-rose-500 text-white font-bold text-[9px] px-2 py-0.5 rounded shadow-md uppercase tracking-wider animate-bounce">
-                          热销推荐 · 限量抢
+                    <div className="space-y-4">
+                      <div 
+                        className={cn(
+                          "aspect-square relative rounded-xl overflow-hidden border border-rose-100 bg-slate-50 flex items-center justify-center cursor-pointer group",
+                          isZoomed && "overflow-auto"
+                        )}
+                        onClick={() => setPreviewImg(generatedImg)}
+                      >
+                        <img 
+                          src={generatedImg} 
+                          alt="Generated design" 
+                          className={cn(
+                            "max-h-full max-w-full object-contain transition-transform duration-300",
+                            isZoomed ? "scale-[2] origin-center" : "group-hover:scale-105"
+                          )} 
+                        />
+                        {showMarketingTag && (
+                          <div className="absolute top-4 left-4 bg-rose-500 text-white font-bold text-[9px] px-2 py-0.5 rounded shadow-md uppercase tracking-wider animate-bounce">
+                            热销推荐 · 限量抢
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                          <Search className="text-white opacity-0 group-hover:opacity-100 w-6 h-6" />
                         </div>
-                      )}
+                      </div>
+
+                      {/* Action Buttons under Generated Image */}
+                      <div className="flex gap-2 justify-center">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-[10px] h-8 border-slate-200 text-slate-600 hover:bg-slate-50"
+                          onClick={handleGenerate}
+                        >
+                          <RefreshCw className="w-3 h-3 mr-1" /> 重新生成
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-[10px] h-8 border-rose-200 text-rose-600 hover:bg-rose-50"
+                          onClick={() => showSuccess("正在准备高清下载包...")}
+                        >
+                          <Download className="w-3 h-3 mr-1" /> 下载
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="text-[10px] h-8 bg-rose-400 hover:bg-rose-500 text-white font-bold"
+                          onClick={() => showSuccess("已成功推送到中达官方直营网店！")}
+                        >
+                          <Send className="w-3 h-3 mr-1" /> 一键上架发布
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -264,24 +319,24 @@ const ImageDesign = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-5 flex flex-wrap gap-4 items-center">
-                <Button variant="outline" size="sm" className="text-xs border-slate-200" onClick={() => handleTune('背景替换')}>
-                  <ImageIcon className="w-3.5 h-3.5 mr-1 text-rose-500" />
+                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('背景替换')}>
+                  <ImageIcon className="w-3.5 h-3.5 mr-1 text-rose-500 group-hover:scale-110 transition-transform" />
                   AI 智能换背景
                 </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200" onClick={() => handleTune('文字编辑')}>
-                  <Tags className="w-3.5 h-3.5 mr-1 text-amber-500" />
+                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('文字编辑')}>
+                  <Tags className="w-3.5 h-3.5 mr-1 text-amber-500 group-hover:scale-110 transition-transform" />
                   智能添加文案
                 </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200" onClick={() => handleTune('贴纸合成')}>
-                  <Wand2 className="w-3.5 h-3.5 mr-1 text-emerald-500" />
+                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('贴纸合成')}>
+                  <Wand2 className="w-3.5 h-3.5 mr-1 text-emerald-500 group-hover:scale-110 transition-transform" />
                   添加促销角标贴纸
                 </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200" onClick={() => handleTune('局部微调/画笔')}>
-                  <Paintbrush className="w-3.5 h-3.5 mr-1 text-indigo-500" />
+                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('局部微调/画笔')}>
+                  <Paintbrush className="w-3.5 h-3.5 mr-1 text-indigo-500 group-hover:scale-110 transition-transform" />
                   AI 局部修补
                 </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200" onClick={() => handleTune('裁剪比例')}>
-                  <Scissors className="w-3.5 h-3.5 mr-1 text-slate-500" />
+                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('裁剪比例')}>
+                  <Scissors className="w-3.5 h-3.5 mr-1 text-slate-500 group-hover:scale-110 transition-transform" />
                   裁剪画布
                 </Button>
               </CardContent>
@@ -290,29 +345,20 @@ const ImageDesign = () => {
         </div>
       </div>
 
-      {/* Footer bar */}
-      <div className="fixed bottom-0 left-0 right-0 md:left-72 bg-white/95 backdrop-blur-md border-t border-rose-200 shadow-2xl p-4 z-40 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs">
-          <CheckCircle className="w-4 h-4 text-green-500" />
-          <span className="font-bold text-slate-800">渲染安全认证已通过</span>
-          <span className="text-[10px] text-slate-400">所用无版权图片合规库，已规避商业字体与版权肖像侵权。</span>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="ghost" size="sm" className="text-xs hover:bg-slate-50 text-slate-600" onClick={() => showSuccess("所有生成的素材已经录入草稿归档！")}>
-            保存草稿
-          </Button>
-          <Button variant="outline" size="sm" className="text-xs border-slate-200 text-slate-600 hover:bg-slate-50" onClick={handleGenerate}>
-            重新渲染生成
-          </Button>
-          <Button variant="outline" size="sm" className="text-xs border-rose-200 text-rose-600 hover:bg-rose-50" onClick={() => showSuccess("正在压缩打包下载，包含原图与高清成品包。")}>
-            <Download className="w-3.5 h-3.5 mr-1" />
-            超清高清下载
-          </Button>
-          <Button size="sm" className="bg-rose-400 hover:bg-rose-500 text-white rounded-xl text-xs font-bold px-4" onClick={() => showSuccess("已成功推送到中达官方直营网店！")}>
-            一键上架发布
-          </Button>
-        </div>
-      </div>
+      {/* Image Preview Dialog */}
+      <Dialog open={!!previewImg} onOpenChange={() => setPreviewImg(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+          <div className="relative w-full h-full flex items-center justify-center p-4">
+            <img src={previewImg || ''} alt="Preview" className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl" />
+            <button 
+              onClick={() => setPreviewImg(null)}
+              className="absolute top-6 right-6 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
+            >
+              <Maximize2 className="w-5 h-5" />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
