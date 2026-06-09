@@ -10,10 +10,16 @@ import { Label } from "@/components/ui/label";
 import { 
   Play, Pause, Upload, Sparkles, Scissors, Music, 
   Volume2, Download, RefreshCw, Layers, Sliders,
-  Video, Eye, Film, AlertCircle
+  Video, Eye, Film, AlertCircle, Type, Send
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
+
+// Import custom micro-tools
+import SubtitleTool from '@/components/video-creation/SubtitleTool';
+import VolumeTool from '@/components/video-creation/VolumeTool';
+import StickerTool from '@/components/video-creation/StickerTool';
+import HdRepairTool from '@/components/video-creation/HdRepairTool';
 
 const VideoCreation = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,6 +29,39 @@ const VideoCreation = () => {
   const [audioVoice, setAudioVoice] = useState('v1');
   const [bgMusic, setBgMusic] = useState('m1');
   
+  // Interactive tools states
+  const [activeTool, setActiveTool] = useState<string | null>(null);
+
+  // Subtitle custom state
+  const [subtitleConfig, setSubtitleConfig] = useState({
+    color: '#ffffff',
+    fontSize: 14,
+    fontFamily: 'sans',
+    stroke: true,
+    avoidSubject: true
+  });
+
+  // Volume balance state
+  const [volumeConfig, setVolumeConfig] = useState({
+    bgm: 30,
+    voice: 80,
+    original: 50,
+    denoise: true
+  });
+
+  // Sticker configuration
+  const [stickerConfig, setStickerConfig] = useState({
+    activeSticker: null as string | null,
+    snapToEdge: true
+  });
+
+  // HD Repair config
+  const [repairConfig, setRepairConfig] = useState({
+    mode: 'hd',
+    denoise: true,
+    sharpen: true
+  });
+
   const [subtitleText, setSubtitleText] = useState(
     "【画面1】夏季肌肤出油暗沉不用怕！\n【画面2】中达多肽面霜，30%浓度酵母精粹深入肌底\n【画面3】28天实测面部细纹明显减淡，水润发光"
   );
@@ -52,20 +91,11 @@ const VideoCreation = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left">
+      <div className="space-y-6 max-w-[1600px] mx-auto pb-12 text-left animate-in fade-in duration-300">
         
-        <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">AI 短视频智能剪辑引擎</h1>
-            <p className="text-xs text-slate-500">静态素材一键生成电商短视频，无需剪辑基础。</p>
-          </div>
-          <Badge className="bg-emerald-100 text-emerald-800 border-none font-bold text-xs py-1 px-3">
-            版权安全：无侵权风险
-          </Badge>
-        </div>
-
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
           
+          {/* Left Panel */}
           <div className="xl:col-span-5 space-y-6">
             <Card className="border-none shadow-sm bg-white">
               <CardHeader className="pb-3 border-b border-slate-100">
@@ -183,6 +213,7 @@ const VideoCreation = () => {
             </Card>
           </div>
 
+          {/* Right Panel */}
           <div className="xl:col-span-7 space-y-6">
             <Card className="border-none shadow-sm bg-white">
               <CardHeader className="pb-3 border-b border-slate-100 flex flex-row justify-between items-center">
@@ -198,8 +229,9 @@ const VideoCreation = () => {
               </CardHeader>
               
               <CardContent className="p-6 space-y-4">
-                <div className="aspect-video bg-slate-900 rounded-xl relative overflow-hidden flex flex-col justify-between p-4">
-                  <div className="absolute inset-0 flex items-center justify-center opacity-70">
+                <div className="aspect-video bg-slate-900 rounded-xl relative overflow-hidden flex flex-col justify-between p-4 shadow-inner">
+                  {/* Underlay product image representing the active video frame */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-85">
                     <img 
                       src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=600&auto=format&fit=crop&q=60" 
                       className="w-full h-full object-contain" 
@@ -207,15 +239,48 @@ const VideoCreation = () => {
                     />
                   </div>
 
+                  {/* Top-Right Badges representing Active Tuning states */}
+                  <div className="absolute top-3 right-3 z-30 flex flex-col gap-1.5 items-end">
+                    {repairConfig.mode === '4k' && (
+                      <Badge className="bg-emerald-500/90 text-white text-[9px] font-bold border-none uppercase shadow-sm">
+                        Ultra 4K
+                      </Badge>
+                    )}
+                    {volumeConfig.denoise && (
+                      <Badge className="bg-indigo-600/90 text-white text-[9px] font-bold border-none shadow-sm">
+                        AI 降噪开启
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Dynamic Corner Sticker representation */}
+                  {stickerConfig.activeSticker && (
+                    <div className={cn(
+                      "absolute z-30 p-2 shadow-lg rounded-lg text-[10px] font-bold text-white tracking-wider animate-bounce",
+                      stickerConfig.snapToEdge ? "top-3 left-3" : "top-1/3 left-1/3",
+                      stickerConfig.activeSticker === 'v-s1' && 'bg-red-500',
+                      stickerConfig.activeSticker === 'v-s2' && 'bg-rose-500',
+                      stickerConfig.activeSticker === 'v-s3' && 'bg-slate-800',
+                      stickerConfig.activeSticker === 'v-s4' && 'bg-amber-500',
+                    )}>
+                      {stickerConfig.activeSticker === 'v-s1' && '🔥 限时秒杀'}
+                      {stickerConfig.activeSticker === 'v-s2' && '✨ 爆款首发'}
+                      {stickerConfig.activeSticker === 'v-s3' && '📦 全场包邮'}
+                      {stickerConfig.activeSticker === 'v-s4' && '💰 满减优惠'}
+                    </div>
+                  )}
+
+                  {/* Centered Play Trigger */}
                   <div className="absolute inset-0 flex items-center justify-center z-20">
                     <button 
                       onClick={handlePlayToggle}
-                      className="bg-rose-500 hover:bg-rose-600 text-white rounded-full p-4 shadow-lg"
+                      className="bg-rose-500 hover:bg-rose-600 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-105 active:scale-95"
                     >
                       {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
                     </button>
                   </div>
 
+                  {/* HD Render block */}
                   {isRendering && (
                     <div className="absolute inset-0 bg-black/80 z-30 flex flex-col items-center justify-center p-6 space-y-4">
                       <div className="space-y-1 text-center w-full max-w-xs">
@@ -225,42 +290,143 @@ const VideoCreation = () => {
                     </div>
                   )}
 
-                  <div className="w-full text-center bg-black/55 backdrop-blur-sm py-2 rounded-lg z-10">
-                    <span className="text-[11px] text-white font-bold">
+                  {/* Live Rendered Subtitle Box */}
+                  <div 
+                    className="w-full text-center bg-black/65 backdrop-blur-sm py-2 px-4 rounded-lg z-10 transition-all"
+                    style={{
+                      marginTop: 'auto',
+                      border: subtitleConfig.stroke ? '1px solid rgba(255,255,255,0.15)' : 'none'
+                    }}
+                  >
+                    <span 
+                      className="text-xs font-bold tracking-wide transition-all duration-200"
+                      style={{
+                        color: subtitleConfig.color,
+                        fontSize: `${subtitleConfig.fontSize}px`,
+                        textShadow: subtitleConfig.stroke ? '1px 1px 2px #000' : 'none',
+                        fontFamily: subtitleConfig.fontFamily === 'mono' ? 'monospace' : 'sans-serif'
+                      }}
+                    >
                       {isPlaying ? "✨ 28天实测面部细纹明显减淡 ✨" : "中达修护面霜，一抹抗老紧致"}
                     </span>
                   </div>
                 </div>
+
+                {/* Sub-Player Ecommerce Action buttons */}
+                <div className="flex gap-2.5 justify-center pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs h-9 border-slate-200"
+                    onClick={startRender}
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                    重新渲染
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs h-9 border-rose-200 text-rose-600 hover:bg-rose-50"
+                    onClick={() => showSuccess("视频高码率导出任务创建成功，开始下载。")}
+                  >
+                    <Download className="w-3.5 h-3.5 mr-1" />
+                    导出视频
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="text-xs h-9 bg-rose-400 hover:bg-rose-500 text-white font-bold"
+                    onClick={() => showSuccess("视频已自动适配规格，上架到商品主图视频槽。")}
+                  >
+                    <Send className="w-3.5 h-3.5 mr-1" />
+                    一键上架
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
+            {/* Smart Micro-tuning Tool bar */}
             <Card className="border-none shadow-sm bg-white">
               <CardHeader className="pb-3 border-b border-slate-100">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <Scissors className="w-4 h-4 text-rose-400" />
-                  精细化微调
+                  精细化微调工具
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-5 flex flex-wrap gap-4 items-center">
-                <Button variant="outline" size="sm" className="text-xs border-slate-200">字幕样式</Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200">音量平衡</Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200">动态贴纸</Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200">高清修复</Button>
+              <CardContent className="p-5">
+                {!activeTool ? (
+                  <div className="flex flex-wrap gap-4 items-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs border-slate-200 group" 
+                      onClick={() => setActiveTool('subtitle')}
+                    >
+                      <Type className="w-3.5 h-3.5 mr-1.5 text-rose-500 group-hover:scale-110 transition-transform" />
+                      字幕样式
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs border-slate-200 group" 
+                      onClick={() => setActiveTool('volume')}
+                    >
+                      <Volume2 className="w-3.5 h-3.5 mr-1.5 text-amber-500 group-hover:scale-110 transition-transform" />
+                      音量平衡
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs border-slate-200 group" 
+                      onClick={() => setActiveTool('sticker')}
+                    >
+                      <Layers className="w-3.5 h-3.5 mr-1.5 text-emerald-500 group-hover:scale-110 transition-transform" />
+                      动态贴纸
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs border-slate-200 group" 
+                      onClick={() => setActiveTool('repair')}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5 text-indigo-500 group-hover:scale-110 transition-transform" />
+                      高清修复
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {activeTool === 'subtitle' && (
+                      <SubtitleTool 
+                        onClose={() => setActiveTool(null)} 
+                        subtitleConfig={subtitleConfig}
+                        setSubtitleConfig={setSubtitleConfig}
+                      />
+                    )}
+                    {activeTool === 'volume' && (
+                      <VolumeTool 
+                        onClose={() => setActiveTool(null)} 
+                        volumeConfig={volumeConfig}
+                        setVolumeConfig={setVolumeConfig}
+                      />
+                    )}
+                    {activeTool === 'sticker' && (
+                      <StickerTool 
+                        onClose={() => setActiveTool(null)} 
+                        stickerConfig={stickerConfig}
+                        setStickerConfig={setStickerConfig}
+                      />
+                    )}
+                    {activeTool === 'repair' && (
+                      <HdRepairTool 
+                        onClose={() => setActiveTool(null)} 
+                        repairConfig={repairConfig}
+                        setRepairConfig={setRepairConfig}
+                      />
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
-        </div>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 md:left-72 bg-white/95 backdrop-blur-md border-t border-rose-200 shadow-2xl p-4 z-40 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs">
-          <AlertCircle className="w-4 h-4 text-amber-500" />
-          <span className="font-bold text-slate-800">合规检测通过</span>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" size="sm" className="text-xs" onClick={startRender}>重新渲染</Button>
-          <Button variant="outline" size="sm" className="text-xs border-rose-200 text-rose-600">导出视频</Button>
-          <Button size="sm" className="bg-rose-400 hover:bg-rose-500 text-white rounded-xl text-xs font-bold px-4">一键上架</Button>
         </div>
       </div>
     </DashboardLayout>

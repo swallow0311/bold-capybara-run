@@ -179,6 +179,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 主图、海报、详情页、场景图智能创作，上传商品图片一键合成电商海报。
               </span>
             )}
+            {location.pathname === '/video-creation' && (
+              <span className="text-[11px] text-slate-400 font-medium">
+                静态素材一键生成电商短视频，无需剪辑基础。
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-5">
