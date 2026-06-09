@@ -7,15 +7,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { 
   Upload, Image as ImageIcon, Sliders, RefreshCw, 
   Download, ArrowLeftRight, Maximize2, Sparkles, 
-  Wand2, Scissors, Paintbrush, Tags, CheckCircle,
+  Wand2, Scissors, Paintbrush, Tags,
   Search, ZoomIn, Send
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
+
+// Import tuning tools
+import BackgroundTool from '@/components/image-design/BackgroundTool';
+import TextTool from '@/components/image-design/TextTool';
+import StickerTool from '@/components/image-design/StickerTool';
+import RepairTool from '@/components/image-design/RepairTool';
+import CropTool from '@/components/image-design/CropTool';
 
 const MOCK_TEMPLATES = [
   { id: 't1', name: '极简纯白主图', size: '800x800', tag: '主图首图' },
@@ -31,10 +38,11 @@ const ImageDesign = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const [activeTool, setActiveTool] = useState<string | null>(null);
   
   // Image comparison mock urls
-  const [originalImg, setOriginalImg] = useState('https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&auto=format&fit=crop&q=60');
-  const [generatedImg, setGeneratedImg] = useState('https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&auto=format&fit=crop&q=60');
+  const [originalImg] = useState('https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&auto=format&fit=crop&q=60');
+  const [generatedImg] = useState('https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&auto=format&fit=crop&q=60');
 
   const handleGenerate = () => {
     setIsGenerating(true);
@@ -42,10 +50,6 @@ const ImageDesign = () => {
       setIsGenerating(false);
       showSuccess("AI 视觉创意海报生成成功！");
     }, 1200);
-  };
-
-  const handleTune = (action: string) => {
-    showSuccess(`正在调起AI微调工具：${action}`);
   };
 
   return (
@@ -318,27 +322,39 @@ const ImageDesign = () => {
                   智能微调修图工具栏
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-5 flex flex-wrap gap-4 items-center">
-                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('背景替换')}>
-                  <ImageIcon className="w-3.5 h-3.5 mr-1 text-rose-500 group-hover:scale-110 transition-transform" />
-                  AI 智能换背景
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('文字编辑')}>
-                  <Tags className="w-3.5 h-3.5 mr-1 text-amber-500 group-hover:scale-110 transition-transform" />
-                  智能添加文案
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('贴纸合成')}>
-                  <Wand2 className="w-3.5 h-3.5 mr-1 text-emerald-500 group-hover:scale-110 transition-transform" />
-                  添加促销角标贴纸
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('局部微调/画笔')}>
-                  <Paintbrush className="w-3.5 h-3.5 mr-1 text-indigo-500 group-hover:scale-110 transition-transform" />
-                  AI 局部修补
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => handleTune('裁剪比例')}>
-                  <Scissors className="w-3.5 h-3.5 mr-1 text-slate-500 group-hover:scale-110 transition-transform" />
-                  裁剪画布
-                </Button>
+              <CardContent className="p-5">
+                {!activeTool ? (
+                  <div className="flex flex-wrap gap-4 items-center">
+                    <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => setActiveTool('background')}>
+                      <ImageIcon className="w-3.5 h-3.5 mr-1 text-rose-500 group-hover:scale-110 transition-transform" />
+                      AI 智能换背景
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => setActiveTool('text')}>
+                      <Tags className="w-3.5 h-3.5 mr-1 text-amber-500 group-hover:scale-110 transition-transform" />
+                      智能添加文案
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => setActiveTool('sticker')}>
+                      <Wand2 className="w-3.5 h-3.5 mr-1 text-emerald-500 group-hover:scale-110 transition-transform" />
+                      添加促销角标贴纸
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => setActiveTool('repair')}>
+                      <Paintbrush className="w-3.5 h-3.5 mr-1 text-indigo-500 group-hover:scale-110 transition-transform" />
+                      AI 局部修补
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-xs border-slate-200 group" onClick={() => setActiveTool('crop')}>
+                      <Scissors className="w-3.5 h-3.5 mr-1 text-slate-500 group-hover:scale-110 transition-transform" />
+                      裁剪画布
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {activeTool === 'background' && <BackgroundTool onClose={() => setActiveTool(null)} />}
+                    {activeTool === 'text' && <TextTool onClose={() => setActiveTool(null)} />}
+                    {activeTool === 'sticker' && <StickerTool onClose={() => setActiveTool(null)} />}
+                    {activeTool === 'repair' && <RepairTool onClose={() => setActiveTool(null)} />}
+                    {activeTool === 'crop' && <CropTool onClose={() => setActiveTool(null)} />}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
