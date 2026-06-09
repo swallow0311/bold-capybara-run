@@ -10,11 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   TrendingDown, TrendingUp, MessageSquare, Lightbulb, ArrowRight,
   AlertCircle, Package, Truck, Filter, Download, Plus, Copy,
   Heart, Database, RefreshCw, BarChart3, HelpCircle, FileText, CheckCircle2,
-  Calendar, Check, Settings2, Sparkles, Send, ShieldAlert, ShieldCheck,
+  Calendar, Check, Settings2, Sparkles, Send, ShieldAlert,
   Search, Eye, Trash2, FileSpreadsheet, Sparkle
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
@@ -48,8 +49,6 @@ const SentimentAnalysis = () => {
   const [enableSentiment, setEnableSentiment] = useState(true);
   const [enableSellPoint, setEnableSellPoint] = useState(true);
   const [enablePainPoint, setEnablePainPoint] = useState(true);
-  const [enableQAParsing, setEnableQAParsing] = useState(true);
-  const [enableWordCloud, setEnableWordCloud] = useState(true);
   
   const [filterSpam, setFilterSpam] = useState(true);
   const [filterShortTxt, setFilterShortTxt] = useState(true);
@@ -58,7 +57,6 @@ const SentimentAnalysis = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [detailItem, setDetailItem] = useState<any>(null);
   const [favorites, setFavorites] = useState<number[]>([]);
-  const [importText, setImportText] = useState('');
   
   const [activeTab, setActiveTab] = useState('details');
 
@@ -105,37 +103,6 @@ const SentimentAnalysis = () => {
     return { total, good, bad, neutral, qa, goodRate, badRate, attributionData };
   }, [cleanAndClassifyReviews]);
 
-  const sellPoints = useMemo(() => {
-    if (stats.total === 0) {
-      return CATEGORY_DEFAULT_SELL_POINTS[selectedCategory].map((point, index) => ({
-        id: index,
-        word: point,
-        heat: 10,
-        count: 0,
-        tag: "类目兜底"
-      }));
-    }
-    return [
-      { id: 1, word: selectedCategory === 'cosmetics' ? "水润舒缓" : "柔软亲肤", heat: 92, count: 18, tag: "好评" },
-      { id: 2, word: selectedCategory === 'cosmetics' ? "深层锁水" : "修身立体", heat: 88, count: 12, tag: "好评" },
-      { id: 3, word: selectedCategory === 'cosmetics' ? "温和无敏" : "透气排汗", heat: 75, count: 9, tag: "好评" },
-      { id: 4, word: "包装大气", heat: 64, count: 5, tag: "好评" }
-    ];
-  }, [selectedCategory, stats.total]);
-
-  const painPoints = [
-    { id: 1, word: "过敏刺痛", freq: 15, quote: "用了两次脸就红了，刺痛感很明显", category: "质量" },
-    { id: 2, word: "闷痘太油", freq: 12, quote: "夏天用真的太油了，第二天就长了两个大痘", category: "质量" },
-    { id: 3, word: "泵头卡死", freq: 8, quote: "按压头设计不科学，按不出来", category: "尺寸" },
-    { id: 4, word: "机器人回复", freq: 5, quote: "问了半天都是机器人自动回复", category: "客服" }
-  ];
-
-  const qaIntents = [
-    { id: 1, q: "这套产品适合敏感肌日常用吗？会过敏吗？", heat: 124, type: "适用肤质" },
-    { id: 2, q: "买赠的赠品是和正装一样功效的吗？", heat: 89, type: "营销活动" },
-    { id: 3, q: "搭配精华一起用，抗老效果会不会更好？", heat: 56, type: "搭配使用" }
-  ];
-
   const pieData = [
     { name: '好评', value: stats.good, color: '#f5756c' },
     { name: '差评', value: stats.bad, color: '#fca39d' },
@@ -158,19 +125,6 @@ const SentimentAnalysis = () => {
   const handleToggleFav = (id: number) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
     showSuccess("收藏状态已更新！");
-  };
-
-  const syncToContentFactory = (type: 'sell' | 'pain') => {
-    if (type === 'sell') {
-      const topSell = sellPoints.map(p => p.word).join(', ');
-      showSuccess(`已成功同步高频卖点「${topSell}」至 AIGC 内容工厂。`);
-    } else {
-      showSuccess(`已成功同步核心痛点问题至 AIGC 规避模块。`);
-    }
-  };
-
-  const syncToVideoCreation = () => {
-    showSuccess("已将用户高频关注点同步至视频创作模块！");
   };
 
   const triggerBatchAnalysis = () => {
@@ -207,34 +161,6 @@ const SentimentAnalysis = () => {
                   <SelectContent>
                     <SelectItem value="sync">本店商品同步</SelectItem>
                     <SelectItem value="manual">手动导入文本</SelectItem>
-                    <SelectItem value="batchsku">批量 SKU 导入</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-500">目类选择</span>
-                <Select value={selectedCategory} onValueChange={(val: any) => setSelectedCategory(val)}>
-                  <SelectTrigger className="w-[120px] h-9 bg-slate-50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cosmetics">美妆个护</SelectItem>
-                    <SelectItem value="apparel">服饰内衣</SelectItem>
-                    <SelectItem value="electronics">3C数码</SelectItem>
-                    <SelectItem value="home">家居家装</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-500">时间段</span>
-                <Select value={timeRange} onValueChange={setTimeRange}>
-                  <SelectTrigger className="w-[110px] h-9 bg-slate-50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">近 7 天</SelectItem>
-                    <SelectItem value="30">近 30 天</SelectItem>
-                    <SelectItem value="all">全部评价</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -248,7 +174,6 @@ const SentimentAnalysis = () => {
                     <SelectItem value="all">全部极性</SelectItem>
                     <SelectItem value="好评">仅看好评</SelectItem>
                     <SelectItem value="差评">仅看差评</SelectItem>
-                    <SelectItem value="咨询">仅看咨询</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -280,25 +205,6 @@ const SentimentAnalysis = () => {
                 <div className="flex items-center justify-between">
                   <Label className="text-slate-600 font-semibold">卖点提取</Label>
                   <Switch checked={enableSellPoint} onCheckedChange={setEnableSellPoint} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-slate-600 font-semibold">差评归因</Label>
-                  <Switch checked={enablePainPoint} onCheckedChange={setEnablePainPoint} />
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-none shadow-sm bg-white">
-              <CardHeader className="pb-3 border-b border-slate-100">
-                <CardTitle className="text-xs font-bold text-slate-700">过滤规则</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label className="text-slate-600 font-semibold">水军过滤</Label>
-                  <Switch checked={filterSpam} onCheckedChange={setFilterSpam} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-slate-600 font-semibold">过滤短文本</Label>
-                  <Switch checked={filterShortTxt} onCheckedChange={setFilterShortTxt} />
                 </div>
               </CardContent>
             </Card>
@@ -429,9 +335,8 @@ const SentimentAnalysis = () => {
             <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-rose-500" /> NLP 数据同步</span>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <Button onClick={() => syncToContentFactory('sell')} className="bg-rose-400 hover:bg-rose-500 text-white font-bold h-9 text-xs rounded-xl">一键生成卖点文案</Button>
-            <Button onClick={() => syncToContentFactory('pain')} variant="outline" className="border-rose-200 text-rose-600 hover:bg-rose-50 text-xs h-9">一键生成规避话术</Button>
-            <Button onClick={syncToVideoCreation} variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-50 text-xs h-9">一键生成视频脚本</Button>
+            <Button onClick={() => showSuccess("已同步卖点")} className="bg-rose-400 hover:bg-rose-500 text-white font-bold h-9 text-xs rounded-xl">一键生成卖点文案</Button>
+            <Button onClick={() => showSuccess("已同步规避话术")} variant="outline" className="border-rose-200 text-rose-600 hover:bg-rose-50 text-xs h-9">一键生成规避话术</Button>
           </div>
         </div>
       </div>
