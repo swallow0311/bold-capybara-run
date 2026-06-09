@@ -17,6 +17,7 @@ import { showSuccess, showError } from '@/utils/toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { cn } from "@/lib/utils";
 
 // 扩展后的高维度商品及商业决策数据
 const INITIAL_PRODUCTS = [
