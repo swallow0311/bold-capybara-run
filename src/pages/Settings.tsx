@@ -1,3 +1,4 @@
+XX。">
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +36,7 @@ const Settings = () => {
                     <SelectValue placeholder="选择大语言模型" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="gpt4">中达自研美妆垂直大模型 v2.0</SelectItem>
+                    <SelectItem value="gpt4">XX自研美妆垂直大模型 v2.0</SelectItem>
                     <SelectItem value="claude">Claude 3.5 Sonnet</SelectItem>
                     <SelectItem value="deepseek">DeepSeek-V3 营销引擎</SelectItem>
                   </SelectContent>
@@ -56,7 +57,7 @@ const Settings = () => {
 
             <div className="space-y-2">
               <Label>系统级 Prompt 前缀 (System Prompt)</Label>
-              <Input defaultValue="你是一个厦门中达美妆的顶尖带货文案大师，擅长利用吸睛的痛点痛击女性敏感肌诉求..." />
+              <Input defaultValue="你是一个厦门XX美妆的顶尖带货文案大师，擅长利用吸睛的痛点痛击女性敏感肌诉求..." />
             </div>
           </CardContent>
         </Card>

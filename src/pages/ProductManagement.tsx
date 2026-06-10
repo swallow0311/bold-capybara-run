@@ -1,3 +1,4 @@
+XX。">
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -36,8 +37,8 @@ interface ProductItem {
 const INITIAL_PRODUCTS: ProductItem[] = [
   {
     id: '1',
-    name: '中达酵母御龄紧致面霜 50g',
-    brand: '中达美妆 (Chanda)',
+    name: 'XX酵母御龄紧致面霜 50g',
+    brand: 'XX美妆 (Chanda)',
     category: '面霜/乳液',
     spuCode: 'SPU-LIP-99001',
     priceRange: '¥299.00',
@@ -45,7 +46,7 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     sales: 12840,
     status: '出售中',
     platform: 'Taobao',
-    shopName: '中达美妆官方旗舰店',
+    shopName: 'XX美妆官方旗舰店',
     skus: [
       { skuCode: 'SKU-99001-01', spec: '经典紧致款 50g', price: 299, stock: 1200, barcode: '6901234567890' },
       { skuCode: 'SKU-99001-02', spec: '润泽保湿款 50g', price: 299, stock: 1250, barcode: '6901234567891' }
@@ -53,8 +54,8 @@ const INITIAL_PRODUCTS: ProductItem[] = [
   },
   {
     id: '2',
-    name: '中达水漾隔离防晒乳 SPF50+',
-    brand: '中达美妆 (Chanda)',
+    name: 'XX水漾隔离防晒乳 SPF50+',
+    brand: 'XX美妆 (Chanda)',
     category: '防晒霜/喷雾',
     spuCode: 'SPU-SUN-88120',
     priceRange: '¥129.00 - ¥189.00',
@@ -62,7 +63,7 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     sales: 5400,
     status: '出售中',
     platform: 'Douyin',
-    shopName: '中达美妆抖音专营店',
+    shopName: 'XX美妆抖音专营店',
     skus: [
       { skuCode: 'SKU-88120-01', spec: '单支装 50ml', price: 129, stock: 500, barcode: '6901234567882' },
       { skuCode: 'SKU-88120-02', spec: '两支特惠装 50ml*2', price: 189, stock: 350, barcode: '6901234567883' }
@@ -71,7 +72,7 @@ const INITIAL_PRODUCTS: ProductItem[] = [
   {
     id: '3',
     name: '积雪草净化海泥面膜 100g',
-    brand: '中达美妆 (Chanda)',
+    brand: 'XX美妆 (Chanda)',
     category: '水洗面膜',
     spuCode: 'SPU-FAC-77002',
     priceRange: '¥89.00',
@@ -79,15 +80,15 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     sales: 890,
     status: '已售罄',
     platform: 'JD',
-    shopName: '中达美妆京东旗舰店',
+    shopName: 'XX美妆京东旗舰店',
     skus: [
       { skuCode: 'SKU-77002-01', spec: '积雪草深层清洁 100g', price: 89, stock: 0, barcode: '6901234567875' }
     ]
   },
   {
     id: '4',
-    name: '中达凝润修护水光唇蜜',
-    brand: '中达美妆 (Chanda)',
+    name: 'XX凝润修护水光唇蜜',
+    brand: 'XX美妆 (Chanda)',
     category: '唇蜜/唇釉',
     spuCode: 'SPU-LIP-66044',
     priceRange: '¥69.00',
@@ -95,7 +96,7 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     sales: 20100,
     status: '出售中',
     platform: 'Taobao',
-    shopName: '中达彩妆官方店',
+    shopName: 'XX彩妆官方店',
     skus: [
       { skuCode: 'SKU-66044-01', spec: '01# 水光西红柿红', price: 69, stock: 2200, barcode: '6901234567861' },
       { skuCode: 'SKU-66044-02', spec: '02# 裸粉豆沙蜜', price: 69, stock: 2300, barcode: '6901234567862' }

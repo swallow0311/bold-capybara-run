@@ -1,3 +1,4 @@
+XX，5-20 -> 6-10。">
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,8 +25,8 @@ const INITIAL_PRODUCTS = [
   { 
     id: 1, 
     img: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=150&auto=format&fit=crop&q=60',
-    name: '中达酵母御龄紧致面霜', 
-    shop: '中达美妆官方旗舰店',
+    name: 'XX酵母御龄紧致面霜', 
+    shop: 'XX美妆官方旗舰店',
     category: '面霜',
     price: 299, 
     sales: 123400, 
@@ -39,18 +40,18 @@ const INITIAL_PRODUCTS = [
     type: 'recommend',
     aiReport: '该产品在35+精致妈妈人群中转化率极高。受早C晚A趋势红利带动，本月流量同比增长72%。推荐采用头部达人矩阵分发+自播配合。',
     historyData: [
-      { date: '5-01', sales: 1200 },
-      { date: '5-05', sales: 1900 },
-      { date: '5-10', sales: 2400 },
-      { date: '5-15', sales: 2900 },
-      { date: '5-20', sales: 3400 },
+      { date: '6-01', sales: 1200 },
+      { date: '6-05', sales: 1900 },
+      { date: '6-10', sales: 2400 },
+      { date: '6-15', sales: 2900 },
+      { date: '6-20', sales: 3400 },
     ]
   },
   { 
     id: 2, 
     img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=150&auto=format&fit=crop&q=60',
-    name: '中达修护舒缓多肽精华液', 
-    shop: '中达海外旗舰店',
+    name: 'XX修护舒缓多肽精华液', 
+    shop: 'XX海外旗舰店',
     category: '精华',
     price: 399, 
     sales: 87000, 
@@ -64,18 +65,18 @@ const INITIAL_PRODUCTS = [
     type: 'darkhorse',
     aiReport: '随着季节交替，敏感修护心智大幅度爆发。建议搭配短视频“换季修护指南”展开中腰部美妆达人纯佣合作。',
     historyData: [
-      { date: '5-01', sales: 800 },
-      { date: '5-05', sales: 1100 },
-      { date: '5-10', sales: 1500 },
-      { date: '5-15', sales: 1700 },
-      { date: '5-20', sales: 2100 },
+      { date: '6-01', sales: 800 },
+      { date: '6-05', sales: 1100 },
+      { date: '6-10', sales: 1500 },
+      { date: '6-15', sales: 1700 },
+      { date: '6-20', sales: 2100 },
     ]
   },
   { 
     id: 3, 
     img: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=150&auto=format&fit=crop&q=60',
-    name: '中达凝润修护水光唇蜜', 
-    shop: '中达彩妆官方店',
+    name: 'XX凝润修护水光唇蜜', 
+    shop: 'XX彩妆官方店',
     category: '彩妆',
     price: 69, 
     sales: 201000, 
@@ -89,18 +90,18 @@ const INITIAL_PRODUCTS = [
     type: 'recommend',
     aiReport: '小红书夏日白开水妆容推荐单品，目前在彩妆榜霸榜TOP3，回购率达35%，是理想的店播福利款与起盘破零品。',
     historyData: [
-      { date: '5-01', sales: 3200 },
-      { date: '5-05', sales: 4500 },
-      { date: '5-10', sales: 4900 },
-      { date: '5-15', sales: 5200 },
-      { date: '5-20', sales: 6000 },
+      { date: '6-01', sales: 3200 },
+      { date: '6-05', sales: 4500 },
+      { date: '6-10', sales: 4900 },
+      { date: '6-15', sales: 5200 },
+      { date: '6-20', sales: 6000 },
     ]
   },
   { 
     id: 4, 
     img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=150&auto=format&fit=crop&q=60',
-    name: '中达清爽控油防晒喷雾', 
-    shop: '中达美妆官方旗舰店',
+    name: 'XX清爽控油防晒喷雾', 
+    shop: 'XX美妆官方旗舰店',
     category: '防晒',
     price: 89, 
     sales: 98000, 
@@ -114,18 +115,18 @@ const INITIAL_PRODUCTS = [
     type: 'new',
     aiReport: '进入夏季以来全网刚需，配合直播间“秒杀买赠”活动极易爆单。注意快速跟进千川流量直投，缩短回本周期。',
     historyData: [
-      { date: '5-01', sales: 1500 },
-      { date: '5-05', sales: 2800 },
-      { date: '5-10', sales: 4100 },
-      { date: '5-15', sales: 5800 },
-      { date: '5-20', sales: 7900 },
+      { date: '6-01', sales: 1500 },
+      { date: '6-05', sales: 2800 },
+      { date: '6-10', sales: 4100 },
+      { date: '6-15', sales: 5800 },
+      { date: '6-20', sales: 7900 },
     ]
   },
   { 
     id: 5, 
     img: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=150&auto=format&fit=crop&q=60',
     name: '积雪草净化海泥面膜', 
-    shop: '中达个人护理专营店',
+    shop: 'XX个人护理专营店',
     category: '面膜',
     price: 129, 
     sales: 54000, 
@@ -139,11 +140,11 @@ const INITIAL_PRODUCTS = [
     type: 'darkhorse',
     aiReport: '清洁泥膜竞争非常激烈，建议从小红书“一周局部清洁”细分痛点场景开展针对性投流，避免正面竞品价格战。',
     historyData: [
-      { date: '5-01', sales: 900 },
-      { date: '5-05', sales: 920 },
-      { date: '5-10', sales: 880 },
-      { date: '5-15', sales: 850 },
-      { date: '5-20', sales: 810 },
+      { date: '6-01', sales: 900 },
+      { date: '6-05', sales: 920 },
+      { date: '6-10', sales: 880 },
+      { date: '6-15', sales: 850 },
+      { date: '6-20', sales: 810 },
     ]
   }
 ];
@@ -374,7 +375,7 @@ const SelectionEngine = () => {
         <Card className="border-none shadow-sm">
           <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-slate-500" />
+              <SlidersHorizontal className="w-4 h-4 text-slate-50" />
               <CardTitle className="text-sm font-bold text-slate-800">多维度爆款指标筛选</CardTitle>
             </div>
             <Button 

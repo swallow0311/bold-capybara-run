@@ -1,3 +1,4 @@
+XX。">
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,9 +10,9 @@ import { Input } from "@/components/ui/input";
 
 const DataCenter = () => {
   const assets = [
-    { id: 'SKU-LIP-001', name: '中达凝润修护水光唇蜜', type: '素材包', stock: '12件', threshold: '50件', status: '低库存报警' },
-    { id: 'SKU-SUN-009', name: '中达水漾隔离防晒乳', type: '视频素材', stock: '45件', threshold: '100件', status: '备货充足' },
-    { id: 'SKU-FAC-012', name: '中达酵母御龄紧致面霜', type: '口播文案', stock: '8件', threshold: '30件', status: '低库存报警' },
+    { id: 'SKU-LIP-001', name: 'XX凝润修护水光唇蜜', type: '素材包', stock: '12件', threshold: '50件', status: '低库存报警' },
+    { id: 'SKU-SUN-009', name: 'XX水漾隔离防晒乳', type: '视频素材', stock: '45件', threshold: '100件', status: '备货充足' },
+    { id: 'SKU-FAC-012', name: 'XX酵母御龄紧致面霜', type: '口播文案', stock: '8件', threshold: '30件', status: '低库存报警' },
   ];
 
   return (

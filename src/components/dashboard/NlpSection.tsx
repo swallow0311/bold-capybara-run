@@ -1,3 +1,4 @@
+6月10日。">
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,7 @@ const sentimentData = [
 
 // 生成近30天日期数据
 const trendData = Array.from({ length: 30 }).map((_, i) => {
-  const date = subDays(new Date(2026, 4, 20), 29 - i);
+  const date = subDays(new Date(2026, 5, 10), 29 - i);
   return {
     date: format(date, 'MM-dd'),
     "满意度评分": (85 + Math.random() * 10).toFixed(1),
@@ -183,7 +184,7 @@ const NlpSection = () => {
         </Card>
 
         <Card className="border-none shadow-sm bg-white">
-          <CardHeader className="pb-2 border-b border-slate-50">
+          <CardHeader className="pb-2 border-b border-slate-100">
             <CardTitle className="text-xs font-bold text-rose-600">风险预警商品</CardTitle>
           </CardHeader>
           <CardContent className="p-0">

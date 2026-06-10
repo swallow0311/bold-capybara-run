@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Search, PenTool, BarChart3, Settings, 
   Bell, Sparkles, ChevronDown, ChevronRight, FileText, 
   ImageIcon, VideoIcon, FolderOpen, ShieldAlert, ShoppingBag, 
-  Link2, Cpu, ArrowLeft, Calendar
+  Link2, Cpu, ArrowLeft, Calendar, AlertTriangle
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,7 @@ const menuItems = [
     children: [
       { name: 'API接口', path: '/settings/api', icon: Link2 },
       { name: '模型配置', path: '/settings/model', icon: Cpu },
+      { name: '预警设置', path: '/settings/alerts', icon: AlertTriangle },
     ]
   },
 ];
@@ -128,11 +129,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                  location.pathname === '/compliance-qa' ? '合规质检' :
                  location.pathname === '/sentiment' ? '评价NLP分析' :
                  location.pathname === '/settings/api' ? 'API接口设置' :
-                 location.pathname === '/settings/model' ? '大模型配置' : '系统中心'}
+                 location.pathname === '/settings/model' ? '大模型配置' :
+                 location.pathname === '/settings/alerts' ? '预警设置' : '系统中心'}
               </h2>
               {isIndex && (
                 <p className="text-[10px] text-slate-400 flex items-center gap-1 font-medium">
-                  <Calendar className="w-3 h-3" /> 数据更新至：2026年5月20日 09:30 (实时同步中)
+                  <Calendar className="w-3 h-3" /> 数据更新至：2026年6月10日 09:30 (实时同步中)
                 </p>
               )}
             </div>

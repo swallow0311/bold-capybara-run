@@ -1,3 +1,4 @@
+XX。">
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,9 +22,9 @@ import { cn } from "@/lib/utils";
 const DEFAULT_FORBIDDEN_WORDS = ["第一", "最强", "根除", "顶级", "特效", "国家级"];
 
 const PRODUCTS = [
-  { value: "p1", label: "中达酵母御龄紧致面霜" },
-  { value: "p2", label: "中达修护舒缓多肽精华液" },
-  { value: "p3", label: "中达凝润修护水光唇蜜" },
+  { value: "p1", label: "XX酵母御龄紧致面霜" },
+  { value: "p2", label: "XX修护舒缓多肽精华液" },
+  { value: "p3", label: "XX凝润修护水光唇蜜" },
 ];
 
 const ContentFactory = () => {
@@ -36,14 +37,14 @@ const ContentFactory = () => {
       id: 1,
       title: '版本 A：专业科学种草',
       score: 95,
-      content: '【敏感肌换季救星】中达修护舒缓多肽精华液真的绝了！里面添加了核心的多肽修护成分，能够快速建立皮肤屏障。很多姐妹担心上脸刺激，但它非常温和。用了一周，脸上的红血丝明显淡了，干燥脱皮都得到了极大改善，妥妥的国货之光！',
+      content: '【敏感肌换季救星】XX修护舒缓多肽精华液真的绝了！里面添加了核心的多肽修护成分，能够快速建立皮肤屏障。很多姐妹担心上脸刺激，但它非常温和。用了一周，脸上的红血丝明显淡了，干燥脱皮都得到了极大改善，妥妥的国货之光！',
       advices: '文字流畅，卖点覆盖全面，合规检测通过率100%。'
     },
     {
       id: 2,
       title: '版本 B：夏日大促福利（含违禁词警告演示）',
       score: 72,
-      content: '中达这款防晒绝对是全网最强的防晒喷雾！夏天出门喷一下，能够第一速度成膜，彻底根除紫外线伤害。大促期间买一送一，赶紧下单抢购！',
+      content: 'XX这款防晒绝对是全网最强的防晒喷雾！夏天出门喷一下，能够第一速度成膜，彻底根除紫外线伤害。大促期间买一送一，赶紧下单抢购！',
       advices: '包含广告法违禁极限词 “最强”、“第一”、“根除”。已自动在合规检测中标识，请点击修复。'
     }
   ]);
@@ -150,8 +151,8 @@ const ContentFactory = () => {
   const handleGenerate = () => {
     setIsGenerating(true);
     setTimeout(() => {
-      const v1Content = `【大促必入】中达酵母御龄紧致面霜来了！主打30%高浓度酵母多肽与玻尿酸配合，专为敏感肌淡纹研发。轻薄乳霜质地，夏日用也无负担。${promoTags.join(' & ')}期间限时直降，心动的姐妹快冲！`;
-      const v2Content = `深度测评国货抗老面霜！中达这瓶面霜的核心是多肽与深层补水配方，极其温和，敏感肌换季抗衰首选。实测28天细纹改善明显。`;
+      const v1Content = `【大促必入】XX酵母御龄紧致面霜来了！主打30%高浓度酵母多肽与玻尿酸配合，专为敏感肌淡纹研发。轻薄乳霜质地，夏日用也无负担。${promoTags.join(' & ')}期间限时直降，心动的姐妹快冲！`;
+      const v2Content = `深度测评国货抗老面霜！XX这瓶面霜的核心是多肽与深层补水配方，极其温和，敏感肌换季抗衰首选。实测28天细纹改善明显。`;
       
       const v1Eval = evaluateText(v1Content, isLockEnabled);
       const v2Eval = evaluateText(v2Content, isLockEnabled);

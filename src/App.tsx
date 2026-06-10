@@ -16,6 +16,7 @@ import ComplianceQA from "./pages/ComplianceQA";
 import SentimentAnalysis from "./pages/SentimentAnalysis";
 import ApiSettings from "./pages/ApiSettings";
 import ModelConfig from "./pages/ModelConfig";
+import AlertSettings from "./pages/AlertSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/sentiment" element={<SentimentAnalysis />} />
           <Route path="/settings/api" element={<ApiSettings />} />
           <Route path="/settings/model" element={<ModelConfig />} />
+          <Route path="/settings/alerts" element={<AlertSettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

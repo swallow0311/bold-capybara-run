@@ -1,3 +1,4 @@
+XX，2026-05-20 -> 2026-06-10。">
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,11 +19,11 @@ import { useNavigate } from 'react-router-dom';
 const INITIAL_ASSETS = [
   {
     id: 1,
-    name: '中达酵母面霜_专业测评版',
+    name: 'XX酵母面霜_专业测评版',
     type: 'text',
-    date: '2026-05-20 09:12',
+    date: '2026-06-10 09:12',
     score: 95,
-    product: '中达御龄紧致面霜',
+    product: 'XX御龄紧致面霜',
     content: '坚持用面部淡纹明显，30%多肽针对精致妈妈群体。里面添加了核心的多肽修护成分，能够快速建立皮肤屏障。很多姐妹担心上脸刺激，但它非常温和。用了一周，脸上的红血丝明显淡了，干燥脱皮都得到了极大改善，妥妥的国货之光！',
     img: '',
     isFavorite: true
@@ -31,7 +32,7 @@ const INITIAL_ASSETS = [
     id: 2,
     name: '夏日防晒海报_金箔高奢',
     type: 'image',
-    date: '2026-05-20 10:45',
+    date: '2026-06-10 10:45',
     score: 91,
     product: '清爽控油防晒喷雾',
     content: '',
@@ -42,7 +43,7 @@ const INITIAL_ASSETS = [
     id: 3,
     name: '水光唇蜜主图卡点短视频',
     type: 'video',
-    date: '2026-05-19 16:30',
+    date: '2026-06-09 16:30',
     score: 93,
     product: '凝润修护水光唇蜜',
     content: '',
@@ -53,7 +54,7 @@ const INITIAL_ASSETS = [
     id: 4,
     name: '修护舒缓多肽精华故事种草版',
     type: 'text',
-    date: '2026-05-18 14:00',
+    date: '2026-06-08 14:00',
     score: 87,
     product: '修护多肽精华液',
     content: '每天晚上厚涂一层，脸上红血丝快速消退，换季必备。这款精华液采用了最新的多肽包裹技术，能够直达肌底，从根源修护受损屏障。质地清爽不黏腻，上脸瞬间吸收，是敏感肌姐妹的福音。',
