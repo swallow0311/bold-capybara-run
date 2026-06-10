@@ -130,7 +130,7 @@ const SelectionSection = () => {
                 <div 
                   key={i} 
                   className={cn(
-                    "transition-all hover:scale-110 cursor-default select-none",
+                    "transition-all hover:scale-110 cursor-default select-none flex items-baseline gap-1",
                     getFontSize(w.count),
                     w.color
                   )}
@@ -139,7 +139,8 @@ const SelectionSection = () => {
                     opacity: w.count < 5000 ? 0.6 : 1
                   }}
                 >
-                  {w.text}
+                  <span>{w.text}</span>
+                  <span className="text-[10px] font-mono opacity-60">({w.count.toLocaleString()})</span>
                 </div>
               ))}
             </div>

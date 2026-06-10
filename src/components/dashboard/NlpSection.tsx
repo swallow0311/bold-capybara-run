@@ -117,7 +117,7 @@ const NlpSection = () => {
                 <div 
                   key={i} 
                   className={cn(
-                    "transition-all hover:scale-110 cursor-default select-none",
+                    "transition-all hover:scale-110 cursor-default select-none flex items-baseline gap-1",
                     getTopicFontSize(w.count),
                     w.color
                   )}
@@ -126,7 +126,8 @@ const NlpSection = () => {
                     opacity: w.count < 300 ? 0.5 : 1
                   }}
                 >
-                  {w.text}
+                  <span>{w.text}</span>
+                  <span className="text-[10px] font-mono opacity-60">({w.count})</span>
                 </div>
               ))}
             </div>
