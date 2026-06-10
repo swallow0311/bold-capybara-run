@@ -17,6 +17,7 @@ import SentimentAnalysis from "./pages/SentimentAnalysis";
 import ApiSettings from "./pages/ApiSettings";
 import ModelConfig from "./pages/ModelConfig";
 import AlertSettings from "./pages/AlertSettings";
+import AlertRecords from "./pages/AlertRecords";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/settings/api" element={<ApiSettings />} />
           <Route path="/settings/model" element={<ModelConfig />} />
           <Route path="/settings/alerts" element={<AlertSettings />} />
+          <Route path="/settings/alerts/records" element={<AlertRecords />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
