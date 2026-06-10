@@ -36,28 +36,28 @@ const Index = () => {
           </div>
         </div>
 
-        {/* 1. 商品管理板块 */}
+        {/* 1. 商品管理板块：在架概览、健康度矩阵、类目分布树状图 */}
         <section id="product-management" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <ProductSection />
         </section>
 
         <div className="h-[1px] bg-slate-200 w-full" />
 
-        {/* 2. AI 选品板块 */}
+        {/* 2. AI 选品板块：效能总览、推荐池卡片流、趋势预测 */}
         <section id="ai-selection" className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
           <SelectionSection />
         </section>
 
         <div className="h-[1px] bg-slate-200 w-full" />
 
-        {/* 3. AIGC 内容工厂板块 */}
+        {/* 3. AIGC 内容工厂板块：生产效能、类型分布环图、效果对比柱状图 */}
         <section id="aigc-factory" className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
           <AigcSection />
         </section>
 
         <div className="h-[1px] bg-slate-200 w-full" />
 
-        {/* 4. 评价 NLP 分析板块 */}
+        {/* 4. 评价 NLP 分析板块：情感总览、话题词云、问题诊断矩阵 */}
         <section id="sentiment-nlp" className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
           <NlpSection />
         </section>
