@@ -7,15 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { 
   Sparkles, Search, Settings2, RefreshCw, TrendingUp, 
   AlertTriangle, ArrowRight, BarChart3, Zap, ShieldAlert,
   Filter, Download, Layers, MessageSquare, ShoppingBag,
   ChevronRight, Info, CheckCircle2, XCircle, Plus,
-  ArrowUpDown, Calendar, LayoutGrid, List
+  ArrowUpDown, Calendar, LayoutGrid, List, Globe, History
 } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from "@/lib/utils";
+import SelectionConfigSheet from '@/components/selection/SelectionConfigSheet';
 import SelectionDetailDrawer from '@/components/selection/SelectionDetailDrawer';
 
 // 模拟选品数据
@@ -34,7 +36,9 @@ const MOCK_SELECTION_DATA = [
     heat: 850,
     profit: '45%',
     price: '¥299',
-    compData: { price: '¥350', sales: '8000' }
+    compData: { price: '¥350', sales: '8000' },
+    tags: ['蓝海赛道', '成分党关注'],
+    opportunity: '竞品普遍反馈包装渗漏，建议采用真空泵头设计。'
   },
   { 
     id: 'SEL-002', 
@@ -50,7 +54,9 @@ const MOCK_SELECTION_DATA = [
     heat: 920,
     profit: '15%',
     price: '¥89',
-    compData: { price: '¥79', sales: '12w+' }
+    compData: { price: '¥79', sales: '12w+' },
+    tags: ['红海竞争', '价格战严重'],
+    opportunity: '市场已饱和，除非有极强价格优势或IP联名，否则不建议切入。'
   },
   { 
     id: 'SEL-003', 
@@ -66,7 +72,9 @@ const MOCK_SELECTION_DATA = [
     heat: 310,
     profit: '30%',
     price: '¥129',
-    compData: { price: '¥119', sales: '5000' }
+    compData: { price: '¥119', sales: '5000' },
+    tags: ['过敏风险', '肤感差'],
+    opportunity: '竞品过敏率高达12%，需重新研发无敏配方。'
   }
 ];
 
@@ -75,6 +83,9 @@ const SelectionEngine = () => {
   const [timeRange, setTimeRange] = useState('30');
   const [activeTab, setActiveTab] = useState('market');
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [sortConfig, setSortConfig] = useState({ key: 'score', direction: 'desc' });
 
   const handleSort = (key: string) => {
@@ -84,11 +95,65 @@ const SelectionEngine = () => {
     }));
   };
 
+  const handleStartSelection = () => {
+    setIsCalculating(true);
+    setProgress(0);
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsCalculating(false);
+          showSuccess("AI 选品计算完成！已识别 12 个蓝海机会点。");
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left animate-in fade-in duration-500">
         
         {/* 1. 顶部操作栏 */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">AI 选品效能中心</h1>
+            <p className="text-xs text-slate-500 mt-1">整合全网大盘、竞品及 NLP 评价数据，深度挖掘蓝海赛道机会</p>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsConfigOpen(true)}
+              className="h-9 text-xs border-slate-200"
+            >
+              <Settings2 className="w-3.5 h-3.5 mr-1.5" /> 权重配置
+            </Button>
+            <Button 
+              onClick={handleStartSelection}
+              disabled={isCalculating}
+              className="bg-rose-400 hover:bg-rose-500 text-white h-9 text-xs shadow-lg shadow-rose-100"
+            >
+              {isCalculating ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+              启动批量并行选品计算
+            </Button>
+          </div>
+        </div>
+
+        {/* 计算进度条 */}
+        {isCalculating && (
+          <Card className="border-none shadow-sm bg-white overflow-hidden">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
+                <span>正在分析多维度数据流 (搜索/竞品/NLP/经营)...</span>
+                <span>{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-1.5" />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 2. 过滤条件卡片 */}
         <Card className="border-none shadow-sm bg-white">
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -122,10 +187,9 @@ const SelectionEngine = () => {
                     <SelectItem value="7">近 7 天</SelectItem>
                     <SelectItem value="30">近 30 天</SelectItem>
                     <SelectItem value="90">近 90 天</SelectItem>
-                    <SelectItem value="custom">自定义周期</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button className="bg-rose-400 hover:bg-rose-500 text-white h-9 text-xs font-bold">
+                <Button variant="outline" className="h-9 text-xs border-slate-200">
                   <Plus className="w-4 h-4 mr-1.5" /> 新建选品任务
                 </Button>
               </div>
@@ -133,7 +197,7 @@ const SelectionEngine = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 pt-2 border-t border-slate-50">
               <div className="space-y-1">
-                <Label className="text-[10px] text-slate-400 font-bold uppercase">价格区间</Label>
+                <span className="text-[10px] text-slate-400 font-bold uppercase">价格区间</span>
                 <div className="flex items-center gap-2">
                   <Input placeholder="Min" className="h-8 text-xs" />
                   <span className="text-slate-300">-</span>
@@ -141,33 +205,30 @@ const SelectionEngine = () => {
                 </div>
               </div>
               <div className="space-y-1">
-                <Label className="text-[10px] text-slate-400 font-bold uppercase">所属类目</Label>
+                <span className="text-[10px] text-slate-400 font-bold uppercase">所属类目</span>
                 <Select defaultValue="all">
                   <SelectTrigger className="h-8 text-xs bg-slate-50"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">全部类目</SelectItem>
                     <SelectItem value="skincare">面部护肤</SelectItem>
-                    <SelectItem value="makeup">彩妆香氛</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-[10px] text-slate-400 font-bold uppercase">好评率阈值</Label>
+                <span className="text-[10px] text-slate-400 font-bold uppercase">好评率阈值</span>
                 <Select defaultValue="80">
                   <SelectTrigger className="h-8 text-xs bg-slate-50"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="80">80% 以上</SelectItem>
-                    <SelectItem value="90">90% 以上</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-[10px] text-slate-400 font-bold uppercase">竞争度阈值</Label>
+                <span className="text-[10px] text-slate-400 font-bold uppercase">竞争度阈值</span>
                 <Select defaultValue="low">
                   <SelectTrigger className="h-8 text-xs bg-slate-50"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="low">仅看低竞争</SelectItem>
-                    <SelectItem value="mid">中低竞争</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -178,7 +239,7 @@ const SelectionEngine = () => {
           </CardContent>
         </Card>
 
-        {/* 2. 选品分类 Tabs */}
+        {/* 3. 选品分类 Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-white border border-slate-200 p-1 h-11 w-full justify-start shadow-sm rounded-xl">
             <TabsTrigger value="market" className="flex-1 gap-2 text-xs font-bold data-[state=active]:bg-rose-50 data-[state=active]:text-rose-600">
@@ -202,7 +263,7 @@ const SelectionEngine = () => {
                   <TableHeader className="bg-slate-50/70">
                     <TableRow>
                       <TableHead className="text-xs">商品信息</TableHead>
-                      <TableHead className="text-xs cursor-pointer" onClick={() => handleSort('score')}>
+                      <TableHead className="text-xs text-center cursor-pointer" onClick={() => handleSort('score')}>
                         潜力综合分 <ArrowUpDown className="w-3 h-3 inline ml-1" />
                       </TableHead>
                       <TableHead className="text-xs cursor-pointer" onClick={() => handleSort('heat')}>
@@ -226,7 +287,7 @@ const SelectionEngine = () => {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           <div className="inline-flex items-center justify-center w-9 h-9 rounded-full border-2 border-rose-100 bg-rose-50">
                             <span className="text-xs font-black text-rose-600">{item.score}</span>
                           </div>
@@ -290,6 +351,12 @@ const SelectionEngine = () => {
         </Tabs>
       </div>
 
+      {/* 权重配置抽屉 */}
+      <SelectionConfigSheet 
+        open={isConfigOpen} 
+        onOpenChange={setIsConfigOpen} 
+      />
+
       {/* 详情拆解抽屉 */}
       <SelectionDetailDrawer 
         item={selectedItem} 
@@ -298,9 +365,5 @@ const SelectionEngine = () => {
     </DashboardLayout>
   );
 };
-
-// 补全缺失的图标导入
-const Globe = ({ className }: any) => <Search className={className} />;
-const History = ({ className }: any) => <RefreshCw className={className} />;
 
 export default SelectionEngine;
