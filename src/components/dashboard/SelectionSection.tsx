@@ -12,6 +12,24 @@ const trendData = [
 ];
 
 const SelectionSection = () => {
+  // 词云数据
+  const keywords = [
+    { text: '早C晚A', count: 12450 },
+    { text: '敏感肌修护', count: 8900 },
+    { text: '多肽抗老', count: 5600 },
+    { text: '防晒喷雾', count: 7200 },
+    { text: '水光感', count: 4300 },
+    { text: '国潮美妆', count: 3100 },
+  ];
+
+  // 根据数量获取样式
+  const getKeywordStyle = (count: number) => {
+    if (count > 10000) return "text-xl font-black text-amber-600";
+    if (count > 7000) return "text-lg font-bold text-amber-500";
+    if (count > 5000) return "text-base font-semibold text-amber-400";
+    return "text-xs font-medium text-slate-400";
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-2">
@@ -98,18 +116,11 @@ const SelectionSection = () => {
             <CardTitle className="text-xs font-bold text-slate-500">搜索关键词热度分布 (出现次数)</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="flex flex-wrap gap-3 justify-center items-center min-h-[150px]">
-              {[
-                { text: '早C晚A', count: 12450, color: 'bg-amber-100 text-amber-700' },
-                { text: '敏感肌修护', count: 8900, color: 'bg-amber-50 text-amber-600' },
-                { text: '多肽抗老', count: 5600, color: 'bg-slate-100 text-slate-600' },
-                { text: '防晒喷雾', count: 7200, color: 'bg-amber-50 text-amber-600' },
-                { text: '水光感', count: 4300, color: 'bg-slate-50 text-slate-500' },
-                { text: '国潮美妆', count: 3100, color: 'bg-slate-50 text-slate-400' },
-              ].map((w, i) => (
-                <div key={i} className={cn("px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-sm border border-slate-100 transition-transform hover:scale-105 cursor-default", w.color)}>
-                  <span className="text-xs font-bold">{w.text}</span>
-                  <span className="text-[10px] opacity-60 font-mono">{w.count.toLocaleString()}</span>
+            <div className="flex flex-wrap gap-x-6 gap-y-4 justify-center items-center min-h-[150px]">
+              {keywords.map((w, i) => (
+                <div key={i} className="flex flex-col items-center transition-transform hover:scale-110 cursor-default">
+                  <span className={cn(getKeywordStyle(w.count))}>{w.text}</span>
+                  <span className="text-[9px] text-slate-400 font-mono mt-0.5">{w.count.toLocaleString()}</span>
                 </div>
               ))}
             </div>

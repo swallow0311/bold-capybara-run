@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Package, AlertTriangle, ClipboardCheck, TrendingUp, ChevronRight } from 'lucide-react';
+import { Package, AlertTriangle, ClipboardCheck, TrendingUp } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 const COLORS = ['#f5756c', '#fca39d', '#fedcd9'];
@@ -57,7 +57,15 @@ const ProductSection = () => {
           <CardContent className="p-4 h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={completenessData} innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
+                <Pie 
+                  data={completenessData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={45} 
+                  outerRadius={65} 
+                  paddingAngle={5} 
+                  dataKey="value"
+                >
                   {completenessData.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <Tooltip />

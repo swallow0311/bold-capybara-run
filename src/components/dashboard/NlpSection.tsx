@@ -22,6 +22,34 @@ const trendData = Array.from({ length: 30 }).map((_, i) => ({
 const NlpSection = () => {
   const navigate = useNavigate();
 
+  // 话题数据
+  const topics = [
+    { text: '正品保障', count: 980, type: 'pos' },
+    { text: '吸收快', count: 850, type: 'pos' },
+    { text: '包装精美', count: 620, type: 'pos' },
+    { text: '物流给力', count: 540, type: 'pos' },
+    { text: '过敏红肿', count: 120, type: 'neg' },
+    { text: '泵头难按', count: 85, type: 'neg' },
+  ];
+
+  const getTopicStyle = (topic: typeof topics[0]) => {
+    const isNeg = topic.type === 'neg';
+    let size = "text-xs";
+    let color = isNeg ? "text-rose-400" : "text-emerald-400";
+
+    if (topic.count > 800) {
+      size = "text-lg font-black";
+      color = isNeg ? "text-rose-600" : "text-emerald-600";
+    } else if (topic.count > 500) {
+      size = "text-base font-bold";
+      color = isNeg ? "text-rose-500" : "text-emerald-500";
+    } else if (topic.count > 100) {
+      size = "text-sm font-semibold";
+    }
+
+    return cn(size, color);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-2">
@@ -56,7 +84,15 @@ const NlpSection = () => {
           <CardContent className="p-4 h-[200px] flex items-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={sentimentData} innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value">
+                <Pie 
+                  data={sentimentData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={50} 
+                  outerRadius={70} 
+                  paddingAngle={5} 
+                  dataKey="value"
+                >
                   {sentimentData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
                 </Pie>
                 <Tooltip />
@@ -78,18 +114,11 @@ const NlpSection = () => {
             <CardTitle className="text-xs font-bold text-slate-500">高频话题分布 (出现次数)</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="flex flex-wrap gap-2 justify-center items-center min-h-[150px]">
-              {[
-                { text: '吸收快', count: 850, color: 'bg-emerald-50 text-emerald-700' },
-                { text: '包装精美', count: 620, color: 'bg-emerald-50 text-emerald-600' },
-                { text: '过敏红肿', count: 120, color: 'bg-rose-50 text-rose-700' },
-                { text: '物流给力', count: 540, color: 'bg-emerald-50 text-emerald-600' },
-                { text: '泵头难按', count: 85, color: 'bg-rose-50 text-rose-600' },
-                { text: '正品保障', count: 980, color: 'bg-emerald-100 text-emerald-800' },
-              ].map((w, i) => (
-                <div key={i} className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-slate-100 shadow-sm", w.color)}>
-                  <span className="text-[11px] font-bold">{w.text}</span>
-                  <span className="text-[9px] opacity-60 font-mono">{w.count}</span>
+            <div className="flex flex-wrap gap-x-6 gap-y-4 justify-center items-center min-h-[150px]">
+              {topics.map((w, i) => (
+                <div key={i} className="flex flex-col items-center transition-transform hover:scale-110 cursor-default">
+                  <span className={getTopicStyle(w)}>{w.text}</span>
+                  <span className="text-[9px] text-slate-400 font-mono mt-0.5">{w.count}</span>
                 </div>
               ))}
             </div>
