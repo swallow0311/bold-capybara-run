@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,355 +6,265 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
 import { 
-  Sparkles, Search, Settings2, RefreshCw, TrendingUp, 
-  AlertTriangle, ArrowRight, BarChart3, Zap, ShieldAlert,
-  Filter, Download, Layers, MessageSquare, ShoppingBag,
-  ChevronRight, Info, CheckCircle2, XCircle, Plus,
-  ArrowUpDown, Calendar, LayoutGrid, List, Globe, History,
-  Flame, MousePointer2, Box, Ship, Eye, Link2, Activity,
-  Target, FileText, Wand2
+  Sparkles, Search, TrendingUp, Target, 
+  Filter, Download, ChevronRight, ArrowUpDown,
+  Calendar, Globe, Flame, MousePointer2, Eye,
+  LayoutGrid, List, BarChart3
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
-import { showSuccess, showError } from '@/utils/toast';
+import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
-import SelectionConfigSheet from '@/components/selection/SelectionConfigSheet';
-import SelectionDetailDrawer from '@/components/selection/SelectionDetailDrawer';
-import DiagnosisDetailDrawer from '@/components/selection/DiagnosisDetailDrawer';
+import AiAnalysisReport from '@/components/selection/AiAnalysisReport';
 
-// 模拟蓝海选品数据
-const BLUE_OCEAN_DATA = [
-  { id: 'SEL-001', img: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=100', title: '多肽紧致修护眼霜', category: '眼部护理', score: 92, growth: '+45%', comp: '低', sales: '1.2w+', profit: '45%', risk: '低', gap: '大', price: '¥299', estSales: '1.2w+', heat: 850, compData: { price: '¥350', sales: '8000' } },
-  { id: 'SEL-002', img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100', title: '氨基酸温和洁面乳', category: '面部清洁', score: 65, growth: '+12%', comp: '极高', sales: '5.5w+', profit: '15%', risk: '低', gap: '小', price: '¥89', estSales: '5.5w+', heat: 920, compData: { price: '¥79', sales: '12w+' } },
-  { id: 'SEL-003', img: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=100', title: '植物精粹防晒喷雾', category: '防晒隔离', score: 42, growth: '-5%', comp: '中', sales: '2000+', profit: '30%', risk: '中', gap: '中', price: '¥129', estSales: '2000+', heat: 310, compData: { price: '¥119', sales: '5000' } },
-];
-
-// 模拟竞品对标数据
-const COMPETITOR_DATA = [
-  { id: 'COMP-01', name: '某大牌酵母面霜', price: '¥399', sales: '5w+', activity: '买一送一', painPoints: '包装漏液、质地太厚', advantage: '品牌背书强', gap: '可切入轻薄质地赛道' },
-  { id: 'COMP-02', name: '网红修护精华', price: '¥159', sales: '10w+', activity: '直播间专享', painPoints: '过敏率高、见效慢', advantage: '营销声量大', gap: '主打敏感肌实测报告' },
-];
-
-// 模拟本店诊断数据
-const STORE_DIAGNOSIS_DATA = [
-  { id: '1', name: '中达酵母御龄紧致面霜', status: '潜力上升', traffic: '高', cvr: '3.2%', sales: 12840, issue: '主图点击率略低', suggestion: '重做AI场景主图' },
-  { id: '2', name: '中达水漾隔离防晒乳', status: '稳定动销', traffic: '中', cvr: '2.8%', sales: 5400, issue: '评价出现负面关键词', suggestion: '痛点整改/话术优化' },
-  { id: '3', name: '积雪草净化海泥面膜', status: '滞销衰退', traffic: '低', cvr: '0.5%', sales: 3200, issue: '价格高于竞品20%', suggestion: '调价建议/买赠活动' },
+// 模拟爆款榜单数据
+const TRENDING_PRODUCTS = [
+  { 
+    rank: 1, 
+    id: 'P-001', 
+    name: '中达多肽紧致修护眼霜', 
+    sales: '12.8w+', 
+    heat: 9850, 
+    avgPrice: 299, 
+    ingredients: ['多肽', '酵母', '玻尿酸'], 
+    platform: '抖音',
+    aiReport: {
+      feasibility: '高',
+      suggestedPrice: '¥269 - ¥320',
+      competition: '中低',
+      ingredientTrends: '多肽成分在抗老赛道搜索量环比增长45%，用户对“即时紧致”需求旺盛。',
+      risks: ['包装密封性投诉率略高', '换季流量波动风险', '竞品低价促销冲击']
+    }
+  },
+  { 
+    rank: 2, 
+    id: 'P-002', 
+    name: '氨基酸温和洁面乳', 
+    sales: '8.5w+', 
+    heat: 8200, 
+    avgPrice: 89, 
+    ingredients: ['氨基酸', '积雪草'], 
+    platform: '小红书',
+    aiReport: {
+      feasibility: '中',
+      suggestedPrice: '¥79 - ¥99',
+      competition: '极高',
+      ingredientTrends: '氨基酸洁面已进入红海期，用户开始关注“洗后不紧绷”的附加功效。',
+      risks: ['同质化严重', '利润空间被压缩', '获客成本持续走高']
+    }
+  },
+  { 
+    rank: 3, 
+    id: 'P-003', 
+    name: '水漾隔离防晒喷雾', 
+    sales: '5.2w+', 
+    heat: 7500, 
+    avgPrice: 129, 
+    ingredients: ['烟酰胺', '物理防晒'], 
+    platform: '抖音',
+    aiReport: {
+      feasibility: '高',
+      suggestedPrice: '¥119 - ¥149',
+      competition: '中',
+      ingredientTrends: '防晒喷雾在户外场景搜索量激增，便携性是核心决策因素。',
+      risks: ['物流易燃易爆限制', '季节性强', '成分合规性抽检']
+    }
+  },
+  { 
+    rank: 4, 
+    id: 'P-004', 
+    name: '丝绒哑光唇釉 01#', 
+    sales: '4.8w+', 
+    heat: 6800, 
+    avgPrice: 69, 
+    ingredients: ['维E', '植物油'], 
+    platform: '小红书',
+    aiReport: {
+      feasibility: '低',
+      suggestedPrice: '¥59 - ¥79',
+      competition: '极高',
+      ingredientTrends: '哑光质地热度下滑，水光感唇蜜正在成为新趋势。',
+      risks: ['色差投诉风险', '品牌忠诚度低', '生命周期短']
+    }
+  }
 ];
 
 const SelectionEngine = () => {
-  const [activeModule, setActiveModule] = useState('blue-ocean');
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [selectedDiagnosis, setSelectedDiagnosis] = useState<any>(null);
-  const [compLink, setCompLink] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [platform, setPlatform] = useState('all');
+  const [category, setCategory] = useState('all');
 
-  const handleImportComp = () => {
-    if (!compLink) return showError("请输入竞品链接或类目关键词");
-    showSuccess("正在抓取竞品全维度数据并进行 AI 卖点拆解...");
-  };
-
-  const handleGenerateAvoidance = (name: string) => {
-    showSuccess(`正在基于「${name}」的负面评价生成 AI 避坑营销话术...`);
-  };
-
-  const handleSyncToCopywriting = (name: string) => {
-    showSuccess(`已将「${name}」的差异化卖点同步至 AIGC 文案创作模块。`);
-  };
+  // 过滤逻辑
+  const filteredProducts = useMemo(() => {
+    return TRENDING_PRODUCTS.filter(p => {
+      const matchesSearch = !searchQuery || p.name.includes(searchQuery);
+      const matchesPlatform = platform === 'all' || p.platform === platform;
+      return matchesSearch && matchesPlatform;
+    });
+  }, [searchQuery, platform]);
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left animate-in fade-in duration-500">
+      <div className="flex flex-col h-full space-y-6 max-w-[1600px] mx-auto pb-12 text-left animate-in fade-in duration-500">
         
-        {/* 顶部模块切换 */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex bg-white border border-slate-200 p-1 rounded-2xl shadow-sm">
-            {[
-              { id: 'blue-ocean', label: '蓝海潜力选品', icon: Globe, sub: '大盘挖掘' },
-              { id: 'competitor', label: '竞品对标选品', icon: Target, sub: '差异化切入' },
-              { id: 'store', label: '本店商品诊断', icon: Activity, sub: '存量盘活' }
-            ].map(m => (
-              <button
-                key={m.id}
-                onClick={() => setActiveModule(m.id)}
-                className={cn(
-                  "px-6 py-2 rounded-xl transition-all flex items-center gap-3",
-                  activeModule === m.id ? "bg-rose-500 text-white shadow-lg shadow-rose-100" : "text-slate-500 hover:bg-slate-50"
-                )}
-              >
-                <m.icon className="w-4 h-4" />
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-bold">{m.label}</span>
-                  <span className={cn("text-[9px] font-medium", activeModule === m.id ? "text-rose-100" : "text-slate-400")}>{m.sub}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsConfigOpen(true)} className="h-10 text-xs border-slate-200">
-              <Settings2 className="w-3.5 h-3.5 mr-1.5" /> 选品权重配置
-            </Button>
-            {/* 移除了“全店深度复盘”按钮 */}
-          </div>
-        </div>
+        {/* 1. 筛选区 */}
+        <Card className="border-none shadow-sm bg-white shrink-0">
+          <CardContent className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] text-slate-400 font-bold uppercase">来源平台</Label>
+              <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger className="h-9 text-xs bg-slate-50">
+                  <SelectValue placeholder="全部平台" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部平台</SelectItem>
+                  <SelectItem value="抖音">抖音电商</SelectItem>
+                  <SelectItem value="小红书">小红书</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* 模块 1: 蓝海潜力选品 */}
-        {activeModule === 'blue-ocean' && (
-          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
-            {/* 筛选工具栏 */}
-            <Card className="border-none shadow-sm bg-white">
-              <CardContent className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] text-slate-400 font-bold uppercase">价格带</Label>
-                  <div className="flex items-center gap-2">
-                    <Input placeholder="Min" className="h-8 text-xs" />
-                    <span className="text-slate-300">-</span>
-                    <Input placeholder="Max" className="h-8 text-xs" />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] text-slate-400 font-bold uppercase">最低月销量</Label>
-                  <Input type="number" defaultValue="1000" className="h-8 text-xs" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] text-slate-400 font-bold uppercase">好评率阈值</Label>
-                  <Select defaultValue="85">
-                    <SelectTrigger className="h-8 text-xs bg-slate-50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="85">85% 以上</SelectItem>
-                      <SelectItem value="90">90% 以上</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] text-slate-400 font-bold uppercase">竞争压力</Label>
-                  <Select defaultValue="low">
-                    <SelectTrigger className="h-8 text-xs bg-slate-50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">仅看低竞争</SelectItem>
-                      <SelectItem value="mid">中低竞争</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-end">
-                  <Button className="w-full h-8 text-xs bg-rose-400 hover:bg-rose-500 text-white">应用筛选匹配货源</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] text-slate-400 font-bold uppercase">美妆品类</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="h-9 text-xs bg-slate-50">
+                  <SelectValue placeholder="全部分类" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部分类</SelectItem>
+                  <SelectItem value="skincare">面部护肤</SelectItem>
+                  <SelectItem value="makeup">时尚彩妆</SelectItem>
+                  <SelectItem value="body">身体护理</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader className="bg-slate-50/70">
-                    <TableRow>
-                      <TableHead className="text-xs">潜力商品信息</TableHead>
-                      <TableHead className="text-xs text-center">潜力分</TableHead>
-                      <TableHead className="text-xs">市场增速</TableHead>
-                      <TableHead className="text-xs">供需缺口</TableHead>
-                      <TableHead className="text-xs">利润空间</TableHead>
-                      <TableHead className="text-xs">风险等级</TableHead>
-                      <TableHead className="text-xs text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {BLUE_OCEAN_DATA.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <img src={item.img} className="w-10 h-10 rounded-lg object-cover border border-slate-100" alt="" />
-                            <div className="space-y-0.5">
-                              <span className="font-bold text-slate-800 text-xs block">{item.title}</span>
-                              <span className="text-[10px] text-slate-400">{item.category}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="inline-flex items-center justify-center w-9 h-9 rounded-full border-2 border-rose-100 bg-rose-50">
-                            <span className="text-xs font-black text-rose-600">{item.score}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-emerald-600 font-bold">{item.growth}</TableCell>
-                        <TableCell><Badge className="bg-amber-100 text-amber-700 border-none text-[10px]">缺口{item.gap}</Badge></TableCell>
-                        <TableCell className="font-bold text-slate-700">{item.profit}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={cn(
-                            "text-[9px] border-none",
-                            item.risk === '低' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
-                          )}>{item.risk}风险</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500" onClick={() => setSelectedItem(item)}>
-                            深度拆解 <ChevronRight className="w-3 h-3 ml-1" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+            <div className="space-y-1.5">
+              <Label className="text-[10px] text-slate-400 font-bold uppercase">时间范围</Label>
+              <Select defaultValue="30">
+                <SelectTrigger className="h-9 text-xs bg-slate-50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">近 7 天</SelectItem>
+                  <SelectItem value="30">近 30 天</SelectItem>
+                  <SelectItem value="90">近 90 天</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* 模块 2: 竞品对标选品 */}
-        {activeModule === 'competitor' && (
-          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
-            <Card className="border-none shadow-sm bg-white">
-              <CardHeader className="pb-3 border-b border-slate-100">
-                <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <Link2 className="w-4 h-4 text-rose-400" /> 批量导入竞品链接/类目
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 flex gap-3">
+            <div className="space-y-1.5 md:col-span-2">
+              <Label className="text-[10px] text-slate-400 font-bold uppercase">关键词搜索</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                 <Input 
-                  value={compLink}
-                  onChange={(e) => setCompLink(e.target.value)}
-                  placeholder="粘贴淘宝/京东/抖音商品链接，或输入类目关键词..." 
-                  className="flex-1 h-10 text-xs bg-slate-50/50" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索爆款商品名称、成分..." 
+                  className="pl-9 h-9 text-xs bg-slate-50 border-slate-200" 
                 />
-                <Button onClick={handleImportComp} className="bg-slate-900 hover:bg-slate-800 text-white h-10 px-6 text-xs font-bold">
-                  开始 AI 拆解
-                </Button>
-              </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {COMPETITOR_DATA.map((comp) => (
-                <Card key={comp.id} className="border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all">
-                  <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 font-bold text-xs">竞</div>
-                      <CardTitle className="text-xs font-bold">{comp.name}</CardTitle>
-                    </div>
-                    <Badge className="bg-slate-100 text-slate-500 border-none text-[10px]">{comp.sales} 销量</Badge>
-                  </CardHeader>
-                  <CardContent className="p-5 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase">核心痛点 (NLP 抓取)</span>
-                        <p className="text-[11px] text-rose-600 font-bold">{comp.painPoints}</p>
-                      </div>
-                      <div className="p-3 bg-emerald-50/30 rounded-xl space-y-1">
-                        <span className="text-[10px] text-emerald-600 font-bold uppercase">差异化切入机会</span>
-                        <p className="text-[11px] text-emerald-700 font-bold">{comp.gap}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        className="flex-1 h-8 text-[10px] border-slate-200"
-                        onClick={() => handleGenerateAvoidance(comp.name)}
-                      >
-                        <FileText className="w-3 h-3 mr-1.5" /> 生成避坑话术
-                      </Button>
-                      <Button 
-                        className="flex-1 h-8 text-[10px] bg-rose-400 hover:bg-rose-500 text-white font-bold"
-                        onClick={() => handleSyncToCopywriting(comp.name)}
-                      >
-                        <Wand2 className="w-3 h-3 mr-1.5" /> 同步至文案创作
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              </div>
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
 
-        {/* 模块 3: 本店商品智能诊断 */}
-        {activeModule === 'store' && (
-          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[
-                { label: '潜力上升品', count: 5, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                { label: '稳定动销品', count: 12, color: 'text-blue-500', bg: 'bg-blue-50' },
-                { label: '滞销衰退品', count: 8, color: 'text-amber-500', bg: 'bg-amber-50' },
-                { label: '高风险品', count: 2, color: 'text-rose-500', bg: 'bg-rose-50' },
-              ].map((stat, i) => (
-                <Card key={i} className="border-none shadow-sm bg-white">
-                  <CardContent className="p-5 flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{stat.label}</p>
-                      <p className={cn("text-2xl font-black", stat.color)}>{stat.count}</p>
-                    </div>
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", stat.bg)}>
-                      <Activity className={cn("w-5 h-5", stat.color)} />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
-              <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm font-bold">全店商品 AI 诊断复盘列表</CardTitle>
-                <Button variant="outline" size="sm" className="h-8 text-[10px] border-rose-200 text-rose-600">
-                  批量生成优化任务
+        {/* 主体内容区：左侧榜单 + 右侧研判 */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden">
+          
+          {/* 2. 爆款数据榜单区 */}
+          <Card className="flex-1 border-none shadow-sm overflow-hidden flex flex-col bg-white">
+            <CardHeader className="py-4 border-b border-slate-100 shrink-0 flex flex-row justify-between items-center">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-rose-400" />
+                全网美妆爆款实时榜单
+              </CardTitle>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="h-8 text-[10px] text-slate-400">
+                  <ArrowUpDown className="w-3 h-3 mr-1" /> 按销量排序
                 </Button>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader className="bg-slate-50/70">
-                    <TableRow>
-                      <TableHead className="text-xs">商品名称</TableHead>
-                      <TableHead className="text-xs">诊断状态</TableHead>
-                      <TableHead className="text-xs">流量/转化</TableHead>
-                      <TableHead className="text-xs">核心问题诊断</TableHead>
-                      <TableHead className="text-xs">AI 优化建议</TableHead>
-                      <TableHead className="text-xs text-right">操作</TableHead>
+              </div>
+            </CardHeader>
+            <div className="flex-1 overflow-auto">
+              <Table>
+                <TableHeader className="bg-slate-50/50 sticky top-0 z-10">
+                  <TableRow>
+                    <TableHead className="w-[60px] text-center text-xs">排名</TableHead>
+                    <TableHead className="text-xs">商品名称</TableHead>
+                    <TableHead className="text-xs text-right">销量</TableHead>
+                    <TableHead className="text-xs text-right">热度</TableHead>
+                    <TableHead className="text-xs text-right">均价</TableHead>
+                    <TableHead className="text-xs">成分标签</TableHead>
+                    <TableHead className="text-xs text-center">来源</TableHead>
+                    <TableHead className="text-xs text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.map((p) => (
+                    <TableRow 
+                      key={p.id} 
+                      className={cn(
+                        "cursor-pointer transition-colors group",
+                        selectedProduct?.id === p.id ? "bg-rose-50/30" : "hover:bg-slate-50/50"
+                      )}
+                      onClick={() => setSelectedProduct(p)}
+                    >
+                      <TableCell className="text-center">
+                        <span className={cn(
+                          "inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black",
+                          p.rank <= 3 ? "bg-rose-500 text-white" : "bg-slate-100 text-slate-400"
+                        )}>
+                          {p.rank}
+                        </span>
+                      </TableCell>
+                      <TableCell className="font-bold text-slate-700 text-xs max-w-[180px] truncate">
+                        {p.name}
+                      </TableCell>
+                      <TableCell className="text-right font-black text-slate-800 text-xs">{p.sales}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1 text-rose-500 font-bold text-xs">
+                          <Flame className="w-3 h-3" /> {p.heat}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-slate-600 text-xs">¥{p.avgPrice}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {p.ingredients.slice(0, 2).map((ing: string) => (
+                            <Badge key={ing} variant="secondary" className="bg-slate-100 text-slate-500 border-none text-[9px] px-1.5 py-0">
+                              {ing}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={cn(
+                          "border-none text-[9px] font-bold",
+                          p.platform === '抖音' ? "bg-slate-800 text-white" : "bg-rose-100 text-rose-600"
+                        )}>
+                          {p.platform}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                          查看详情
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {STORE_DIAGNOSIS_DATA.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                        <TableCell className="font-bold text-slate-700 text-xs">{item.name}</TableCell>
-                        <TableCell>
-                          <Badge className={cn(
-                            "border-none text-[9px] font-bold",
-                            item.status === '潜力上升' && "bg-emerald-100 text-emerald-700",
-                            item.status === '稳定动销' && "bg-blue-100 text-blue-700",
-                            item.status === '滞销衰退' && "bg-amber-100 text-amber-700",
-                          )}>{item.status}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-[9px] text-slate-400"><span>CVR</span><span>{item.cvr}</span></div>
-                            <Progress value={parseFloat(item.cvr) * 20} className="h-1" />
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-rose-600 font-medium text-[11px]">{item.issue}</TableCell>
-                        <TableCell className="text-slate-500 text-[11px]">{item.suggestion}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500" onClick={() => setSelectedDiagnosis(item)}>
-                            查看诊断详情
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
 
+          {/* 3. AI 研判结果区 */}
+          <Card className="w-full lg:w-[400px] border-none shadow-sm flex flex-col overflow-hidden bg-white shrink-0">
+            <CardContent className="p-6 h-full">
+              <AiAnalysisReport product={selectedProduct} />
+            </CardContent>
+          </Card>
+
+        </div>
       </div>
-
-      {/* 权重配置抽屉 */}
-      <SelectionConfigSheet open={isConfigOpen} onOpenChange={setIsConfigOpen} />
-
-      {/* 选品详情抽屉 */}
-      <SelectionDetailDrawer item={selectedItem} onClose={() => setSelectedItem(null)} />
-
-      {/* 诊断详情抽屉 */}
-      <DiagnosisDetailDrawer item={selectedDiagnosis} onClose={() => setSelectedDiagnosis(null)} />
     </DashboardLayout>
   );
 };
