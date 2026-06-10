@@ -42,7 +42,7 @@ const MOCK_SELECTION_DATA = [
     score: 92, 
     estSales: '1.2w+',
     compLevel: '低',
-    gap: '大', // 供需缺口
+    gap: '大',
     riskTag: '无风险',
     nlpStatus: '已完成',
     status: '蓝海爆款',
@@ -122,7 +122,7 @@ const SelectionEngine = () => {
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left animate-in fade-in duration-500">
         
-        {/* 1. 顶部大盘趋势看板 (对标京东/淘宝) */}
+        {/* 1. 顶部大盘趋势看板 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 border-none shadow-sm bg-white overflow-hidden">
             <CardHeader className="pb-2 border-b border-slate-50 flex flex-row items-center justify-between">
@@ -180,7 +180,7 @@ const SelectionEngine = () => {
           </Card>
         </div>
 
-        {/* 2. AI 实时推荐商品池 (对标 1688) */}
+        {/* 2. AI 实时推荐商品池 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ const SelectionEngine = () => {
                 <Settings2 className="w-3.5 h-3.5 mr-1.5" /> 权重配置
               </Button>
               <Button onClick={handleStartSelection} disabled={isCalculating} className="bg-rose-400 hover:bg-rose-500 text-white h-8 text-[10px] font-bold">
-                {isCalculating ? <RefreshCw className="w-3 h-3 mr-1.5 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1.5" />}
+                {isCalculating ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-1.5" />}
                 换一批推荐
               </Button>
             </div>
@@ -234,7 +234,7 @@ const SelectionEngine = () => {
           </div>
         </div>
 
-        {/* 3. 选品模式与过滤 (对标淘宝/京东) */}
+        {/* 3. 选品模式与过滤 */}
         <Card className="border-none shadow-sm bg-white">
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
