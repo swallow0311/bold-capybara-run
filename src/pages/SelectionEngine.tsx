@@ -13,12 +13,24 @@ import {
   AlertTriangle, ArrowRight, BarChart3, Zap, ShieldAlert,
   Filter, Download, Layers, MessageSquare, ShoppingBag,
   ChevronRight, Info, CheckCircle2, XCircle, Plus,
-  ArrowUpDown, Calendar, LayoutGrid, List, Globe, History
+  ArrowUpDown, Calendar, LayoutGrid, List, Globe, History,
+  Flame, MousePointer2, Box, Ship
 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from "@/lib/utils";
 import SelectionConfigSheet from '@/components/selection/SelectionConfigSheet';
 import SelectionDetailDrawer from '@/components/selection/SelectionDetailDrawer';
+
+// 模拟趋势数据
+const TREND_DATA = [
+  { name: '06-01', heat: 400, supply: 240 },
+  { name: '06-03', heat: 600, supply: 280 },
+  { name: '06-05', heat: 850, supply: 300 },
+  { name: '06-07', heat: 1200, supply: 320 },
+  { name: '06-09', heat: 1100, supply: 350 },
+  { name: '06-10', heat: 1500, supply: 380 },
+];
 
 // 模拟选品数据
 const MOCK_SELECTION_DATA = [
@@ -30,6 +42,7 @@ const MOCK_SELECTION_DATA = [
     score: 92, 
     estSales: '1.2w+',
     compLevel: '低',
+    gap: '大', // 供需缺口
     riskTag: '无风险',
     nlpStatus: '已完成',
     status: '蓝海爆款',
@@ -48,6 +61,7 @@ const MOCK_SELECTION_DATA = [
     score: 65, 
     estSales: '5.5w+',
     compLevel: '极高',
+    gap: '小',
     riskTag: '价格战',
     nlpStatus: '已完成',
     status: '已生成素材',
@@ -66,6 +80,7 @@ const MOCK_SELECTION_DATA = [
     score: 42, 
     estSales: '2000+',
     compLevel: '中',
+    gap: '中',
     riskTag: '过敏预警',
     nlpStatus: '待分析',
     status: '高风险滞销',
@@ -86,14 +101,6 @@ const SelectionEngine = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [sortConfig, setSortConfig] = useState({ key: 'score', direction: 'desc' });
-
-  const handleSort = (key: string) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
-    }));
-  };
 
   const handleStartSelection = () => {
     setIsCalculating(true);
@@ -115,45 +122,119 @@ const SelectionEngine = () => {
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left animate-in fade-in duration-500">
         
-        {/* 1. 顶部操作栏 */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">AI 选品效能中心</h1>
-            <p className="text-xs text-slate-500 mt-1">整合全网大盘、竞品及 NLP 评价数据，深度挖掘蓝海赛道机会</p>
+        {/* 1. 顶部大盘趋势看板 (对标京东/淘宝) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 border-none shadow-sm bg-white overflow-hidden">
+            <CardHeader className="pb-2 border-b border-slate-50 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-rose-500" />
+                <CardTitle className="text-sm font-bold">全网类目热度与供需趋势预测</CardTitle>
+              </div>
+              <Badge className="bg-rose-50 text-rose-600 border-none text-[10px]">实时更新</Badge>
+            </CardHeader>
+            <CardContent className="p-4 h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={TREND_DATA}>
+                  <defs>
+                    <linearGradient id="colorHeat" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f5756c" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#f5756c" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis hide />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="heat" stroke="#f5756c" strokeWidth={3} fillOpacity={1} fill="url(#colorHeat)" name="搜索热度" />
+                  <Line type="monotone" dataKey="supply" stroke="#94a3b8" strokeDasharray="5 5" name="市场供应量" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm bg-white">
+            <CardHeader className="pb-2 border-b border-slate-50">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-orange-500" />
+                <CardTitle className="text-sm font-bold">全网美妆热搜关键词 TOP</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { text: '早C晚A', heat: '99w+', color: 'text-rose-500 bg-rose-50' },
+                  { text: '敏感肌修护', heat: '85w+', color: 'text-orange-500 bg-orange-50' },
+                  { text: '多肽抗老', heat: '72w+', color: 'text-slate-700 bg-slate-50' },
+                  { text: '水光感唇蜜', heat: '68w+', color: 'text-slate-700 bg-slate-50' },
+                  { text: '物理防晒', heat: '55w+', color: 'text-slate-700 bg-slate-50' },
+                  { text: '氨基酸洁面', heat: '42w+', color: 'text-slate-700 bg-slate-50' },
+                ].map((kw, i) => (
+                  <div key={i} className={cn("px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all hover:scale-105 cursor-pointer", kw.color)}>
+                    <span className="text-xs font-bold">{kw.text}</span>
+                    <span className="text-[9px] opacity-60">{kw.heat}</span>
+                  </div>
+                ))}
+              </div>
+              <Button variant="ghost" className="w-full mt-4 text-[10px] text-slate-400 hover:text-rose-500">查看更多商机词 <ChevronRight className="w-3 h-3 ml-1" /></Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 2. AI 实时推荐商品池 (对标 1688) */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-rose-500" />
+              <h2 className="text-base font-black text-slate-800">AI 智能推荐蓝海商品池</h2>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsConfigOpen(true)} className="h-8 text-[10px] border-slate-200">
+                <Settings2 className="w-3.5 h-3.5 mr-1.5" /> 权重配置
+              </Button>
+              <Button onClick={handleStartSelection} disabled={isCalculating} className="bg-rose-400 hover:bg-rose-500 text-white h-8 text-[10px] font-bold">
+                {isCalculating ? <RefreshCw className="w-3 h-3 mr-1.5 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1.5" />}
+                换一批推荐
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsConfigOpen(true)}
-              className="h-9 text-xs border-slate-200"
-            >
-              <Settings2 className="w-3.5 h-3.5 mr-1.5" /> 权重配置
-            </Button>
-            <Button 
-              onClick={handleStartSelection}
-              disabled={isCalculating}
-              className="bg-rose-400 hover:bg-rose-500 text-white h-9 text-xs shadow-lg shadow-rose-100"
-            >
-              {isCalculating ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
-              启动批量并行选品计算
-            </Button>
+
+          <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+            {MOCK_SELECTION_DATA.map((item, i) => (
+              <Card key={i} className="min-w-[280px] border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-100 shrink-0">
+                      <img src={item.img} className="w-full h-full object-cover" alt="" />
+                      <div className="absolute top-0 left-0 bg-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-br-lg">
+                        潜力 {item.score}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-800 truncate">{item.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className="bg-emerald-50 text-emerald-700 border-none text-[9px]">供需缺口: {item.gap}</Badge>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">预估月销: <span className="text-slate-700 font-bold">{item.estSales}</span></p>
+                    </div>
+                  </div>
+                  <div className="p-2.5 bg-slate-50 rounded-xl text-[10px] text-slate-500 leading-relaxed line-clamp-2">
+                    {item.opportunity}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1 h-8 text-[10px] bg-rose-400 hover:bg-rose-500 text-white font-bold" onClick={() => showSuccess("已成功建立商品档案并同步至 AIGC 模块")}>
+                      一键上架
+                    </Button>
+                    <Button variant="outline" className="w-8 h-8 p-0 border-slate-200" onClick={() => setSelectedItem(item)}>
+                      <Eye className="w-3.5 h-3.5 text-slate-400" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
 
-        {/* 计算进度条 */}
-        {isCalculating && (
-          <Card className="border-none shadow-sm bg-white overflow-hidden">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
-                <span>正在分析多维度数据流 (搜索/竞品/NLP/经营)...</span>
-                <span>{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-1.5" />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* 2. 过滤条件卡片 */}
+        {/* 3. 选品模式与过滤 (对标淘宝/京东) */}
         <Card className="border-none shadow-sm bg-white">
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -189,9 +270,10 @@ const SelectionEngine = () => {
                     <SelectItem value="90">近 90 天</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" className="h-9 text-xs border-slate-200">
-                  <Plus className="w-4 h-4 mr-1.5" /> 新建选品任务
-                </Button>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <Input placeholder="搜索类目、关键词或竞品..." className="pl-9 h-9 text-xs bg-slate-50 border-slate-200" />
+                </div>
               </div>
             </div>
 
@@ -239,7 +321,7 @@ const SelectionEngine = () => {
           </CardContent>
         </Card>
 
-        {/* 3. 选品分类 Tabs */}
+        {/* 4. 选品分类 Tabs 与 列表 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-white border border-slate-200 p-1 h-11 w-full justify-start shadow-sm rounded-xl">
             <TabsTrigger value="market" className="flex-1 gap-2 text-xs font-bold data-[state=active]:bg-rose-50 data-[state=active]:text-rose-600">
@@ -263,12 +345,8 @@ const SelectionEngine = () => {
                   <TableHeader className="bg-slate-50/70">
                     <TableRow>
                       <TableHead className="text-xs">商品信息</TableHead>
-                      <TableHead className="text-xs text-center cursor-pointer" onClick={() => handleSort('score')}>
-                        潜力综合分 <ArrowUpDown className="w-3 h-3 inline ml-1" />
-                      </TableHead>
-                      <TableHead className="text-xs cursor-pointer" onClick={() => handleSort('heat')}>
-                        预估销量/热度 <ArrowUpDown className="w-3 h-3 inline ml-1" />
-                      </TableHead>
+                      <TableHead className="text-xs text-center">潜力综合分</TableHead>
+                      <TableHead className="text-xs">预估销量/热度</TableHead>
                       <TableHead className="text-xs">竞争等级</TableHead>
                       <TableHead className="text-xs">风险/NLP状态</TableHead>
                       <TableHead className="text-xs text-center">状态标签</TableHead>

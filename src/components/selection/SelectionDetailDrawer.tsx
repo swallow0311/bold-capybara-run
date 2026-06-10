@@ -8,7 +8,7 @@ import {
   TrendingUp, MessageSquare, Zap, ArrowRight, 
   ShieldAlert, ShoppingBag, BarChart3, Send,
   CheckCircle2, AlertCircle, Lightbulb, RefreshCw,
-  Eye, FileText, HelpCircle, ShieldCheck
+  Eye, FileText, HelpCircle, ShieldCheck, Box, Ship, Coins
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -62,7 +62,7 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-8">
             
-            {/* 1. 商品基础与竞品对比 */}
+            {/* 1. 核心数据与竞品对比 (对标京东) */}
             <div className="grid grid-cols-3 gap-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
                 <span className="text-[10px] text-slate-400 font-bold uppercase">建议零售价</span>
@@ -81,7 +81,46 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
               </div>
             </div>
 
-            {/* 2. NLP 评价分析卡片 */}
+            {/* 2. 供应链与价格竞争力 (对标 1688) */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                <Box className="w-4 h-4 text-rose-400" /> 供应链与价格竞争力分析
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="border-none shadow-sm bg-slate-50/50">
+                  <CardHeader className="p-4 pb-0"><CardTitle className="text-[11px] font-bold text-slate-500">价格区间竞争力热力图</CardTitle></CardHeader>
+                  <CardContent className="p-4">
+                    <div className="grid grid-cols-5 gap-1 h-12">
+                      {[20, 45, 85, 60, 15].map((val, i) => (
+                        <div key={i} className={cn("rounded-sm flex items-center justify-center text-[8px] font-bold", val > 70 ? "bg-rose-400 text-white" : "bg-rose-50 text-rose-700")}>
+                          {val}%
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-[8px] text-slate-400 mt-1">
+                      <span>低价区</span><span>主流区</span><span>高价区</span>
+                    </div>
+                    <p className="text-[9px] text-slate-400 mt-3">※ 建议定价在主流区边缘，利用 AIGC 强化高溢价心智。</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-none shadow-sm bg-slate-50/50">
+                  <CardHeader className="p-4 pb-0"><CardTitle className="text-[11px] font-bold text-slate-500">供应链稳定性评估</CardTitle></CardHeader>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px]"><span className="text-slate-500">货源充足度</span><span className="font-bold text-emerald-500">极高</span></div>
+                      <Progress value={95} className="h-1" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px]"><span className="text-slate-500">物流响应速度</span><span className="font-bold text-amber-500">中等</span></div>
+                      <Progress value={65} className="h-1" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* 3. NLP 评价分析卡片 (对标淘宝) */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
@@ -93,7 +132,6 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* 情感分布 */}
                 <Card className="border-none shadow-sm bg-slate-50/50">
                   <CardHeader className="p-4 pb-0"><CardTitle className="text-[11px] font-bold text-slate-500">情感分布 (Sentiment)</CardTitle></CardHeader>
                   <CardContent className="p-4 h-[160px] flex items-center">
@@ -117,7 +155,6 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
                   </CardContent>
                 </Card>
 
-                {/* 核心痛点归因 */}
                 <Card className="border-none shadow-sm bg-slate-50/50">
                   <CardHeader className="p-4 pb-0"><CardTitle className="text-[11px] font-bold text-slate-500">核心痛点归因 (Pain Points)</CardTitle></CardHeader>
                   <CardContent className="p-4 h-[160px]">
@@ -134,7 +171,6 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* TOP 卖点 */}
                 <div className="space-y-3">
                   <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> 智能提炼 TOP 卖点
@@ -149,7 +185,6 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
                   </div>
                 </div>
 
-                {/* 用户问答 */}
                 <div className="space-y-3">
                   <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
                     <HelpCircle className="w-3.5 h-3.5 text-blue-500" /> 高频用户问答 (Q&A)
@@ -169,7 +204,7 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
               </div>
             </div>
 
-            {/* 3. 合规风险提示 */}
+            {/* 4. 合规风险提示 */}
             <div className="p-4 bg-rose-50/50 border border-rose-100 rounded-2xl space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold text-rose-700">
