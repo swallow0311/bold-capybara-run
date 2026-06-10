@@ -49,7 +49,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(true);
 
   const isIndex = location.pathname === '/';
-  const isCreateOrEditProduct = location.pathname === '/products/create' || location.pathname.startsWith('/products/edit');
+  const isProductSubPage = location.pathname === '/products/create' || location.pathname.startsWith('/products/edit') || location.pathname.startsWith('/products/view');
 
   return (
     <div className="flex h-screen bg-[#FFFBFB] text-slate-900 font-sans">
@@ -112,7 +112,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
           <div className="flex items-center gap-3">
-            {isCreateOrEditProduct && (
+            {isProductSubPage && (
               <Link to="/products" className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-rose-500 transition-colors mr-1">
                 <ArrowLeft className="w-4 h-4" />
               </Link>
@@ -123,6 +123,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                  location.pathname === '/products' ? '商品管理' : 
                  location.pathname === '/products/create' ? '新建商品' :
                  location.pathname.startsWith('/products/edit') ? '编辑商品' :
+                 location.pathname.startsWith('/products/view') ? '商品详情' :
                  location.pathname === '/selection' ? 'AI选品' :
                  location.pathname === '/content' ? '文案生成' :
                  location.pathname === '/image-design' ? '图片设计' :

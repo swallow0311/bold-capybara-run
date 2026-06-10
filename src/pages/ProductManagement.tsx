@@ -102,7 +102,7 @@ const INITIAL_PRODUCTS: ProductItem[] = [
   }
 ];
 
-const ITEMS_PER_PAGE = 2; // 为演示分页效果，每页默认展示 2 条商品数据
+const ITEMS_PER_PAGE = 10; // 调整为每页展示 10 条商品数据
 
 const ProductManagement = () => {
   const navigate = useNavigate();
@@ -164,7 +164,7 @@ const ProductManagement = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-xl font-bold text-slate-900">店铺商品主档管理</h1>
-            <p className="text-slate-500 text-xs mt-0.5">多源电商开放平台商品同步，打通 AI 选品与评价分析物料流</p>
+            <p className="text-slate-500 text-xs mt-0.5">多源电商开放平台商品同步，打通 AI 选品与评价 analysis 物料流</p>
           </div>
           <div className="flex gap-2">
             <Button 

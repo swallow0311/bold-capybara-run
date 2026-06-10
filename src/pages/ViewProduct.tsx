@@ -106,37 +106,19 @@ const ViewProduct = () => {
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6 pb-24 text-slate-800 text-xs text-left animate-in fade-in duration-300">
         
-        {/* 顶部导航与操作 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-9 w-9 p-0 text-slate-500 hover:text-rose-500 hover:bg-slate-100 rounded-lg"
-              onClick={() => navigate('/products')}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="text-base font-bold text-slate-900">查看商品详情</h1>
-              <p className="text-[10px] text-slate-400">只读视图，不允许直接在此页中进行任何编辑保存操作</p>
-            </div>
-          </div>
-          <Badge className={cn(
-            "border-none text-xs font-bold px-3 py-1",
-            product.status === '出售中' && 'bg-emerald-100 text-emerald-700',
-            product.status === '已售罄' && 'bg-rose-100 text-rose-700',
-            product.status === '仓库中' && 'bg-amber-100 text-amber-700',
-            product.status === '草稿箱' && 'bg-slate-100 text-slate-500',
-          )}>
-            {product.status}
-          </Badge>
-        </div>
-
         {/* 1. 基本信息卡片 */}
         <Card className="border-none shadow-sm bg-white">
-          <CardHeader className="pb-3 border-b border-slate-100">
+          <CardHeader className="pb-3 border-b border-slate-100 flex flex-row justify-between items-center">
             <CardTitle className="text-sm font-bold text-slate-800">1. 基本数据建档</CardTitle>
+            <Badge className={cn(
+              "border-none text-xs font-bold px-3 py-1",
+              product.status === '出售中' && 'bg-emerald-100 text-emerald-700',
+              product.status === '已售罄' && 'bg-rose-100 text-rose-700',
+              product.status === '仓库中' && 'bg-amber-100 text-amber-700',
+              product.status === '草稿箱' && 'bg-slate-100 text-slate-500',
+            )}>
+              {product.status}
+            </Badge>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-3 gap-6">
