@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Treemap } from 'recharts';
 import { Package, AlertTriangle, ClipboardCheck, TrendingUp } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const COLORS = ['#f5756c', '#fca39d', '#fedcd9'];
 

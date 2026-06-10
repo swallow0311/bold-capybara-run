@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadialBarChart, RadialBar } from 'recharts';
 import { PenTool, CheckCircle2, Zap, Coins } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const radialData = [
   { name: '短视频', value: 500, fill: '#fedcd9' },
@@ -72,8 +73,8 @@ const AigcSection = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={compareData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} />
-                <YAxis tick={{ fontSize: 10 }} axisLine={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
                 <Bar dataKey="AI内容" fill="#f5756c" radius={[4, 4, 0, 0]} />

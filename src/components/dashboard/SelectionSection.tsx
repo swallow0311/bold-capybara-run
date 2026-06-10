@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Sparkles, Flame, ArrowUpRight, Plus } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const trendData = [
   { name: '5/14', heat: 400 },

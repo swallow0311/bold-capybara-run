@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { MessageSquare, Star, AlertCircle, TrendingDown } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 const sentimentData = [
   { name: '正向', value: 89, color: '#10b981' },
@@ -50,7 +51,7 @@ const NlpSection = () => {
         <Card className="border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
             <CardTitle className="text-xs font-bold text-slate-500">情感分布比例</CardTitle>
-          </Header>
+          </CardHeader>
           <CardContent className="p-4 h-[200px] flex items-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -74,7 +75,7 @@ const NlpSection = () => {
         <Card className="border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
             <CardTitle className="text-xs font-bold text-slate-500">高频话题词云 (情感色标)</CardTitle>
-          </Header>
+          </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-2 justify-center items-center min-h-[150px]">
               {[
