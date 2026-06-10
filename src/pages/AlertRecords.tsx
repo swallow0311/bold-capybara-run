@@ -7,32 +7,85 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   AlertTriangle, Search, Download, 
   Clock, ArrowRight, History,
   ShieldAlert, ShoppingBag, Zap, MessageSquare,
   Eye, Archive, TrendingUp, User, Info, CheckCircle2,
-  Play, Check, X, RefreshCw, ListChecks
+  Play, Check, X, RefreshCw, ListChecks, ClipboardList
 } from 'lucide-react';
-import { showSuccess } from '@/utils/toast';
+import { showSuccess, showError } from '@/utils/toast';
 import { cn } from "@/lib/utils";
 
+// 扩展 Mock 数据，增加处理历史记录
 const MOCK_RECORDS = [
-  { id: 'AL-20260610-001', type: '库存', title: 'XX酵母面霜库存告急', level: '高级', status: '待处理', time: '2026-06-10 09:15', owner: '张三', desc: '当前库存 8 件，低于安全阈值 10 件。' },
-  { id: 'AL-20260610-002', type: '合规', title: 'AIGC 文案包含极限词', level: '高级', status: '处理中', time: '2026-06-10 08:40', owner: '李四', desc: '检测到“全网最强”违禁词，已自动拦截。' },
-  { id: 'AL-20260609-045', type: 'NLP', title: '评价负面情感激增', level: '中级', status: '已处理', time: '2026-06-09 16:20', owner: '王五', desc: '近24h负面评价占比达15%，主要反馈过敏。' },
-  { id: 'AL-20260609-012', type: '价格', title: '竞品价格大幅下调', level: '通知', status: '已验证', time: '2026-06-09 10:05', owner: '系统', desc: '竞品 A 价格下调 20%，建议关注。' },
-  { id: 'AL-20260608-088', type: '系统', title: 'API 调用错误率超标', level: '高级', status: '已归档', time: '2026-06-08 23:50', owner: '技术部', desc: '淘宝接口响应超时率达 3.5%。' },
+  { 
+    id: 'AL-20260610-001', 
+    type: '库存', 
+    title: 'XX酵母面霜库存告急', 
+    level: '高级', 
+    status: '待处理', 
+    time: '2026-06-10 09:15', 
+    owner: '张三', 
+    desc: '当前库存 8 件，低于安全阈值 10 件。',
+    history: [
+      { time: '2026-06-10 09:15', action: '系统触发预警', operator: '系统', content: '触发库存安全阈值告警' }
+    ]
+  },
+  { 
+    id: 'AL-20260610-002', 
+    type: '合规', 
+    title: 'AIGC 文案包含极限词', 
+    level: '高级', 
+    status: '处理中', 
+    time: '2026-06-10 08:40', 
+    owner: '李四', 
+    desc: '检测到“全网最强”违禁词，已自动拦截。',
+    history: [
+      { time: '2026-06-10 08:40', action: '系统触发预警', operator: '系统', content: '触发 AIGC 合规拦截规则' },
+      { time: '2026-06-10 09:00', action: '开始处理', operator: '李四', content: '正在联系文案组修改关键词' }
+    ]
+  },
+  { 
+    id: 'AL-20260609-045', 
+    type: 'NLP', 
+    title: '评价负面情感激增', 
+    level: '中级', 
+    status: '已处理', 
+    time: '2026-06-09 16:20', 
+    owner: '王五', 
+    desc: '近24h负面评价占比达15%，主要反馈过敏。',
+    history: [
+      { time: '2026-06-09 16:20', action: '系统触发预警', operator: '系统', content: '触发 NLP 情感波动告警' },
+      { time: '2026-06-09 17:00', action: '开始处理', operator: '王五', content: '核实过敏批次' },
+      { time: '2026-06-10 10:00', action: '标记完成', operator: '王五', content: '已下架对应批次并开启售后通道' }
+    ]
+  },
 ];
 
 const AlertRecords = () => {
   const [records, setRecords] = useState(MOCK_RECORDS);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedRecord, setSelectedRecord] = useState<typeof MOCK_RECORDS[0] | null>(null);
+  
+  // 详情抽屉状态
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  
+  // 操作弹窗状态
+  const [actionModal, setActionDialog] = useState<{
+    isOpen: boolean;
+    recordId: string | null;
+    type: 'process' | 'complete' | 'verify' | 'archive' | null;
+    inputValue: string;
+  }>({
+    isOpen: false,
+    recordId: null,
+    type: null,
+    inputValue: ''
+  });
 
   const getLevelBadge = (level: string) => {
     const styles: any = {
@@ -66,26 +119,62 @@ const AlertRecords = () => {
     return <Icon className="w-3.5 h-3.5 text-slate-400" />;
   };
 
-  // 更改单条预警状态
-  const handleStatusChange = (id: string, newStatus: string) => {
-    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
-    if (selectedRecord && selectedRecord.id === id) {
-      setSelectedRecord(prev => prev ? { ...prev, status: newStatus } : null);
+  // 打开操作弹窗
+  const openActionModal = (recordId: string, type: 'process' | 'complete' | 'verify' | 'archive') => {
+    setActionDialog({
+      isOpen: true,
+      recordId,
+      type,
+      inputValue: ''
+    });
+  };
+
+  // 提交操作
+  const handleActionSubmit = () => {
+    const { recordId, type, inputValue } = actionModal;
+    if (!recordId || !type) return;
+
+    // 校验逻辑
+    const isRequired = type !== 'archive';
+    if (isRequired && (!inputValue.trim() || inputValue.length < 1)) {
+      showError(type === 'process' ? "请输入处理内容" : "请输入备注信息");
+      return;
     }
-    showSuccess(`预警状态已成功更新为「${newStatus}」`);
-  };
+    if (inputValue.length > 200) {
+      showError("内容不能超过 200 个字符");
+      return;
+    }
 
-  // 批量更改状态
-  const handleBatchStatusChange = (newStatus: string) => {
-    setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: newStatus } : r));
-    showSuccess(`已批量将 ${selectedIds.length} 项预警标记为「${newStatus}」`);
-    setSelectedIds([]);
-  };
+    const now = new Date().toLocaleString();
+    const statusMap: any = {
+      process: '处理中',
+      complete: '已处理',
+      verify: '已验证',
+      archive: '已归档'
+    };
+    const actionNameMap: any = {
+      process: '开始处理',
+      complete: '标记完成',
+      verify: '效果验证',
+      archive: '归档记录'
+    };
 
-  // 归档操作
-  const handleArchive = (id: string) => {
-    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: '已归档' } : r));
-    showSuccess("预警记录已成功归档并从待办中移除。");
+    setRecords(prev => prev.map(r => {
+      if (r.id === recordId) {
+        return {
+          ...r,
+          status: statusMap[type],
+          history: [
+            ...r.history,
+            { time: now, action: actionNameMap[type], operator: '当前用户', content: inputValue || (type === 'archive' ? '无备注归档' : '') }
+          ]
+        };
+      }
+      return r;
+    }));
+
+    showSuccess(`操作成功，预警状态已更新为「${statusMap[type]}」`);
+    setActionDialog({ isOpen: false, recordId: null, type: null, inputValue: '' });
   };
 
   // 过滤后的数据列表
@@ -98,42 +187,24 @@ const AlertRecords = () => {
         
       const matchesSearch = searchQuery.trim() === '' ||
         r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.owner.toLowerCase().includes(searchQuery.toLowerCase());
+        r.id.toLowerCase().includes(searchQuery.toLowerCase());
 
       return matchesStatus && matchesSearch;
     });
   }, [records, statusFilter, searchQuery]);
 
-  // 获取快捷操作按钮配置
-  const getQuickAction = (record: typeof MOCK_RECORDS[0]) => {
-    switch (record.status) {
-      case '待处理':
-        return { label: '开始处理', icon: Play, color: 'text-indigo-600 hover:bg-indigo-50', nextStatus: '处理中' };
-      case '处理中':
-        return { label: '标记完成', icon: Check, color: 'text-emerald-600 hover:bg-emerald-50', nextStatus: '已处理' };
-      case '已处理':
-        return { label: '效果验证', icon: CheckCircle2, color: 'text-teal-600 hover:bg-teal-50', nextStatus: '已验证' };
-      default:
-        return null;
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-slate-800 text-xs text-left animate-in fade-in duration-500">
         
-        {/* 顶部标题与操作 */}
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-xl font-bold text-slate-900">预警记录中心</h1>
             <p className="text-xs text-slate-500 mt-1">实时追踪全链路预警状态流转，确保风险闭环处理</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => showSuccess("正在导出预警分析报告...")}>
-              <Download className="w-3.5 h-3.5 mr-1.5" /> 导出报告
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => showSuccess("正在导出预警分析报告...")}>
+            <Download className="w-3.5 h-3.5 mr-1.5" /> 导出报告
+          </Button>
         </div>
 
         {/* 状态流转示意图 */}
@@ -169,7 +240,7 @@ const AlertRecords = () => {
               <Input 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索预警标题、ID 或负责人..." 
+                placeholder="搜索预警标题或 ID..." 
                 className="pl-9 text-xs h-9 bg-slate-50/50 border-slate-200" 
               />
             </div>
@@ -196,251 +267,199 @@ const AlertRecords = () => {
             <Table>
               <TableHeader className="bg-slate-50/70">
                 <TableRow>
-                  <TableHead className="w-[40px] text-center">
-                    <Checkbox 
-                      checked={selectedIds.length === filteredRecords.length && filteredRecords.length > 0} 
-                      onCheckedChange={(c) => setSelectedIds(c ? filteredRecords.map(r => r.id) : [])} 
-                    />
-                  </TableHead>
                   <TableHead className="text-xs">预警 ID / 时间</TableHead>
                   <TableHead className="text-xs">类型</TableHead>
                   <TableHead className="text-xs">预警标题与描述</TableHead>
                   <TableHead className="text-xs text-center">优先级</TableHead>
                   <TableHead className="text-xs text-center">当前状态</TableHead>
-                  <TableHead className="text-xs">负责人</TableHead>
-                  <TableHead className="text-xs text-right w-[240px]">操作</TableHead>
+                  <TableHead className="text-xs text-right w-[200px]">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRecords.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-slate-400">
-                      暂无符合条件的预警记录
+                {filteredRecords.map(record => (
+                  <TableRow key={record.id} className="hover:bg-slate-50/50 transition-colors">
+                    <TableCell>
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] text-slate-400 font-mono block">{record.id}</span>
+                        <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {record.time}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        {getTypeIcon(record.type)}
+                        <span className="font-medium text-slate-600">{record.type}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-0.5 max-w-[300px]">
+                        <span className="font-bold text-slate-800 text-xs block">{record.title}</span>
+                        <p className="text-[10px] text-slate-400 truncate">{record.desc}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">{getLevelBadge(record.level)}</TableCell>
+                    <TableCell className="text-center">{getStatusBadge(record.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        {/* 动态操作按钮 */}
+                        {record.status === '待处理' && (
+                          <Button 
+                            variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-indigo-600 hover:bg-indigo-50"
+                            onClick={() => openActionModal(record.id, 'process')}
+                          >
+                            <Play className="w-3 h-3 mr-1" /> 处理
+                          </Button>
+                        )}
+                        {record.status === '处理中' && (
+                          <Button 
+                            variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-emerald-600 hover:bg-emerald-50"
+                            onClick={() => openActionModal(record.id, 'complete')}
+                          >
+                            <Check className="w-3 h-3 mr-1" /> 完成
+                          </Button>
+                        )}
+                        {record.status === '已处理' && (
+                          <Button 
+                            variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-teal-600 hover:bg-teal-50"
+                            onClick={() => openActionModal(record.id, 'verify')}
+                          >
+                            <CheckCircle2 className="w-3 h-3 mr-1" /> 验证
+                          </Button>
+                        )}
+                        {record.status === '已验证' && (
+                          <Button 
+                            variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-slate-600 hover:bg-slate-100"
+                            onClick={() => openActionModal(record.id, 'archive')}
+                          >
+                            <Archive className="w-3 h-3 mr-1" /> 归档
+                          </Button>
+                        )}
+                        
+                        <Button 
+                          variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500 hover:bg-rose-50" 
+                          onClick={() => setSelectedRecord(record)}
+                        >
+                          <Eye className="w-3 h-3 mr-1" /> 详情
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredRecords.map(record => {
-                    const quickAction = getQuickAction(record);
-                    return (
-                      <TableRow key={record.id} className="hover:bg-slate-50/50 transition-colors">
-                        <TableCell className="text-center">
-                          <Checkbox 
-                            checked={selectedIds.includes(record.id)} 
-                            onCheckedChange={(c) => setSelectedIds(prev => c ? [...prev, record.id] : prev.filter(i => i !== record.id))} 
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-0.5">
-                            <span className="text-[10px] text-slate-400 font-mono block">{record.id}</span>
-                            <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> {record.time}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5">
-                            {getTypeIcon(record.type)}
-                            <span className="font-medium text-slate-600">{record.type}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-0.5 max-w-[300px]">
-                            <span className="font-bold text-slate-800 text-xs block">{record.title}</span>
-                            <p className="text-[10px] text-slate-400 truncate">{record.desc}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">{getLevelBadge(record.level)}</TableCell>
-                        <TableCell className="text-center">{getStatusBadge(record.status)}</TableCell>
-                        <TableCell>
-                          <span className="text-[11px] font-medium text-slate-600">{record.owner}</span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            {quickAction && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className={cn("h-7 text-[10px] font-bold px-2", quickAction.color)}
-                                onClick={() => handleStatusChange(record.id, quickAction.nextStatus)}
-                              >
-                                <quickAction.icon className="w-3 h-3 mr-1" /> {quickAction.label}
-                              </Button>
-                            )}
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-7 text-[10px] text-rose-500 hover:bg-rose-50 px-2" 
-                              onClick={() => setSelectedRecord(record)}
-                            >
-                              <Eye className="w-3 h-3 mr-1" /> 详情
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-7 text-[10px] text-slate-500 hover:bg-slate-100 px-2"
-                              disabled={record.status === '已归档'}
-                              onClick={() => handleArchive(record.id)}
-                            >
-                              <Archive className="w-3 h-3 mr-1" /> 归档
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
+                ))}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
-
-        {/* 自动升级逻辑提示 */}
-        <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3">
-          <History className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-          <div className="space-y-1 text-left">
-            <span className="text-xs font-bold text-amber-700">超时自动升级监控中</span>
-            <p className="text-[11px] text-amber-600/80 leading-relaxed">
-              系统正在实时监控所有“待处理”预警。若中级预警超过 48h 未响应，将自动标记为“高级”并推送至部门主管；高级预警超过 2h 未响应，将触发语音外呼提醒。
-            </p>
-          </div>
-        </div>
-
-        {/* 底部批量操作栏 */}
-        <div className={cn(
-          "fixed bottom-6 left-72 right-8 bg-white/95 backdrop-blur-md border border-slate-200 shadow-2xl p-4 rounded-2xl z-40 transition-all flex items-center justify-between",
-          selectedIds.length === 0 ? "translate-y-32 opacity-0" : "translate-y-0 opacity-100"
-        )}>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-50 rounded-xl border border-rose-100">
-              <span className="text-xs font-bold text-rose-600">已选中 {selectedIds.length} 项预警</span>
-              <button onClick={() => setSelectedIds([])} className="text-rose-400 hover:text-rose-600"><X className="w-3.5 h-3.5" /></button>
-            </div>
-            <div className="h-6 w-[1px] bg-slate-200" />
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => handleBatchStatusChange('处理中')}>
-                <Play className="w-3.5 h-3.5 mr-1.5 text-indigo-500" /> 批量开始处理
-              </Button>
-              <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => handleBatchStatusChange('已处理')}>
-                <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-500" /> 批量标记完成
-              </Button>
-              <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => handleBatchStatusChange('已验证')}>
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-teal-500" /> 批量效果验证
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-xs text-slate-500 hover:text-rose-500" onClick={() => handleBatchStatusChange('已归档')}>
-              <Archive className="w-3.5 h-3.5 mr-1.5" /> 批量归档记录
-            </Button>
-            <Button className="bg-rose-400 hover:bg-rose-500 text-white h-9 px-6 text-xs font-bold rounded-xl shadow-lg shadow-rose-200">
-              生成批量处理报告
-            </Button>
-          </div>
-        </div>
       </div>
 
-      {/* 预警详情侧抽屉 */}
+      {/* 操作输入弹窗 */}
+      <Dialog open={actionModal.isOpen} onOpenChange={(open) => !open && setActionDialog({ ...actionModal, isOpen: false })}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-bold flex items-center gap-2">
+              {actionModal.type === 'process' && <><Play className="w-4 h-4 text-indigo-500" /> 开始处理预警</>}
+              {actionModal.type === 'complete' && <><Check className="w-4 h-4 text-emerald-500" /> 标记处理完成</>}
+              {actionModal.type === 'verify' && <><CheckCircle2 className="w-4 h-4 text-teal-500" /> 验证处理效果</>}
+              {actionModal.type === 'archive' && <><Archive className="w-4 h-4 text-slate-500" /> 归档预警记录</>}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-700">
+                {actionModal.type === 'process' ? '处理内容' : '备注信息'}
+                {actionModal.type !== 'archive' && <span className="text-rose-500 ml-1">*</span>}
+              </Label>
+              <Textarea 
+                value={actionModal.inputValue}
+                onChange={(e) => setActionDialog({ ...actionModal, inputValue: e.target.value })}
+                placeholder={actionModal.type === 'archive' ? "请输入归档备注（选填）" : "请输入详细说明（1-200字）"}
+                className="text-xs h-24 resize-none"
+              />
+              <div className="text-right text-[10px] text-slate-400">
+                {actionModal.inputValue.length} / 200
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" size="sm" onClick={() => setActionDialog({ ...actionModal, isOpen: false })}>取消</Button>
+            <Button size="sm" className="bg-rose-400 hover:bg-rose-500 text-white" onClick={handleActionSubmit}>确认提交</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 详情侧抽屉 */}
       <Sheet open={!!selectedRecord} onOpenChange={() => setSelectedRecord(null)}>
         {selectedRecord && (
           <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0 text-left">
             <SheetHeader className="p-6 border-b border-slate-100 shrink-0">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-rose-500" />
-                <SheetTitle>预警任务处理工作流</SheetTitle>
+                <SheetTitle>预警任务详情轨迹</SheetTitle>
               </div>
-              <SheetDescription>查看预警源数据、流转历史，进行指派与闭环处理。</SheetDescription>
+              <SheetDescription>查看预警源数据及全生命周期处理记录。</SheetDescription>
             </SheetHeader>
 
-            <div className="flex-1 p-6 space-y-6 overflow-y-auto text-slate-700">
-              {/* 基本元信息 */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] text-slate-400 block font-mono">任务ID: {selectedRecord.id}</span>
-                    <span className="text-xs font-bold text-slate-800">{selectedRecord.title}</span>
+            <div className="flex-1 p-6 space-y-8 overflow-y-auto">
+              {/* 1. 预警基础信息 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                  <Info className="w-4 h-4 text-rose-400" /> 预警基础信息
+                </div>
+                <div className="bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">预警 ID</span>
+                    <span className="font-mono font-bold text-slate-700">{selectedRecord.id}</span>
                   </div>
-                  {getLevelBadge(selectedRecord.level)}
-                </div>
-              </div>
-
-              {/* 异常详情原因 */}
-              <div className="space-y-2">
-                <Label className="text-slate-500 font-semibold block">风险警示描述</Label>
-                <div className="p-4 bg-rose-50/20 border border-rose-100 rounded-xl text-xs leading-relaxed text-slate-700">
-                  {selectedRecord.desc}
-                </div>
-              </div>
-
-              {/* 状态处理流转 */}
-              <div className="space-y-3">
-                <Label className="text-slate-500 font-semibold block">风险流转状态更新</Label>
-                <div className="space-y-2">
-                  <Select 
-                    value={selectedRecord.status} 
-                    onValueChange={(val) => handleStatusChange(selectedRecord.id, val)}
-                  >
-                    <SelectTrigger className="bg-slate-50/50 text-xs">
-                      <SelectValue placeholder="更新处理状态" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="待处理">待处理 (待确认风险)</SelectItem>
-                      <SelectItem value="处理中">处理中 (正在跟进整改)</SelectItem>
-                      <SelectItem value="已处理">已处理 (完成修正待确认)</SelectItem>
-                      <SelectItem value="已验证">已验证 (效果复核确认)</SelectItem>
-                      <SelectItem value="已归档">已归档 (存入历史归档)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* 责任人与时间信息 */}
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 block">当前负责人</span>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                    <User className="w-3.5 h-3.5 text-slate-400" />
-                    {selectedRecord.owner}
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">预警类型</span>
+                    <span className="font-bold text-slate-700">{selectedRecord.type}</span>
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 block">触发触发时间</span>
-                  <div className="text-xs font-bold text-slate-700 font-mono">
-                    {selectedRecord.time}
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">当前状态</span>
+                    {getStatusBadge(selectedRecord.status)}
+                  </div>
+                  <div className="space-y-1 pt-2 border-t border-slate-200">
+                    <span className="text-slate-400 block">风险描述</span>
+                    <p className="text-xs text-slate-700 leading-relaxed">{selectedRecord.desc}</p>
                   </div>
                 </div>
               </div>
 
-              {/* 预警处理流转日志 */}
-              <div className="space-y-3">
-                <Label className="text-slate-500 font-semibold block">预警日志轨迹</Label>
-                <div className="relative border-l border-slate-200 pl-4 ml-2 space-y-4 text-[11px]">
-                  <div className="relative">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-4 ring-rose-100" />
-                    <span className="font-bold text-slate-700 block">系统自动生成预警</span>
-                    <span className="text-[10px] text-slate-400 font-mono">今天 {selectedRecord.time.split(' ')[1]}</span>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-slate-300 rounded-full" />
-                    <span className="text-slate-600 block">触发 QPS / 超算规则检测分析</span>
-                    <span className="text-[10px] text-slate-400">进行归因检测</span>
-                  </div>
+              {/* 2. 处理记录轨迹 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                  <ClipboardList className="w-4 h-4 text-rose-400" /> 处理记录轨迹
+                </div>
+                <div className="relative border-l-2 border-slate-100 ml-2 pl-6 space-y-8">
+                  {selectedRecord.history.map((log: any, idx: number) => (
+                    <div key={idx} className="relative">
+                      {/* 节点圆点 */}
+                      <div className={cn(
+                        "absolute -left-[33px] top-0.5 w-4 h-4 rounded-full border-2 border-white shadow-sm",
+                        idx === selectedRecord.history.length - 1 ? "bg-rose-500 ring-4 ring-rose-100" : "bg-slate-300"
+                      )} />
+                      
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-800 text-xs">{log.action}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">{log.time}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                          <User className="w-3 h-3" />
+                          <span>操作人：{log.operator}</span>
+                        </div>
+                        <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-[11px] text-slate-600 leading-relaxed">
+                          {log.content}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-
             </div>
 
-            <div className="p-6 border-t border-slate-100 flex justify-end gap-2 shrink-0">
-              <Button variant="ghost" size="sm" onClick={() => setSelectedRecord(null)}>关闭窗口</Button>
-              <Button 
-                onClick={() => {
-                  handleStatusChange(selectedRecord.id, '已处理');
-                  setSelectedRecord(null);
-                }} 
-                className="bg-rose-400 hover:bg-rose-500 text-white font-bold h-9 text-xs"
-              >
-                已处理完成
-              </Button>
+            <div className="p-6 border-t border-slate-100 shrink-0">
+              <Button variant="outline" className="w-full" onClick={() => setSelectedRecord(null)}>关闭详情</Button>
             </div>
           </SheetContent>
         )}
