@@ -12,7 +12,7 @@ import {
   Eye, FileText, HelpCircle, ShieldCheck, Box, Ship, 
   Coins, Target, Users, MapPin, AlertTriangle, 
   Check, Info, Activity, Flame, Clock, Scale,
-  Sparkles, ListTodo
+  Sparkles
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { showSuccess } from '@/utils/toast';
@@ -55,14 +55,7 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => showSuccess("已加入实时监控库")}>
-                <Activity className="w-3.5 h-3.5 mr-1.5" /> 加入监控
-              </Button>
-              <Button className="bg-rose-400 hover:bg-rose-500 text-white h-9 text-xs font-bold shadow-lg shadow-rose-100">
-                <Send className="w-3.5 h-3.5 mr-1.5" /> 推送至 AIGC 生产
-              </Button>
-            </div>
+            {/* 移除了“加入监控”和“推送至 AIGC 生产”按钮 */}
           </div>
         </SheetHeader>
 
@@ -342,7 +335,7 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
             {/* 七、风险合规&运营适配 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-none shadow-sm bg-white">
-                <CardHeader className="pb-3 border-b border-slate-50">
+                <CardHeader className="pb-3 border-b border-slate-100">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <ShieldAlert className="w-4 h-4 text-rose-400" /> 风险检测
                   </CardTitle>
@@ -364,11 +357,10 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
               </Card>
 
               <Card className="border-none shadow-sm bg-white">
-                <CardHeader className="pb-3 border-b border-slate-50">
+                <CardHeader className="pb-3 border-b border-slate-100">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <Activity className="w-4 h-4 text-rose-400" /> 运营适配
-                  </CardTitle>
-                </CardHeader>
+                  </CardTitle>                </CardHeader>
                 <CardContent className="p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] text-slate-500">适配流量渠道</span>
@@ -452,5 +444,10 @@ const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) =>
     </Sheet>
   );
 };
+
+// 补全缺失的图标
+const ListTodo = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 16 2 2 4-4"/><path d="m3 6 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+);
 
 export default SelectionDetailDrawer;

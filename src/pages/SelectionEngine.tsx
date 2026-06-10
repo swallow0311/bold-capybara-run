@@ -57,6 +57,14 @@ const SelectionEngine = () => {
     showSuccess("正在抓取竞品全维度数据并进行 AI 卖点拆解...");
   };
 
+  const handleGenerateAvoidance = (name: string) => {
+    showSuccess(`正在基于「${name}」的负面评价生成 AI 避坑营销话术...`);
+  };
+
+  const handleSyncToCopywriting = (name: string) => {
+    showSuccess(`已将「${name}」的差异化卖点同步至 AIGC 文案创作模块。`);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left animate-in fade-in duration-500">
@@ -89,9 +97,7 @@ const SelectionEngine = () => {
             <Button variant="outline" size="sm" onClick={() => setIsConfigOpen(true)} className="h-10 text-xs border-slate-200">
               <Settings2 className="w-3.5 h-3.5 mr-1.5" /> 选品权重配置
             </Button>
-            <Button className="bg-slate-900 hover:bg-slate-800 text-white h-10 text-xs font-bold">
-              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> 全店深度复盘
-            </Button>
+            {/* 移除了“全店深度复盘”按钮 */}
           </div>
         </div>
 
@@ -241,10 +247,17 @@ const SelectionEngine = () => {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" className="flex-1 h-8 text-[10px] border-slate-200">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 h-8 text-[10px] border-slate-200"
+                        onClick={() => handleGenerateAvoidance(comp.name)}
+                      >
                         <FileText className="w-3 h-3 mr-1.5" /> 生成避坑话术
                       </Button>
-                      <Button className="flex-1 h-8 text-[10px] bg-rose-400 hover:bg-rose-500 text-white font-bold">
+                      <Button 
+                        className="flex-1 h-8 text-[10px] bg-rose-400 hover:bg-rose-500 text-white font-bold"
+                        onClick={() => handleSyncToCopywriting(comp.name)}
+                      >
                         <Wand2 className="w-3 h-3 mr-1.5" /> 同步至文案创作
                       </Button>
                     </div>
