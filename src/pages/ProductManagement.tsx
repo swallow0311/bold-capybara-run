@@ -36,8 +36,8 @@ interface ProductItem {
 const INITIAL_PRODUCTS: ProductItem[] = [
   {
     id: '1',
-    name: 'XX酵母御龄紧致面霜 50g',
-    brand: 'XX美妆 (Chanda)',
+    name: '中达酵母御龄紧致面霜 50g',
+    brand: '中达美妆 (Chanda)',
     category: '面霜/乳液',
     spuCode: 'SPU-LIP-99001',
     priceRange: '¥299.00',
@@ -45,7 +45,7 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     sales: 12840,
     status: '出售中',
     platform: 'Taobao',
-    shopName: 'XX美妆官方旗舰店',
+    shopName: '中达美妆官方旗舰店',
     skus: [
       { skuCode: 'SKU-99001-01', spec: '经典紧致款 50g', price: 299, stock: 1200, barcode: '6901234567890' },
       { skuCode: 'SKU-99001-02', spec: '润泽保湿款 50g', price: 299, stock: 1250, barcode: '6901234567891' }
@@ -53,8 +53,8 @@ const INITIAL_PRODUCTS: ProductItem[] = [
   },
   {
     id: '2',
-    name: 'XX水漾隔离防晒乳 SPF50+',
-    brand: 'XX美妆 (Chanda)',
+    name: '中达水漾隔离防晒乳 SPF50+',
+    brand: '中达美妆 (Chanda)',
     category: '防晒霜/喷雾',
     spuCode: 'SPU-SUN-88120',
     priceRange: '¥129.00 - ¥189.00',
@@ -62,10 +62,42 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     sales: 5400,
     status: '出售中',
     platform: 'Douyin',
-    shopName: 'XX美妆抖音专营店',
+    shopName: '中达美妆抖音专营店',
     skus: [
       { skuCode: 'SKU-88120-01', spec: '单支装 50ml', price: 129, stock: 500, barcode: '6901234567882' },
       { skuCode: 'SKU-88120-02', spec: '两支特惠装 50ml*2', price: 189, stock: 350, barcode: '6901234567883' }
+    ]
+  },
+  {
+    id: '3',
+    name: '积雪草净化海泥面膜 100g',
+    brand: '中达美妆 (Chanda)',
+    category: '面膜/清洁',
+    spuCode: 'SPU-FAC-77002',
+    priceRange: '¥89.00',
+    stock: 0,
+    sales: 3200,
+    status: '已售罄',
+    platform: 'JD',
+    shopName: '中达美妆京东旗舰店',
+    skus: [
+      { skuCode: 'SKU-77002-01', spec: '积雪草深层清洁 100g', price: 89, stock: 0, barcode: '6901234567875' }
+    ]
+  },
+  {
+    id: '4',
+    name: '中达凝润修护水光唇蜜',
+    brand: '中达美妆 (Chanda)',
+    category: '唇部彩妆',
+    spuCode: 'SPU-LIP-66044',
+    priceRange: '¥69.00',
+    stock: 2200,
+    sales: 1560,
+    status: '草稿箱',
+    platform: 'Taobao',
+    shopName: '中达彩妆官方店',
+    skus: [
+      { skuCode: 'SKU-66044-01', spec: '01# 水光西红柿红', price: 69, stock: 2200, barcode: '6901234567861' }
     ]
   }
 ];
@@ -89,78 +121,201 @@ const ProductManagement = () => {
     showSuccess("开始拉取授权店铺的线上实时商品数据...");
     setTimeout(() => {
       setIsSyncing(false);
-      showSuccess("拉取完成：检测到新品，已自动建立档案。");
+      showSuccess("拉取完成：检测到 2 款新品，已自动建立 SPU/SKU 档案。");
     }, 2000);
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (window.confirm(`确定要删除商品「${name}」吗？此操作不可撤销。`)) {
+      setProducts(products.filter(p => p.id !== id));
+      showSuccess("商品已成功从主档中移除。");
+    }
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-[1600px] mx-auto pb-12 text-slate-800 text-xs text-left">
+      <div className="space-y-6 max-w-[1600px] mx-auto pb-12 text-slate-800 text-xs text-left animate-in fade-in duration-500">
+        
+        {/* 顶部标题与全局操作 */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-xl font-bold text-slate-900">店铺商品主档管理</h1>
-            <p className="text-slate-500 text-xs mt-0.5">多源电商开放平台商品同步，打通AI选品与评价分析物料流</p>
+            <p className="text-slate-500 text-xs mt-0.5">多源电商开放平台商品同步，打通 AI 选品与评价分析物料流</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handlePullFromShop} disabled={isSyncing} className="bg-rose-400 hover:bg-rose-500 text-white text-xs h-9">
+            <Button 
+              onClick={handlePullFromShop} 
+              disabled={isSyncing}
+              className="bg-rose-400 hover:bg-rose-500 text-white text-xs h-9 shadow-lg shadow-rose-100"
+            >
               <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", isSyncing && "animate-spin")} />
               拉取多平台在线商品
             </Button>
-            <Button onClick={() => navigate('/products/create')} variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs h-9">
+            <Button 
+              onClick={() => navigate('/products/create')}
+              variant="outline" 
+              className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs h-9"
+            >
               <Plus className="w-3.5 h-3.5 mr-1.5" />
               新建商品
             </Button>
           </div>
         </div>
 
+        {/* 状态切换与搜索 */}
         <Card className="border-none shadow-sm bg-white">
-          <CardContent className="p-4">
-            <div className="relative max-w-sm">
+          <CardContent className="p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
+              {[
+                { id: 'all', label: '全部商品' },
+                { id: '出售中', label: '出售中' },
+                { id: '已售罄', label: '已售罄' },
+                { id: '仓库中', label: '仓库中' },
+                { id: '草稿箱', label: '草稿箱' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setStatusTab(tab.id as any)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex-1 md:flex-none",
+                    statusTab === tab.id ? "bg-white text-rose-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <Input 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索商品名称或编码..." 
-                className="pl-9 text-xs h-9 bg-slate-50/50 border-slate-200"
+                placeholder="搜索商品名称、SPU 编码..." 
+                className="pl-9 text-xs h-9 bg-slate-50/50 border-slate-200 focus:bg-white transition-all"
               />
             </div>
           </CardContent>
         </Card>
 
+        {/* 商品列表表格 */}
         <Card className="border-none shadow-sm overflow-hidden bg-white">
           <CardContent className="p-0">
             <Table>
               <TableHeader className="bg-slate-50/70">
                 <TableRow>
-                  <TableHead className="text-xs">商品编码</TableHead>
-                  <TableHead className="text-xs">商品名称</TableHead>
-                  <TableHead className="text-xs">品牌</TableHead>
-                  <TableHead className="text-xs text-right">价格</TableHead>
+                  <TableHead className="text-xs">商品编码 / 平台</TableHead>
+                  <TableHead className="text-xs">商品主档信息</TableHead>
+                  <TableHead className="text-xs">所属品牌 / 类目</TableHead>
+                  <TableHead className="text-xs text-right">价格区间</TableHead>
+                  <TableHead className="text-xs text-right">总库存 / 销量</TableHead>
                   <TableHead className="text-xs text-center">状态</TableHead>
-                  <TableHead className="text-xs text-right">操作</TableHead>
+                  <TableHead className="text-xs text-right w-[180px]">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map(p => (
-                  <TableRow key={p.id} className="hover:bg-slate-50/50">
-                    <TableCell className="font-mono font-bold">{p.spuCode}</TableCell>
-                    <TableCell className="font-bold">{p.name}</TableCell>
-                    <TableCell>{p.brand}</TableCell>
-                    <TableCell className="text-right font-bold">{p.priceRange}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge className={cn("border-none text-[9px] font-bold", p.status === '出售中' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700')}>
-                        {p.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => navigate(`/products/edit/${p.id}`)} className="h-7 text-[10px]">编辑</Button>
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map(p => (
+                    <TableRow key={p.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <TableCell>
+                        <div className="space-y-1">
+                          <span className="font-mono font-bold text-slate-500 block">{p.spuCode}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className={cn(
+                              "text-[9px] px-1.5 py-0.2 rounded font-black uppercase",
+                              p.platform === 'Taobao' && "bg-orange-100 text-orange-600",
+                              p.platform === 'JD' && "bg-red-100 text-red-600",
+                              p.platform === 'Douyin' && "bg-slate-800 text-white",
+                            )}>
+                              {p.platform}
+                            </span>
+                            <span className="text-[10px] text-slate-400 truncate max-w-[80px]">{p.shopName}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                            <Package className="w-5 h-5 text-slate-300" />
+                          </div>
+                          <span className="font-bold text-slate-700 leading-snug max-w-[200px]">{p.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-0.5">
+                          <span className="font-medium text-slate-600 block">{p.brand}</span>
+                          <span className="text-slate-400">{p.category}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-bold text-slate-700">{p.priceRange}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="space-y-0.5">
+                          <span className={cn("font-bold block", p.stock < 50 ? "text-rose-500" : "text-slate-700")}>
+                            {p.stock.toLocaleString()} <span className="text-[9px] font-normal text-slate-400">件</span>
+                          </span>
+                          <span className="text-slate-400">已售 {p.sales.toLocaleString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={cn(
+                          "border-none text-[9px] font-bold",
+                          p.status === '出售中' && 'bg-emerald-100 text-emerald-700',
+                          p.status === '已售罄' && 'bg-rose-100 text-rose-700',
+                          p.status === '仓库中' && 'bg-amber-100 text-amber-700',
+                          p.status === '草稿箱' && 'bg-slate-100 text-slate-500',
+                        )}>
+                          {p.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => navigate(`/products/edit/${p.id}`)}
+                            className="h-7 text-[10px] text-slate-500 hover:text-rose-500"
+                          >
+                            <Edit3 className="w-3 h-3 mr-1" /> 编辑
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDelete(p.id, p.name)}
+                            className="h-7 text-[10px] text-slate-500 hover:text-rose-500"
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" /> 删除
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-40 text-center text-slate-400">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Package className="w-8 h-8 opacity-20" />
+                        <span>暂无符合条件的商品档案</span>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
+
+        {/* 底部统计信息 */}
+        <div className="flex justify-between items-center px-2">
+          <div className="flex gap-6 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+            <span>总商品数: {products.length}</span>
+            <span>出售中: {products.filter(p => p.status === '出售中').length}</span>
+            <span>库存预警: {products.filter(p => p.stock < 50).length}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] text-slate-400">
+            <Layers className="w-3 h-3" />
+            <span>数据最后同步时间：2026-06-10 10:30</span>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
