@@ -27,7 +27,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/bold-capybara-run">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/products" element={<ProductManagement />} />
