@@ -14,7 +14,7 @@ import {
   Filter, Download, Layers, MessageSquare, ShoppingBag,
   ChevronRight, Info, CheckCircle2, XCircle, Plus,
   ArrowUpDown, Calendar, LayoutGrid, List, Globe, History,
-  Flame, MousePointer2, Box, Ship
+  Flame, MousePointer2, Box, Ship, Eye
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { showSuccess, showError } from '@/utils/toast';
