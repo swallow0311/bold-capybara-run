@@ -36,7 +36,6 @@ const TRENDING_PRODUCTS = [
     ingredients: ['多肽', '酵母', '玻尿酸'], 
     platform: '抖音',
     img: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=100',
-    // 固定算法权重计算：综合分=市场热度25%+蓝海竞争25%+盈利潜力25%+口碑舆情15%+风险合规10%
     scores: { '市场热度': 95, '蓝海竞争': 88, '盈利潜力': 92, '口碑舆情': 85, '风险安全': 98 },
     label: '综合最优',
     data: { 
@@ -126,19 +125,17 @@ const SelectionEngine = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-full space-y-6 max-w-[1600px] mx-auto pb-12 text-left animate-in fade-in duration-500">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full space-y-6 max-w-[1600px] mx-auto pb-12 text-left animate-in fade-in duration-500">
         
         <div className="flex justify-between items-center">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-            <TabsList className="bg-white border border-slate-200 p-1 h-11 shadow-sm rounded-xl">
-              <TabsTrigger value="trending" className="gap-2 text-xs font-bold data-[state=active]:bg-rose-50 data-[state=active]:text-rose-600">
-                <BarChart3 className="w-3.5 h-3.5" /> 全网爆款榜单
-              </TabsTrigger>
-              <TabsTrigger value="benchmarking" className="gap-2 text-xs font-bold data-[state=active]:bg-rose-50 data-[state=active]:text-rose-600">
-                <Scale className="w-3.5 h-3.5" /> 竞品深度对标
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <TabsList className="bg-white border border-slate-200 p-1 h-11 shadow-sm rounded-xl">
+            <TabsTrigger value="trending" className="gap-2 text-xs font-bold data-[state=active]:bg-rose-50 data-[state=active]:text-rose-600">
+              <BarChart3 className="w-3.5 h-3.5" /> 全网爆款榜单
+            </TabsTrigger>
+            <TabsTrigger value="benchmarking" className="gap-2 text-xs font-bold data-[state=active]:bg-rose-50 data-[state=active]:text-rose-600">
+              <Scale className="w-3.5 h-3.5" /> 竞品深度对标
+            </TabsTrigger>
+          </TabsList>
           
           {activeTab === 'benchmarking' && validation.valid && (
             <div className="flex gap-2">
@@ -335,7 +332,7 @@ const SelectionEngine = () => {
           )}
         </TabsContent>
 
-      </div>
+      </Tabs>
     </DashboardLayout>
   );
 };
