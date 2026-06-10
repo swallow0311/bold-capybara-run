@@ -20,8 +20,8 @@ const CopyAssetCard = ({ asset, onDelete, onToggleFavorite }: CopyAssetCardProps
   const navigate = useNavigate();
 
   return (
-    <Card className="border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all overflow-hidden flex flex-col">
-      <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex justify-between items-start">
+    <Card className="border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all overflow-hidden flex flex-col h-[320px]">
+      <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex justify-between items-start shrink-0">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Badge className="bg-rose-100 text-rose-700 border-none text-[9px] font-bold">文案</Badge>
@@ -37,14 +37,14 @@ const CopyAssetCard = ({ asset, onDelete, onToggleFavorite }: CopyAssetCardProps
         </button>
       </div>
 
-      <CardContent className="p-4 flex-1 flex flex-col space-y-3">
-        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex-1">
-          <p className="text-[11px] text-slate-600 leading-relaxed line-clamp-4 font-mono">
+      <CardContent className="p-4 flex-1 flex flex-col space-y-3 overflow-hidden">
+        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex-1 overflow-hidden">
+          <p className="text-[11px] text-slate-600 leading-relaxed line-clamp-5 font-mono">
             {asset.content}
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 shrink-0">
           <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
             <ShieldCheck className="w-3 h-3 text-emerald-500" />
             <span>合规性: {asset.compliance}</span>
@@ -55,13 +55,13 @@ const CopyAssetCard = ({ asset, onDelete, onToggleFavorite }: CopyAssetCardProps
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 shrink-0">
           <Badge variant="outline" className="text-[9px] border-slate-200 text-slate-500">{asset.config.platform}</Badge>
           <Badge variant="outline" className="text-[9px] border-slate-200 text-slate-500">{asset.config.style}</Badge>
           <Badge variant="outline" className="text-[9px] border-slate-200 text-slate-500">{asset.wordCount}字</Badge>
         </div>
 
-        <div className="pt-2 border-t border-slate-50 flex justify-between items-center">
+        <div className="pt-2 border-t border-slate-50 flex justify-between items-center shrink-0">
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-rose-500" onClick={() => showSuccess("已复制文案内容")}>
               <Copy className="w-3.5 h-3.5" />
@@ -70,14 +70,9 @@ const CopyAssetCard = ({ asset, onDelete, onToggleFavorite }: CopyAssetCardProps
               <Edit3 className="w-3.5 h-3.5" />
             </Button>
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="h-7 text-[10px] text-slate-500" onClick={() => showSuccess("已复用原始生成参数")}>
-              复用参数
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500" onClick={() => onDelete(asset.id)}>
-              <Trash2 className="w-3.5 h-3" />
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500" onClick={() => onDelete(asset.id)}>
+            <Trash2 className="w-3.5 h-3" />
+          </Button>
         </div>
       </CardContent>
     </Card>
