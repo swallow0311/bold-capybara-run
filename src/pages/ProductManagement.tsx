@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
-  Package, Search, Plus, Edit3, Trash2, RefreshCw, Layers
+  Package, Search, Plus, Edit3, Trash2, RefreshCw, Layers, Eye, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -102,12 +102,29 @@ const INITIAL_PRODUCTS: ProductItem[] = [
   }
 ];
 
+const ITEMS_PER_PAGE = 2; // 为演示分页效果，每页默认展示 2 条商品数据
+
 const ProductManagement = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
   const [statusTab, setStatusTab] = useState<'all' | '出售中' | '已售罄' | '仓库中' | '草稿箱'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // 当筛选状态或搜索内容改变时，自动将页码重置为第 1 页
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusTab, searchQuery]);
+
+  // 计算各个分类的数量
+  const counts = {
+    all: products.length,
+    active: products.filter(p => p.status === '出售中').length,
+    soldout: products.filter(p => p.status === '已售罄').length,
+    warehouse: products.filter(p => p.status === '仓库中').length,
+    draft: products.filter(p => p.status === '草稿箱').length
+  };
 
   const filteredProducts = products.filter(p => {
     const matchesStatus = statusTab === 'all' || p.status === statusTab;
@@ -115,6 +132,13 @@ const ProductManagement = () => {
                           p.spuCode.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
+  // 分页截取商品数据
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handlePullFromShop = () => {
     setIsSyncing(true);
@@ -167,11 +191,11 @@ const ProductManagement = () => {
           <CardContent className="p-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
               {[
-                { id: 'all', label: '全部商品' },
-                { id: '出售中', label: '出售中' },
-                { id: '已售罄', label: '已售罄' },
-                { id: '仓库中', label: '仓库中' },
-                { id: '草稿箱', label: '草稿箱' }
+                { id: 'all', label: `全部商品 (${counts.all})` },
+                { id: '出售中', label: `出售中 (${counts.active})` },
+                { id: '已售罄', label: `已售罄 (${counts.soldout})` },
+                { id: '仓库中', label: `仓库中 (${counts.warehouse})` },
+                { id: '草稿箱', label: `草稿箱 (${counts.draft})` }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -210,13 +234,13 @@ const ProductManagement = () => {
                   <TableHead className="text-xs text-right">价格区间</TableHead>
                   <TableHead className="text-xs text-right">总库存 / 销量</TableHead>
                   <TableHead className="text-xs text-center">状态</TableHead>
-                  <TableHead className="text-xs text-right w-[180px]">操作</TableHead>
+                  <TableHead className="text-xs text-right w-[240px]">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.length > 0 ? (
-                  filteredProducts.map(p => (
-                    <TableRow key={p.id} className="hover:bg-slate-50/50 transition-colors group">
+                {paginatedProducts.length > 0 ? (
+                  paginatedProducts.map(p => (
+                    <TableRow key={p.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell>
                         <div className="space-y-1">
                           <span className="font-mono font-bold text-slate-500 block">{p.spuCode}</span>
@@ -268,12 +292,20 @@ const ProductManagement = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => navigate(`/products/view/${p.id}`)}
+                            className="h-7 text-[10px] text-rose-600 hover:bg-rose-50"
+                          >
+                            <Eye className="w-3 h-3 mr-1" /> 查看
+                          </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => navigate(`/products/edit/${p.id}`)}
-                            className="h-7 text-[10px] text-slate-500 hover:text-rose-500"
+                            className="h-7 text-[10px] text-slate-500 hover:text-slate-700"
                           >
                             <Edit3 className="w-3 h-3 mr-1" /> 编辑
                           </Button>
@@ -281,7 +313,7 @@ const ProductManagement = () => {
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleDelete(p.id, p.name)}
-                            className="h-7 text-[10px] text-slate-500 hover:text-rose-500"
+                            className="h-7 text-[10px] text-slate-500 hover:text-slate-700"
                           >
                             <Trash2 className="w-3 h-3 mr-1" /> 删除
                           </Button>
@@ -304,18 +336,56 @@ const ProductManagement = () => {
           </CardContent>
         </Card>
 
-        {/* 底部统计信息 */}
-        <div className="flex justify-between items-center px-2">
+        {/* 分页与底部数据统计 */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 px-2 pt-2 border-t border-slate-100">
           <div className="flex gap-6 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             <span>总商品数: {products.length}</span>
-            <span>出售中: {products.filter(p => p.status === '出售中').length}</span>
+            <span>出售中: {counts.active}</span>
             <span>库存预警: {products.filter(p => p.stock < 50).length}</span>
           </div>
-          <div className="flex items-center gap-2 text-[10px] text-slate-400">
-            <Layers className="w-3 h-3" />
-            <span>数据最后同步时间：2026-06-10 10:30</span>
+
+          {/* 分页控制栏 */}
+          <div className="flex items-center gap-1.5">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-8 w-8 p-0 border-slate-200" 
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const pageNum = i + 1;
+              return (
+                <Button 
+                  key={pageNum}
+                  variant={currentPage === pageNum ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn(
+                    "h-8 w-8 p-0 text-xs font-bold transition-all",
+                    currentPage === pageNum 
+                      ? "bg-rose-400 hover:bg-rose-500 text-white border-transparent"
+                      : "border-slate-200 hover:bg-slate-50 text-slate-600"
+                  )}
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </Button>
+              );
+            })}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-8 w-8 p-0 border-slate-200" 
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
+
       </div>
     </DashboardLayout>
   );

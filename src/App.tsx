@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import ProductManagement from "./pages/ProductManagement";
 import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
+import ViewProduct from "./pages/ViewProduct";
 import SelectionEngine from "./pages/SelectionEngine";
 import ContentFactory from "./pages/ContentFactory";
 import ImageDesign from "./pages/ImageDesign";
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/products" element={<ProductManagement />} />
           <Route path="/products/create" element={<CreateProduct />} />
           <Route path="/products/edit/:id" element={<EditProduct />} />
+          <Route path="/products/view/:id" element={<ViewProduct />} />
           <Route path="/selection" element={<SelectionEngine />} />
           <Route path="/content" element={<ContentFactory />} />
           <Route path="/image-design" element={<ImageDesign />} />
