@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 // 导入子组件
 import AiAnalysisReport from '@/components/selection/AiAnalysisReport';
 import BenchmarkingRadar from '@/components/selection/BenchmarkingRadar';
-import DiagnosisDetailDrawer from '@/components/selection/DiagnosisDetailDrawer';
+import DiagnosisReport from '@/components/selection/DiagnosisReport';
 import SelectionConfigSheet from '@/components/selection/SelectionConfigSheet';
 
 // 初始种子竞品数据
@@ -37,13 +37,14 @@ const TRENDING_PRODUCTS = [
     scores: { '市场热度': 95, '蓝海竞争': 88, '盈利潜力': 92, '口碑舆情': 85, '风险安全': 98 },
     label: '综合最优',
     isCore: true, // 核心对标对象
+    healthStatus: '健康',
+    aiSummaryTag: '高潜爆品',
     data: { 
       totalScore: 94, tag: '高潜爆款', trend: '45% 稳定上升', lifecycle: '增长期', season: '四季', 
       trafficSource: '搜索(45%) 视频(35%)', competitorCount: 12, monopoly: '低', cost: 45, 
       priceRange: '¥299 - 350', margin: 65, profit: 150000, roi: 1.5, goodTags: '温和、吸收快', 
       badTags: '包装渗漏', returnRate: 3.2, audienceMatch: '25-40岁女性', supplyStability: '优质稳定', 
       moq: 100, leadTime: 3, infringementRisk: '低', compliance: '已备案',
-      // 对比设置指标映射值
       salesTrend: '↑ 45.2% 月度爆发', priceSegment: '¥299.00 - ¥349.00', ratingsCount: '12,840 条', 
       publishDate: '2026-01-15', shippingMethod: '顺丰包邮/海外仓直邮', variantsCount: '3个变体(15ml/30ml/礼盒)'
     },
@@ -56,6 +57,8 @@ const TRENDING_PRODUCTS = [
     scores: { '市场热度': 85, '蓝海竞争': 40, '盈利潜力': 60, '口碑舆情': 90, '风险安全': 95 },
     label: '热度最优',
     isCore: false,
+    healthStatus: '健康',
+    aiSummaryTag: '平稳红海',
     data: { 
       totalScore: 78, tag: '红海稳健', trend: '12% 震荡前行', lifecycle: '成熟期', season: '四季', 
       trafficSource: '搜索(60%) 笔记(30%)', competitorCount: 85, monopoly: '高', cost: 15, 
@@ -74,6 +77,8 @@ const TRENDING_PRODUCTS = [
     scores: { '市场热度': 78, '蓝海竞争': 65, '盈利潜力': 85, '口碑舆情': 75, '风险安全': 80 },
     label: '季节新品',
     isCore: false,
+    healthStatus: '风险',
+    aiSummaryTag: '高危监控',
     data: { 
       totalScore: 82, tag: '季节爆品', trend: '120% 强力攀升', lifecycle: '爆发期', season: '夏季', 
       trafficSource: '直播(50%) 视频(40%)', competitorCount: 32, monopoly: '中', cost: 28, 
@@ -88,9 +93,9 @@ const TRENDING_PRODUCTS = [
 ];
 
 const STORE_DIAGNOSIS_DATA = [
-  { id: 'S-001', name: '中达酵母御龄面霜', status: '健康', traffic: '1.2w', cvr: '3.5%', sentiment: '92%', trend: 'up' },
-  { id: 'S-002', name: '积雪草净化海泥面膜', status: '风险', traffic: '2.5k', cvr: '0.8%', sentiment: '75%', trend: 'down' },
-  { id: 'S-003', name: '水漾隔离防晒乳', status: '滞销', traffic: '800', cvr: '0.2%', sentiment: '88%', trend: 'down' },
+  { id: 'S-001', name: '中达酵母御龄面霜', status: '健康', traffic: '1.2w', cvr: '3.5%', sentiment: '92%', trend: 'up', profitMargin: '65%', aiSummaryTag: '高频复购' },
+  { id: 'S-002', name: '积雪草净化海泥面膜', status: '风险', traffic: '2.5k', cvr: '0.8%', sentiment: '75%', trend: 'down', profitMargin: '40%', aiSummaryTag: '包装缺陷' },
+  { id: 'S-003', name: '水漾隔离防晒乳', status: '滞销', traffic: '800', cvr: '0.2%', sentiment: '88%', trend: 'down', profitMargin: '55%', aiSummaryTag: '流量下滑' },
 ];
 
 const SelectionEngine = () => {
@@ -99,19 +104,24 @@ const SelectionEngine = () => {
   // 蓝海潜力选中
   const [selectedProduct, setSelectedProduct] = useState<any>(TRENDING_PRODUCTS[0]);
   
+  // 本店商品诊断选中与筛选状态
+  const [selectedDiagnosisProduct, setSelectedDiagnosisProduct] = useState<any>(STORE_DIAGNOSIS_DATA[0]);
+  const [diagnosisStatusFilter, setDiagnosisStatusFilter] = useState('all');
+  const [diagnosisTagFilter, setDiagnosisTagFilter] = useState('all');
+
   // 竞品配置区解析池数据
   const [parsedPool, setParsedPool] = useState<any[]>([
     { id: 'PARSED-01', name: '海外高端鱼子酱面霜 (亚马逊标杆)', category: '面部护肤', img: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=100', platform: 'Amazon', brand: 'Lamer', asin: 'B08F567X' },
     { id: 'PARSED-02', name: '纯有机绿茶控油乳液 (Shopify爆款)', category: '面部护肤', img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=100', platform: 'Shopify', brand: 'Innisfree', asin: 'B07T890Y' }
   ]);
 
-  // 1.1 左侧三种竞品输入状态
+  // 左侧三种竞品输入状态
   const [inputMode, setInputMode] = useState<'link' | 'search' | 'csv'>('link');
   const [linkInput, setLinkInput] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   
-  // 4. 对比与对齐设置
+  // 对比与对齐设置
   const [alignmentMode, setAlignmentMode] = useState<'category' | 'price' | 'audience'>('category');
   const [indicators, setIndicators] = useState({
     sales: true,
@@ -122,15 +132,34 @@ const SelectionEngine = () => {
     variants: true
   });
 
-  // 对标对比组列表 (默认载入前三款种子数据)
+  // 对标对比组列表
   const [compareList, setCompareList] = useState<any[]>(TRENDING_PRODUCTS.slice(0, 3));
-  // 选中对比项详情查看
   const [selectedCompareProduct, setSelectedCompareProduct] = useState<any>(TRENDING_PRODUCTS[0]);
 
   const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [diagnosisItem, setDiagnosisItem] = useState<any>(null);
 
-  // 1.1.1 链接解析
+  // 本店诊断数据过滤逻辑
+  const filteredDiagnosisData = useMemo(() => {
+    return STORE_DIAGNOSIS_DATA.filter(item => {
+      const matchesStatus = diagnosisStatusFilter === 'all' || item.status === diagnosisStatusFilter;
+      const matchesTag = diagnosisTagFilter === 'all' || item.aiSummaryTag === diagnosisTagFilter;
+      return matchesStatus && matchesTag;
+    });
+  }, [diagnosisStatusFilter, diagnosisTagFilter]);
+
+  // 当过滤数据变动时自动校准第一条数据的默认选中
+  useEffect(() => {
+    if (filteredDiagnosisData.length > 0) {
+      const exists = filteredDiagnosisData.some(p => p.id === selectedDiagnosisProduct?.id);
+      if (!exists) {
+        setSelectedDiagnosisProduct(filteredDiagnosisData[0]);
+      }
+    } else {
+      setSelectedDiagnosisProduct(null);
+    }
+  }, [filteredDiagnosisData, selectedDiagnosisProduct]);
+
+  // 链接解析
   const handleParseLink = () => {
     if (!linkInput.trim()) {
       showError("请输入有效的竞品店铺或商品链接");
@@ -151,7 +180,7 @@ const SelectionEngine = () => {
     showSuccess("链接解析成功！已自动提取产品缩略图与所属类目，载入竞品配置池。");
   };
 
-  // 1.1.2 自动补全输入检测
+  // 自动补全输入检测
   const handleSearchInputChange = (val: string) => {
     setSearchInput(val);
     if (val.trim().length > 1) {
@@ -182,7 +211,7 @@ const SelectionEngine = () => {
     showSuccess("自动补全成功！竞品已生成配置档录入解析池。");
   };
 
-  // 1.1.3 CSV批量导入 (最多20个)
+  // CSV批量导入
   const handleCsvUpload = () => {
     showSuccess("正在批量解析上传的 CSV 对标竞品清单...");
     setTimeout(() => {
@@ -200,7 +229,7 @@ const SelectionEngine = () => {
     }, 1200);
   };
 
-  // 3. 添加为对比组 & 设置核心对标
+  // 添加为对比组 & 设置核心对标
   const handleAddToCompare = (item: any) => {
     if (compareList.length >= 5) {
       showError("最多支持对比 5 款商品，请先移除已有对标组商品");
@@ -213,7 +242,7 @@ const SelectionEngine = () => {
     const newCompareItem = {
       ...item,
       rank: compareList.length + 1,
-      isCore: compareList.length === 0, // 如果对比组为空，自动作为核心
+      isCore: compareList.length === 0,
       scores: { '市场热度': 80, '蓝海竞争': 70, '盈利潜力': 75, '口碑舆情': 82, '风险安全': 90 },
       data: {
         totalScore: 82, tag: '高潜对标', trend: '↑ 24% 增长', lifecycle: '进入期', season: '四季', 
@@ -241,17 +270,6 @@ const SelectionEngine = () => {
       setSelectedCompareProduct(target);
       showSuccess(`已成功将「${target.name}」设为本次分析的核心对标对象`);
     }
-  };
-
-  const handleRemoveCompare = (id: string) => {
-    const list = compareList.filter(item => item.id !== id);
-    setCompareList(list);
-    // 如果移除的是核心对标，则转移核心位置
-    if (compareList.find(c => c.id === id)?.isCore && list.length > 0) {
-      list[0].isCore = true;
-      setSelectedCompareProduct(list[0]);
-    }
-    showSuccess("已从对比列表中移除");
   };
 
   // 竞品对标准入校验
@@ -320,9 +338,10 @@ const SelectionEngine = () => {
                     <TableRow>
                       <TableHead className="w-[60px] text-center text-xs">排名</TableHead>
                       <TableHead className="text-xs">商品信息</TableHead>
+                      <TableHead className="text-xs text-center">健康状态</TableHead>
                       <TableHead className="text-xs text-right">潜力分</TableHead>
                       <TableHead className="text-xs text-right">热度趋势</TableHead>
-                      <TableHead className="text-xs text-right">操作</TableHead>
+                      <TableHead className="text-xs text-right">AI总结标签</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -338,9 +357,17 @@ const SelectionEngine = () => {
                             </div>
                           </div>
                         </TableCell>
+                        <TableCell className="text-center">
+                          <Badge className={cn(
+                            "border-none text-[9px] font-bold",
+                            p.healthStatus === '健康' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                          )}>{p.healthStatus}</Badge>
+                        </TableCell>
                         <TableCell className="text-right font-black text-rose-500 text-xs">{p.data.totalScore}</TableCell>
                         <TableCell className="text-right"><div className="flex items-center justify-end gap-1 text-emerald-500 font-bold text-xs">↑ {p.data.trend}</div></TableCell>
-                        <TableCell className="text-right"><Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500">分析</Button></TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant="outline" className="border-rose-100 text-rose-600 bg-rose-50/50 text-[9px]">{p.aiSummaryTag}</Badge>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -369,7 +396,6 @@ const SelectionEngine = () => {
                   </CardTitle>
                 </CardHeader>
                 
-                {/* 需求5: 设置项一屏显示不下，则显示垂直滚动条 */}
                 <ScrollArea className="flex-1">
                   <CardContent className="p-4 space-y-6">
                     
@@ -403,7 +429,7 @@ const SelectionEngine = () => {
                           <Label className="text-[10px] text-slate-400">支持Amazon/Shopify/TikTok Shop链接</Label>
                           <div className="flex gap-1">
                             <Input 
-                              placeholder="粘贴竞品店铺或商品详情链接..." 
+                              placeholder="粘贴竞品店铺或商品链接..." 
                               value={linkInput} 
                               onChange={(e) => setLinkInput(e.target.value)}
                               className="h-8 text-xs bg-slate-50/50"
@@ -427,7 +453,6 @@ const SelectionEngine = () => {
                             />
                             <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
                           </div>
-                          {/* 关联提示浮层 */}
                           {autocompleteSuggestions.length > 0 && (
                             <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100">
                               {autocompleteSuggestions.map((item, idx) => (
@@ -806,73 +831,119 @@ const SelectionEngine = () => {
 
         {/* 3. 本店商品诊断 */}
         {activeTab === 'diagnosis' && (
-          <div className="m-0 space-y-6 flex-1 min-h-[500px]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { label: '健康商品', val: 12, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                { label: '风险商品', val: 3, color: 'text-amber-500', bg: 'bg-amber-50' },
-                { label: '滞销/待优化', val: 5, color: 'text-rose-500', bg: 'bg-rose-50' },
-              ].map((s, i) => (
-                <Card key={i} className="border-none shadow-sm bg-white">
-                  <CardContent className="p-5 flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase">{s.label}</p>
-                      <p className={cn("text-2xl font-black", s.color)}>{s.val}</p>
-                    </div>
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", s.bg)}>
-                      <Activity className={cn("w-5 h-5", s.color)} />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
-              <CardHeader className="py-4 border-b border-slate-100 flex flex-row justify-between items-center">
-                <CardTitle className="text-sm font-bold flex items-center gap-2"><Activity className="w-4 h-4 text-rose-400" /> 本店商品健康度扫描</CardTitle>
-                <Button variant="outline" size="sm" className="h-8 text-xs border-slate-200" onClick={() => showSuccess("全店商品健康度扫描已启动...")}>
-                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> 重新扫描
-                </Button>
+          <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden min-h-[500px]">
+            {/* 左侧：列表与筛选 */}
+            <Card className="flex-1 border-none shadow-sm overflow-hidden flex flex-col bg-white">
+              <CardHeader className="py-4 border-b border-slate-100 shrink-0 space-y-4">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-rose-400" />
+                  本店商品健康度扫描
+                </CardTitle>
+                
+                {/* 增加筛选条件 */}
+                <div className="flex flex-wrap items-center gap-4 pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">健康状态</span>
+                    <Select value={diagnosisStatusFilter} onValueChange={setDiagnosisStatusFilter}>
+                      <SelectTrigger className="w-28 h-8 text-[11px] bg-slate-50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">所有状态</SelectItem>
+                        <SelectItem value="健康">健康</SelectItem>
+                        <SelectItem value="风险">风险</SelectItem>
+                        <SelectItem value="滞销">滞销</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase">AI总结标签</span>
+                    <Select value={diagnosisTagFilter} onValueChange={setDiagnosisTagFilter}>
+                      <SelectTrigger className="w-28 h-8 text-[11px] bg-slate-50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">所有标签</SelectItem>
+                        <SelectItem value="高频复购">高频复购</SelectItem>
+                        <SelectItem value="包装缺陷">包装缺陷</SelectItem>
+                        <SelectItem value="流量下滑">流量下滑</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 text-[11px] text-slate-400 hover:text-rose-500" 
+                    onClick={() => { setDiagnosisStatusFilter('all'); setDiagnosisTagFilter('all'); }}
+                  >
+                    重置
+                  </Button>
+                </div>
               </CardHeader>
-              <Table>
-                <TableHeader className="bg-slate-50/50">
-                  <TableRow>
-                    <TableHead className="text-xs">商品名称</TableHead>
-                    <TableHead className="text-xs text-center">健康状态</TableHead>
-                    <TableHead className="text-xs text-right">7日流量</TableHead>
-                    <TableHead className="text-xs text-right">转化率 (CVR)</TableHead>
-                    <TableHead className="text-xs text-right">好评率</TableHead>
-                    <TableHead className="text-xs text-right">操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {STORE_DIAGNOSIS_DATA.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                      <TableCell className="font-bold text-slate-700 text-xs">{item.name}</TableCell>
-                      <TableCell className="text-center">
-                        <Badge className={cn(
-                          "border-none text-[9px] font-bold",
-                          item.status === '健康' ? 'bg-emerald-100 text-emerald-700' : 
-                          item.status === '风险' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
-                        )}>{item.status}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-xs">{item.traffic}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1 font-bold text-xs">
-                          {item.cvr}
-                          {item.trend === 'up' ? <TrendingUp className="w-3 h-3 text-emerald-500" /> : <TrendingDown className="w-3 h-3 text-rose-500" />}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-bold text-slate-600 text-xs">{item.sentiment}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500" onClick={() => setDiagnosisItem(item)}>
-                          诊断详情 <ChevronRight className="w-3 h-3 ml-1" />
-                        </Button>
-                      </TableCell>
+
+              <div className="flex-1 overflow-auto">
+                <Table>
+                  <TableHeader className="bg-slate-50/50 sticky top-0 z-10">
+                    <TableRow>
+                      <TableHead className="text-xs">商品名称</TableHead>
+                      <TableHead className="text-xs text-center">健康状态</TableHead>
+                      <TableHead className="text-xs text-right">预计利润空间</TableHead>
+                      <TableHead className="text-xs text-right">7日流量</TableHead>
+                      <TableHead className="text-xs text-right">转化率 (CVR)</TableHead>
+                      <TableHead className="text-xs text-right">好评率</TableHead>
+                      <TableHead className="text-xs text-right">AI总结标签</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDiagnosisData.length > 0 ? (
+                      filteredDiagnosisData.map((item) => (
+                        <TableRow 
+                          key={item.id} 
+                          className={cn(
+                            "cursor-pointer transition-colors text-xs",
+                            selectedDiagnosisProduct?.id === item.id ? "bg-rose-50/30" : "hover:bg-slate-50/50"
+                          )}
+                          onClick={() => setSelectedDiagnosisProduct(item)}
+                        >
+                          <TableCell className="font-bold text-slate-700 text-xs">{item.name}</TableCell>
+                          <TableCell className="text-center">
+                            <Badge className={cn(
+                              "border-none text-[9px] font-bold",
+                              item.status === '健康' ? 'bg-emerald-100 text-emerald-700' : 
+                              item.status === '风险' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
+                            )}>{item.status}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-black text-rose-500 text-xs">{item.profitMargin}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{item.traffic}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1 font-bold text-xs">
+                              {item.cvr}
+                              {item.trend === 'up' ? <TrendingUp className="w-3 h-3 text-emerald-500" /> : <TrendingDown className="w-3 h-3 text-rose-500" />}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-slate-600 text-xs">{item.sentiment}</TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="outline" className="border-rose-100 text-rose-600 bg-rose-50/50 text-[9px]">{item.aiSummaryTag}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="h-40 text-center text-slate-400">
+                          暂无符合筛选条件的诊断商品
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+
+            {/* 右侧：诊断详情直接在页面展示 */}
+            <Card className="w-full lg:w-[400px] border-none shadow-sm flex flex-col overflow-hidden bg-white shrink-0">
+              <CardContent className="p-6 h-full">
+                <DiagnosisReport product={selectedDiagnosisProduct} />
+              </CardContent>
             </Card>
           </div>
         )}
@@ -893,8 +964,7 @@ const SelectionEngine = () => {
       </div>
 
       <SelectionConfigSheet open={isConfigOpen} onOpenChange={setIsConfigOpen} />
-      <DiagnosisDetailDrawer item={diagnosisItem} onClose={() => setDiagnosisItem(null)} />
-    </DashboardLayout>
+    </div>
   );
 };
 

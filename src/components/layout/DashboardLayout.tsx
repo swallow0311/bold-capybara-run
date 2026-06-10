@@ -12,7 +12,7 @@ import NotificationPopover from './NotificationPopover';
 const menuItems = [
   { name: '核心看板', sub: '数据统计与ROI指标', icon: LayoutDashboard, path: '/' },
   { name: '商品管理', sub: '店铺SPU/SKU一体化管控', icon: ShoppingBag, path: '/products' },
-  { name: 'AI选品', sub: '全网爆款趋势挖掘', icon: Search, path: '/selection' },
+  { name: 'AI 选品引擎', sub: '全网爆款趋势挖掘', icon: Search, path: '/selection' },
   { 
     name: 'AIGC内容工厂', 
     sub: '多版本内容智能产出', 
@@ -125,7 +125,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                    location.pathname === '/products/create' ? '新建商品' :
                    location.pathname.startsWith('/products/edit') ? '编辑商品' :
                    location.pathname.startsWith('/products/view') ? '商品详情' :
-                   location.pathname === '/selection' ? 'AI选品' :
+                   location.pathname === '/selection' ? 'AI 选品引擎' :
                    location.pathname === '/content' ? '文案生成' :
                    location.pathname === '/image-design' ? '图片设计' :
                    location.pathname === '/video-creation' ? '视频创作' :
