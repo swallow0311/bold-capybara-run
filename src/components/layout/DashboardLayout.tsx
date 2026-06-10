@@ -7,6 +7,7 @@ import {
   Link2, Cpu, ArrowLeft, Calendar, AlertTriangle, ListTodo
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import NotificationPopover from './NotificationPopover';
 
 const menuItems = [
   { name: '核心看板', sub: '数据统计与ROI指标', icon: LayoutDashboard, path: '/' },
@@ -143,10 +144,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
           
           <div className="flex items-center gap-5">
-            <button className="p-2 text-slate-400 hover:text-slate-600 relative hover:bg-slate-50 rounded-full transition-colors">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-400 rounded-full border border-white"></span>
-            </button>
+            <NotificationPopover />
             <div className="h-5 w-[1px] bg-slate-200"></div>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center font-bold text-xs shadow-sm border border-rose-100">张</div>
