@@ -118,24 +118,29 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               </Link>
             )}
             <div className="flex flex-col text-left">
-              <h2 className="text-sm font-bold text-slate-800">
-                {isIndex ? '智能运营中台核心看板' : 
-                 location.pathname === '/products' ? '商品管理' : 
-                 location.pathname === '/products/create' ? '新建商品' :
-                 location.pathname.startsWith('/products/edit') ? '编辑商品' :
-                 location.pathname.startsWith('/products/view') ? '商品详情' :
-                 location.pathname === '/selection' ? 'AI选品' :
-                 location.pathname === '/content' ? '文案生成' :
-                 location.pathname === '/image-design' ? '图片设计' :
-                 location.pathname === '/video-creation' ? '视频创作' :
-                 location.pathname === '/asset-library' ? '素材库' :
-                 location.pathname === '/compliance-qa' ? '合规质检' :
-                 location.pathname === '/sentiment' ? '评价NLP分析' :
-                 location.pathname === '/settings/api' ? 'API接口设置' :
-                 location.pathname === '/settings/model' ? '大模型配置' :
-                 location.pathname === '/settings/alerts' ? '预警设置' : 
-                 location.pathname === '/settings/alerts/records' ? '预警记录' : '系统中心'}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-slate-800">
+                  {isIndex ? '智能运营中台核心看板' : 
+                   location.pathname === '/products' ? '商品管理' : 
+                   location.pathname === '/products/create' ? '新建商品' :
+                   location.pathname.startsWith('/products/edit') ? '编辑商品' :
+                   location.pathname.startsWith('/products/view') ? '商品详情' :
+                   location.pathname === '/selection' ? 'AI选品' :
+                   location.pathname === '/content' ? '文案生成' :
+                   location.pathname === '/image-design' ? '图片设计' :
+                   location.pathname === '/video-creation' ? '视频创作' :
+                   location.pathname === '/asset-library' ? '素材库' :
+                   location.pathname === '/compliance-qa' ? '合规质检' :
+                   location.pathname === '/sentiment' ? '评价NLP分析' :
+                   location.pathname === '/settings/api' ? 'API接口设置' :
+                   location.pathname === '/settings/model' ? '大模型配置' :
+                   location.pathname === '/settings/alerts' ? '预警设置' : 
+                   location.pathname === '/settings/alerts/records' ? '预警记录' : '系统中心'}
+                </h2>
+                {location.pathname === '/content' && (
+                  <span className="text-[11px] font-medium text-slate-400">AI 营销风控安全锁已开启：自动拦截极限词</span>
+                )}
+              </div>
               {isIndex && (
                 <p className="text-[10px] text-slate-400 flex items-center gap-1 font-medium">
                   <Calendar className="w-3 h-3" /> 数据更新至：2026年6月10日 09:30 (实时同步中)

@@ -92,21 +92,6 @@ const ContentFactory = () => {
     <DashboardLayout>
       <div className="flex flex-col h-full space-y-4 relative text-left">
         
-        {/* 顶部风控状态栏 */}
-        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm shrink-0">
-          <div className="flex items-center gap-2 text-xs">
-            <ShieldAlert className={cn("w-4 h-4", advConfig.compliance ? "text-emerald-500" : "text-amber-500")} />
-            <span className={cn("font-bold text-sm", advConfig.compliance ? "text-emerald-600" : "text-amber-600")}>
-              {advConfig.compliance ? "AI 营销风控安全锁已开启：自动拦截极限词" : "风控安全锁已关闭：请注意合规性"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] border-slate-200 text-slate-400">
-              模型底座：中达美妆垂直大模型 v2.0
-            </Badge>
-          </div>
-        </div>
-
         <div className="flex-1 flex gap-6 overflow-hidden">
           
           {/* 左侧配置面板 (40%) */}
