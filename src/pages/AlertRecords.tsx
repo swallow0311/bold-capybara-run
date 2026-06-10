@@ -10,7 +10,7 @@ import {
   AlertTriangle, Search, Filter, Download, 
   Clock, CheckCircle2, ArrowRight, History,
   ShieldAlert, ShoppingBag, Zap, MessageSquare,
-  MoreHorizontal, Eye, Archive
+  MoreHorizontal, Eye, Archive, TrendingUp
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ const MOCK_RECORDS = [
 ];
 
 const AlertRecords = () => {
-  const [records, setProducts] = useState(MOCK_RECORDS);
+  const [records] = useState(MOCK_RECORDS);
   const [statusFilter, setStatusFilter] = useState('all');
 
   const getLevelBadge = (level: string) => {
