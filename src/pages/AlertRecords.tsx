@@ -207,31 +207,6 @@ const AlertRecords = () => {
           </Button>
         </div>
 
-        {/* 状态流转示意图 */}
-        <Card className="border-none shadow-sm bg-white overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between max-w-4xl mx-auto">
-              {[
-                { label: '待处理', desc: '新预警', color: 'bg-slate-100 text-slate-600' },
-                { label: '处理中', desc: '正在跟进', color: 'bg-indigo-100 text-indigo-700' },
-                { label: '已处理', desc: '处理完成', color: 'bg-emerald-100 text-emerald-700' },
-                { label: '已验证', desc: '效果确认', color: 'bg-teal-100 text-teal-700' },
-                { label: '已归档', desc: '历史记录', color: 'bg-slate-50 text-slate-400' },
-              ].map((step, i, arr) => (
-                <React.Fragment key={step.label}>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className={cn("px-4 py-1.5 rounded-full font-bold text-[11px] shadow-sm", step.color)}>
-                      {step.label}
-                    </div>
-                    <span className="text-[10px] text-slate-400">{step.desc}</span>
-                  </div>
-                  {i < arr.length - 1 && <ArrowRight className="w-4 h-4 text-slate-200 mb-6" />}
-                </React.Fragment>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* 筛选工具栏 */}
         <Card className="border-none shadow-sm bg-white">
           <CardContent className="p-4 flex flex-wrap items-center gap-4">
