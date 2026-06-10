@@ -11,7 +11,7 @@ import {
   TrendingUp, Zap, Search, Filter, Download, 
   BarChart3, PieChart, Flame, ArrowUpRight, 
   Info, Star, Heart, ExternalLink, Globe,
-  ShoppingBag, PlayCircle, Layers, RefreshCw
+  ShoppingBag, PlayCircle, Layers
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { showSuccess } from '@/utils/toast';
