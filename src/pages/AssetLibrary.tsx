@@ -1,4 +1,3 @@
-XX，2026-05-20 -> 2026-06-10。">
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
