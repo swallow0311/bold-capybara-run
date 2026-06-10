@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { MessageSquare, Star, AlertCircle, TrendingDown } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { format, subDays } from 'date-fns';
 
 const sentimentData = [
   { name: '正向', value: 89, color: '#10b981' },
@@ -14,40 +15,37 @@ const sentimentData = [
   { name: '负向', value: 3, color: '#f43f5e' },
 ];
 
-const trendData = Array.from({ length: 30 }).map((_, i) => ({
-  day: i + 1,
-  "满意度评分": (85 + Math.random() * 10).toFixed(1),
-}));
+// 生成近30天日期数据
+const trendData = Array.from({ length: 30 }).map((_, i) => {
+  const date = subDays(new Date(2026, 4, 20), 29 - i);
+  return {
+    date: format(date, 'MM-dd'),
+    "满意度评分": (85 + Math.random() * 10).toFixed(1),
+  };
+});
 
 const NlpSection = () => {
   const navigate = useNavigate();
 
   // 话题数据
   const topics = [
-    { text: '正品保障', count: 980, type: 'pos' },
-    { text: '吸收快', count: 850, type: 'pos' },
-    { text: '包装精美', count: 620, type: 'pos' },
-    { text: '物流给力', count: 540, type: 'pos' },
-    { text: '过敏红肿', count: 120, type: 'neg' },
-    { text: '泵头难按', count: 85, type: 'neg' },
+    { text: '正品保障', count: 980, type: 'pos', color: 'text-emerald-600' },
+    { text: '吸收快', count: 850, type: 'pos', color: 'text-emerald-500' },
+    { text: '包装精美', count: 620, type: 'pos', color: 'text-emerald-400' },
+    { text: '物流给力', count: 540, type: 'pos', color: 'text-slate-400' },
+    { text: '过敏红肿', count: 120, type: 'neg', color: 'text-rose-600' },
+    { text: '泵头难按', count: 85, type: 'neg', color: 'text-rose-500' },
+    { text: '肤感', count: 450, type: 'pos', color: 'text-slate-500' },
+    { text: '回购', count: 720, type: 'pos', color: 'text-emerald-500' },
+    { text: '味道淡', count: 310, type: 'pos', color: 'text-slate-300' },
   ];
 
-  const getTopicStyle = (topic: typeof topics[0]) => {
-    const isNeg = topic.type === 'neg';
-    let size = "text-xs";
-    let color = isNeg ? "text-rose-400" : "text-emerald-400";
-
-    if (topic.count > 800) {
-      size = "text-lg font-black";
-      color = isNeg ? "text-rose-600" : "text-emerald-600";
-    } else if (topic.count > 500) {
-      size = "text-base font-bold";
-      color = isNeg ? "text-rose-500" : "text-emerald-500";
-    } else if (topic.count > 100) {
-      size = "text-sm font-semibold";
-    }
-
-    return cn(size, color);
+  const getTopicFontSize = (count: number) => {
+    if (count > 900) return "text-3xl font-black";
+    if (count > 700) return "text-2xl font-bold";
+    if (count > 500) return "text-lg font-semibold";
+    if (count > 300) return "text-sm font-medium";
+    return "text-xs font-normal";
   };
 
   return (
@@ -114,11 +112,21 @@ const NlpSection = () => {
             <CardTitle className="text-xs font-bold text-slate-500">高频话题分布 (出现次数)</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="flex flex-wrap gap-x-6 gap-y-4 justify-center items-center min-h-[150px]">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center items-center min-h-[180px] relative">
               {topics.map((w, i) => (
-                <div key={i} className="flex flex-col items-center transition-transform hover:scale-110 cursor-default">
-                  <span className={getTopicStyle(w)}>{w.text}</span>
-                  <span className="text-[9px] text-slate-400 font-mono mt-0.5">{w.count}</span>
+                <div 
+                  key={i} 
+                  className={cn(
+                    "transition-all hover:scale-110 cursor-default select-none",
+                    getTopicFontSize(w.count),
+                    w.color
+                  )}
+                  style={{ 
+                    margin: `${Math.floor(Math.random() * 4) + 2}px`,
+                    opacity: w.count < 300 ? 0.5 : 1
+                  }}
+                >
+                  {w.text}
                 </div>
               ))}
             </div>
@@ -160,9 +168,13 @@ const NlpSection = () => {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="day" hide />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} axisLine={false} />
                 <YAxis domain={[0, 100]} hide />
-                <Tooltip formatter={(value) => [`${value}`, '满意度评分']} />
+                <Tooltip 
+                  labelStyle={{ fontSize: '11px', fontWeight: 'bold', color: '#64748b' }}
+                  itemStyle={{ fontSize: '11px', fontWeight: 'bold' }}
+                  formatter={(value) => [`${value}`, '满意度评分']} 
+                />
                 <Line type="monotone" dataKey="满意度评分" stroke="#10b981" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>

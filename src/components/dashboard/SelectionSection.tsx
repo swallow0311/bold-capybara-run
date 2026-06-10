@@ -14,20 +14,29 @@ const trendData = [
 const SelectionSection = () => {
   // 词云数据
   const keywords = [
-    { text: '早C晚A', count: 12450 },
-    { text: '敏感肌修护', count: 8900 },
-    { text: '多肽抗老', count: 5600 },
-    { text: '防晒喷雾', count: 7200 },
-    { text: '水光感', count: 4300 },
-    { text: '国潮美妆', count: 3100 },
+    { text: '早C晚A', count: 12450, color: 'text-rose-500' },
+    { text: '跨境', count: 15000, color: 'text-blue-500' },
+    { text: '供应链', count: 11000, color: 'text-rose-600' },
+    { text: '物流', count: 9800, color: 'text-emerald-500' },
+    { text: '营销', count: 8900, color: 'text-slate-400' },
+    { text: '敏感肌修护', count: 8900, color: 'text-amber-500' },
+    { text: '多肽抗老', count: 5600, color: 'text-slate-400' },
+    { text: '防晒喷雾', count: 7200, color: 'text-rose-400' },
+    { text: '直播', count: 9500, color: 'text-rose-500' },
+    { text: 'SaaS', count: 6800, color: 'text-slate-300' },
+    { text: '水光感', count: 4300, color: 'text-slate-400' },
+    { text: '国潮美妆', count: 3100, color: 'text-slate-300' },
+    { text: '社交', count: 7500, color: 'text-blue-400' },
+    { text: '广告', count: 8200, color: 'text-amber-600' },
   ];
 
-  // 根据数量获取样式
-  const getKeywordStyle = (count: number) => {
-    if (count > 10000) return "text-xl font-black text-amber-600";
-    if (count > 7000) return "text-lg font-bold text-amber-500";
-    if (count > 5000) return "text-base font-semibold text-amber-400";
-    return "text-xs font-medium text-slate-400";
+  // 根据数量获取字号
+  const getFontSize = (count: number) => {
+    if (count > 12000) return "text-3xl font-black";
+    if (count > 9000) return "text-2xl font-bold";
+    if (count > 7000) return "text-lg font-semibold";
+    if (count > 5000) return "text-sm font-medium";
+    return "text-xs font-normal";
   };
 
   return (
@@ -116,11 +125,21 @@ const SelectionSection = () => {
             <CardTitle className="text-xs font-bold text-slate-500">搜索关键词热度分布 (出现次数)</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="flex flex-wrap gap-x-6 gap-y-4 justify-center items-center min-h-[150px]">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center items-center min-h-[180px] relative">
               {keywords.map((w, i) => (
-                <div key={i} className="flex flex-col items-center transition-transform hover:scale-110 cursor-default">
-                  <span className={cn(getKeywordStyle(w.count))}>{w.text}</span>
-                  <span className="text-[9px] text-slate-400 font-mono mt-0.5">{w.count.toLocaleString()}</span>
+                <div 
+                  key={i} 
+                  className={cn(
+                    "transition-all hover:scale-110 cursor-default select-none",
+                    getFontSize(w.count),
+                    w.color
+                  )}
+                  style={{ 
+                    margin: `${Math.floor(Math.random() * 5) + 2}px`,
+                    opacity: w.count < 5000 ? 0.6 : 1
+                  }}
+                >
+                  {w.text}
                 </div>
               ))}
             </div>
