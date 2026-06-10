@@ -29,7 +29,7 @@ import DiagnosisDetailDrawer from '@/components/selection/DiagnosisDetailDrawer'
 import SelectionConfigSheet from '@/components/selection/SelectionConfigSheet';
 
 // 初始种子竞品数据
-const INITIAL_TRENDING_PRODUCTS = [
+const TRENDING_PRODUCTS = [
   { 
     rank: 1, id: 'P-001', name: '中达多肽紧致修护眼霜', category: '面部护肤',
     sales: '12.8w+', heat: 9850, avgPrice: 299, ingredients: ['多肽', '酵母'], platform: '抖音',
@@ -97,7 +97,7 @@ const SelectionEngine = () => {
   const [activeTab, setActiveTab] = useState('potential');
   
   // 蓝海潜力选中
-  const [selectedProduct, setSelectedProduct] = useState<any>(TRENDING_PRODUCTS_DATA()[0]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(TRENDING_PRODUCTS[0]);
   
   // 竞品配置区解析池数据
   const [parsedPool, setParsedPool] = useState<any[]>([
@@ -123,17 +123,12 @@ const SelectionEngine = () => {
   });
 
   // 对标对比组列表 (默认载入前三款种子数据)
-  const [compareList, setCompareList] = useState<any[]>(TRENDING_PRODUCTS_DATA().slice(0, 3));
+  const [compareList, setCompareList] = useState<any[]>(TRENDING_PRODUCTS.slice(0, 3));
   // 选中对比项详情查看
-  const [selectedCompareProduct, setSelectedCompareProduct] = useState<any>(TRENDING_PRODUCTS_DATA()[0]);
+  const [selectedCompareProduct, setSelectedCompareProduct] = useState<any>(TRENDING_PRODUCTS[0]);
 
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [diagnosisItem, setDiagnosisItem] = useState<any>(null);
-
-  // 自动获取爆款数据生成辅助函数
-  function TRENDING_PRODUCTS_DATA() {
-    return TRENDING_PRODUCTS;
-  }
 
   // 1.1.1 链接解析
   const handleParseLink = () => {
