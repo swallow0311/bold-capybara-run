@@ -133,6 +133,12 @@ const SentimentAnalysis = () => {
   const [productFilter, setProductFilter] = useState('all');
   const [timeRange, setTimeRange] = useState('30');
 
+  // 新增：差评数/率范围筛选状态
+  const [badCountOp, setBadCountOp] = useState('>=');
+  const [badCountVal, setBadCountVal] = useState('');
+  const [badRateOp, setBadRateOp] = useState('>=');
+  const [badRateVal, setBadRateVal] = useState('');
+
   // 规则设置状态
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [rules, setRules] = useState({
@@ -148,11 +154,11 @@ const SentimentAnalysis = () => {
   });
 
   // 选中的产品（默认选中第一个）
-  const [selectedProduct, setSelectedProduct] = useState<typeof PRODUCTS_DATA[0]>(PRODUCTS_DATA[0]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(PRODUCTS_DATA[0]);
 
   // 穿透查看明细抽屉状态
   const [drillDownMetric, setDrillDownMetric] = useState<string | null>(null);
-  const [drillDownProduct, setDrillDownProduct] = useState<typeof PRODUCTS_DATA[0] | null>(null);
+  const [drillDownProduct, setDrillDownProduct] = useState<any>(null);
   const [wordFilter, setWordFilter] = useState<string | null>(null);
 
   // 动态计算每个产品的统计数值（根据规则设置实时变化）
@@ -175,6 +181,10 @@ const SentimentAnalysis = () => {
       const validBad = validReviews.filter(r => r.polarity === '差评').length;
       const neutralCount = validReviews.filter(r => r.polarity === '中性').length;
       
+      const total = reviews.length;
+      const validGoodRate = total > 0 ? parseFloat(((validGood / total) * 100).toFixed(1)) : 0;
+      const validBadRate = total > 0 ? parseFloat(((validBad / total) * 100).toFixed(1)) : 0;
+
       const invalidReviews = reviews.filter(r => 
         (rules.spamFilter && keywords.some(k => r.text.includes(k))) || 
         (rules.shortFilter && r.text.length < rules.shortLength)
@@ -184,7 +194,9 @@ const SentimentAnalysis = () => {
       return {
         ...product,
         validGood,
+        validGoodRate,
         validBad,
+        validBadRate,
         neutralCount,
         invalid: invalidCount
       };
@@ -193,9 +205,27 @@ const SentimentAnalysis = () => {
 
   // 过滤后的产品列表
   const filteredProducts = useMemo(() => {
-    if (productFilter === 'all') return computedProducts;
-    return computedProducts.filter(p => p.id === productFilter);
-  }, [computedProducts, productFilter]);
+    let list = computedProducts;
+    if (productFilter !== 'all') list = list.filter(p => p.id === productFilter);
+
+    // 应用差评数筛选
+    if (badCountVal !== '') {
+      const val = parseInt(badCountVal);
+      if (badCountOp === '>') list = list.filter(p => p.validBad > val);
+      if (badCountOp === '>=') list = list.filter(p => p.validBad >= val);
+      if (badCountOp === '<') list = list.filter(p => p.validBad < val);
+    }
+
+    // 应用差评率筛选
+    if (badRateVal !== '') {
+      const val = parseFloat(badRateVal);
+      if (badRateOp === '>') list = list.filter(p => p.validBadRate > val);
+      if (badRateOp === '>=') list = list.filter(p => p.validBadRate >= val);
+      if (badRateOp === '<') list = list.filter(p => p.validBadRate < val);
+    }
+
+    return list;
+  }, [computedProducts, productFilter, badCountOp, badCountVal, badRateOp, badRateVal]);
 
   // 穿透明细过滤逻辑
   const drillDownReviews = useMemo(() => {
@@ -246,10 +276,10 @@ const SentimentAnalysis = () => {
   // 详情面板图表数据
   const pieData = useMemo(() => {
     if (!selectedProduct) return [];
-    const good = selectedProduct.reviews.filter(r => r.polarity === '好评').length;
-    const bad = selectedProduct.reviews.filter(r => r.polarity === '差评').length;
-    const neutral = selectedProduct.reviews.filter(r => r.polarity === '中性').length;
-    const qa = selectedProduct.reviews.filter(r => r.polarity === '咨询').length;
+    const good = selectedProduct.reviews.filter((r: any) => r.polarity === '好评').length;
+    const bad = selectedProduct.reviews.filter((r: any) => r.polarity === '差评').length;
+    const neutral = selectedProduct.reviews.filter((r: any) => r.polarity === '中性').length;
+    const qa = selectedProduct.reviews.filter((r: any) => r.polarity === '咨询').length;
     return [
       { name: '好评', value: good, color: '#f5756c' },
       { name: '差评', value: bad, color: '#fca39d' },
@@ -260,11 +290,11 @@ const SentimentAnalysis = () => {
 
   const barData = useMemo(() => {
     if (!selectedProduct) return [];
-    const quality = selectedProduct.reviews.filter(r => r.category === '质量' && r.polarity === '差评').length;
-    const logistics = selectedProduct.reviews.filter(r => r.category === '物流' && r.polarity === '差评').length;
-    const size = selectedProduct.reviews.filter(r => r.category === '尺寸' && r.polarity === '差评').length;
-    const colorDiff = selectedProduct.reviews.filter(r => r.category === '色差' && r.polarity === '差评').length;
-    const service = selectedProduct.reviews.filter(r => r.category === '客服' && r.polarity === '差评').length;
+    const quality = selectedProduct.reviews.filter((r: any) => r.category === '质量' && r.polarity === '差评').length;
+    const logistics = selectedProduct.reviews.filter((r: any) => r.category === '物流' && r.polarity === '差评').length;
+    const size = selectedProduct.reviews.filter((r: any) => r.category === '尺寸' && r.polarity === '差评').length;
+    const colorDiff = selectedProduct.reviews.filter((r: any) => r.category === '色差' && r.polarity === '差评').length;
+    const service = selectedProduct.reviews.filter((r: any) => r.category === '客服' && r.polarity === '差评').length;
     return [
       { name: '质量', 频次: quality },
       { name: '物流', 频次: logistics },
@@ -287,7 +317,7 @@ const SentimentAnalysis = () => {
         
         {/* 顶部筛选项与操作栏 */}
         <Card className="border-none shadow-sm shrink-0 bg-white">
-          <CardContent className="p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <CardContent className="p-4 flex flex-col gap-4">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-500">数据源</span>
@@ -315,16 +345,67 @@ const SentimentAnalysis = () => {
                   <option value="all">全部评价</option>
                 </Select>
               </div>
+
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => showSuccess("报告已成功导出。")} className="h-9 text-xs border-slate-200">
+                  <Download className="w-3.5 h-3.5 mr-1.5" />
+                  导出
+                </Button>
+                <Button variant="outline" onClick={() => setIsRulesOpen(true)} className="h-9 text-xs border-rose-200 text-rose-600 hover:bg-rose-50">
+                  <Settings2 className="w-3.5 h-3.5 mr-1.5" />
+                  规则设置
+                </Button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => showSuccess("报告已成功导出。")} className="h-9 text-xs border-slate-200">
-                <Download className="w-3.5 h-3.5 mr-1.5" />
-                导出
-              </Button>
-              <Button variant="outline" onClick={() => setIsRulesOpen(true)} className="h-9 text-xs border-rose-200 text-rose-600 hover:bg-rose-50">
-                <Settings2 className="w-3.5 h-3.5 mr-1.5" />
-                规则设置
+            {/* 新增：差评数/率范围筛选行 */}
+            <div className="flex flex-wrap items-center gap-6 pt-2 border-t border-slate-50">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-500">有效差评数</span>
+                <div className="flex items-center gap-1">
+                  <Select value={badCountOp} onValueChange={setBadCountOp} className="w-20">
+                    <option value=">">大于</option>
+                    <option value=">=">大于等于</option>
+                    <option value="<">小于</option>
+                  </Select>
+                  <Input 
+                    type="number" 
+                    value={badCountVal} 
+                    onChange={(e) => setBadCountVal(e.target.value)}
+                    placeholder="数值" 
+                    className="w-20 h-9 text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-500">有效差评率</span>
+                <div className="flex items-center gap-1">
+                  <Select value={badRateOp} onValueChange={setBadRateOp} className="w-20">
+                    <option value=">">大于</option>
+                    <option value=">=">大于等于</option>
+                    <option value="<">小于</option>
+                  </Select>
+                  <div className="relative">
+                    <Input 
+                      type="number" 
+                      value={badRateVal} 
+                      onChange={(e) => setBadRateVal(e.target.value)}
+                      placeholder="比例" 
+                      className="w-20 h-9 text-xs pr-6"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-slate-400 hover:text-rose-500"
+                onClick={() => { setBadCountVal(''); setBadRateVal(''); }}
+              >
+                清空范围筛选
               </Button>
             </div>
           </CardContent>
@@ -346,8 +427,8 @@ const SentimentAnalysis = () => {
                 <TableHeader className="bg-slate-50/50 sticky top-0 z-10">
                   <TableRow>
                     <TableHead className="text-xs">所属产品</TableHead>
-                    <TableHead className="text-xs text-right">有效好评数</TableHead>
-                    <TableHead className="text-xs text-right">有效差评数</TableHead>
+                    <TableHead className="text-xs text-right">有效好评数/率</TableHead>
+                    <TableHead className="text-xs text-right">有效差评数/率</TableHead>
                     <TableHead className="text-xs text-right">中性评论数</TableHead>
                     <TableHead className="text-xs text-right">无效评论数</TableHead>
                   </TableRow>
@@ -364,7 +445,7 @@ const SentimentAnalysis = () => {
                     >
                       <TableCell className="font-bold text-slate-700 max-w-[180px] truncate">{p.name}</TableCell>
                       
-                      {/* 有效好评数 */}
+                      {/* 有效好评数/率 */}
                       <TableCell className="text-right">
                         <span 
                           onClick={(e) => {
@@ -375,11 +456,11 @@ const SentimentAnalysis = () => {
                           }}
                           className="text-rose-500 hover:underline font-semibold cursor-pointer"
                         >
-                          {p.validGood}
+                          {p.validGood} <span className="text-[10px] text-slate-400 font-normal">({p.validGoodRate}%)</span>
                         </span>
                       </TableCell>
 
-                      {/* 有效差评数 */}
+                      {/* 有效差评数/率 */}
                       <TableCell className="text-right">
                         <span 
                           onClick={(e) => {
@@ -390,7 +471,7 @@ const SentimentAnalysis = () => {
                           }}
                           className="text-rose-500 hover:underline font-semibold cursor-pointer"
                         >
-                          {p.validBad}
+                          {p.validBad} <span className="text-[10px] text-slate-400 font-normal">({p.validBadRate}%)</span>
                         </span>
                       </TableCell>
 
@@ -464,7 +545,7 @@ const SentimentAnalysis = () => {
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <span className="text-[10px] text-slate-400 font-bold block mb-1.5">高频卖点 TOP5</span>
                         <div className="flex flex-wrap gap-1">
-                          {selectedProduct.sellPoints.map(p => (
+                          {selectedProduct.sellPoints.map((p: string) => (
                             <Badge key={p} className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[9px] font-medium">
                               {p}
                             </Badge>
@@ -474,7 +555,7 @@ const SentimentAnalysis = () => {
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <span className="text-[10px] text-slate-400 font-bold block mb-1.5">高频痛点 TOP5</span>
                         <div className="flex flex-wrap gap-1">
-                          {selectedProduct.painPoints.map(p => (
+                          {selectedProduct.painPoints.map((p: string) => (
                             <Badge key={p} className="bg-rose-50 text-rose-700 border border-rose-100 text-[9px] font-medium">
                               {p}
                             </Badge>
@@ -528,7 +609,7 @@ const SentimentAnalysis = () => {
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                       <span className="text-[10px] text-slate-500 font-bold block">维度热度排行</span>
                       <div className="space-y-2">
-                        {selectedProduct.dimensionHeat.map((item, idx) => (
+                        {selectedProduct.dimensionHeat.map((item: any, idx: number) => (
                           <div key={idx} className="space-y-1">
                             <div className="flex justify-between text-[9px] font-semibold text-slate-600">
                               <span>{item.name}</span>
@@ -551,7 +632,7 @@ const SentimentAnalysis = () => {
                       <div className="p-3 bg-emerald-50/20 rounded-xl border border-emerald-100/50">
                         <span className="text-[10px] text-emerald-700 font-bold block mb-2">好评词云</span>
                         <div className="flex flex-wrap gap-2 justify-center items-center min-h-[80px]">
-                          {selectedProduct.wordCloud.positive.map((w, idx) => (
+                          {selectedProduct.wordCloud.positive.map((w: any, idx: number) => (
                             <span 
                               key={idx} 
                               onClick={() => handleWordClick(w.text, 'validGood')}
@@ -568,7 +649,7 @@ const SentimentAnalysis = () => {
                       <div className="p-3 bg-rose-50/20 rounded-xl border border-rose-100/50">
                         <span className="text-[10px] text-rose-700 font-bold block mb-2">差评词云</span>
                         <div className="flex flex-wrap gap-2 justify-center items-center min-h-[80px]">
-                          {selectedProduct.wordCloud.negative.map((w, idx) => (
+                          {selectedProduct.wordCloud.negative.map((w: any, idx: number) => (
                             <span 
                               key={idx} 
                               onClick={() => handleWordClick(w.text, 'validBad')}
@@ -601,7 +682,7 @@ const SentimentAnalysis = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {selectedProduct.sellPointsTable.map((row, idx) => (
+                            {selectedProduct.sellPointsTable.map((row: any, idx: number) => (
                               <TableRow key={idx} className="hover:bg-slate-50/50">
                                 <TableCell className="py-1.5 font-bold text-slate-700">{row.word}</TableCell>
                                 <TableCell className="py-1.5 text-right font-semibold text-rose-500">{row.heat}</TableCell>
@@ -630,7 +711,7 @@ const SentimentAnalysis = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {selectedProduct.painPointsTable.map((row, idx) => (
+                            {selectedProduct.painPointsTable.map((row: any, idx: number) => (
                               <TableRow key={idx} className="hover:bg-slate-50/50">
                                 <TableCell className="py-1.5 font-bold text-slate-700">{row.word}</TableCell>
                                 <TableCell className="py-1.5 text-right font-semibold text-rose-500">{row.freq}</TableCell>
@@ -690,7 +771,7 @@ const SentimentAnalysis = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  drillDownReviews.map((r, idx) => (
+                  drillDownReviews.map((r: any, idx: number) => (
                     <TableRow key={idx} className="hover:bg-slate-50/50 text-xs">
                       <TableCell className="font-medium text-slate-700 leading-relaxed">{r.text}</TableCell>
                       <TableCell className="text-center">
@@ -707,7 +788,7 @@ const SentimentAnalysis = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {r.entities.map(e => (
+                          {r.entities.map((e: string) => (
                             <Badge key={e} className="bg-rose-50 text-rose-600 border border-rose-100 text-[9px]">
                               {e}
                             </Badge>
@@ -823,7 +904,7 @@ const SentimentAnalysis = () => {
                   {rules.shortFilter && (
                     <div className="flex items-center gap-2 pt-1">
                       <span className="text-[10px] text-slate-500">过滤低于</span>
-                      <Select value={rules.shortLength.toString()} onValueChange={(val) => setRules(prev => ({ ...prev, shortLength: parseInt(val) }))}>
+                      <Select value={rules.shortLength.toString()} onValueChange={(val: string) => setRules(prev => ({ ...prev, shortLength: parseInt(val) }))}>
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
@@ -879,8 +960,8 @@ const SentimentAnalysis = () => {
 };
 
 // 简易 Select 组件封装
-const Select = ({ children, value, onValueChange }: any) => (
-  <div className="relative">
+const Select = ({ children, value, onValueChange, className }: any) => (
+  <div className={cn("relative", className)}>
     <select 
       value={value} 
       onChange={(e) => onValueChange?.(e.target.value)}
