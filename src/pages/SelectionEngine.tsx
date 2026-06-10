@@ -14,7 +14,7 @@ import {
   Calendar, Globe, Flame, MousePointer2, Eye,
   LayoutGrid, List, BarChart3, Scale, Plus, Trash2,
   RefreshCw, Heart, FileSpreadsheet, Send, AlertCircle,
-  ShieldAlert
+  ShieldAlert, Zap
 } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from "@/lib/utils";
