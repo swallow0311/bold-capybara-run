@@ -1,10 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   Video, Play, Download, Scissors, Trash2, Heart, 
-  Clock, Monitor, Music, MessageSquare
+  Clock, Monitor, Music, MessageSquare, Edit3
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -16,6 +17,8 @@ interface VideoAssetCardProps {
 }
 
 const VideoAssetCard = ({ asset, onDelete, onToggleFavorite }: VideoAssetCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all overflow-hidden">
       <div className="relative aspect-video bg-slate-900 overflow-hidden">
@@ -58,8 +61,8 @@ const VideoAssetCard = ({ asset, onDelete, onToggleFavorite }: VideoAssetCardPro
         </div>
 
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" size="sm" className="flex-1 h-8 text-[10px] border-slate-200" onClick={() => showSuccess("进入二次剪辑工作台")}>
-            <Scissors className="w-3 h-3 mr-1.5" /> 二次剪辑
+          <Button variant="outline" size="sm" className="flex-1 h-8 text-[10px] border-slate-200" onClick={() => navigate('/video-creation')}>
+            <Edit3 className="w-3 h-3 mr-1.5" /> 编辑
           </Button>
           <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-slate-200 text-slate-400 hover:text-rose-500" onClick={() => showSuccess("视频文件下载中...")}>
             <Download className="w-3.5 h-3.5" />

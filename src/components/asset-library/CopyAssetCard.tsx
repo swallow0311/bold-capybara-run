@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,8 @@ interface CopyAssetCardProps {
 }
 
 const CopyAssetCard = ({ asset, onDelete, onToggleFavorite }: CopyAssetCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all overflow-hidden flex flex-col">
       <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex justify-between items-start">
@@ -63,7 +66,7 @@ const CopyAssetCard = ({ asset, onDelete, onToggleFavorite }: CopyAssetCardProps
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-rose-500" onClick={() => showSuccess("已复制文案内容")}>
               <Copy className="w-3.5 h-3.5" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-rose-500" onClick={() => showSuccess("进入在线编辑模式")}>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-400 hover:text-rose-500" onClick={() => navigate('/content')}>
               <Edit3 className="w-3.5 h-3.5" />
             </Button>
           </div>
@@ -72,7 +75,7 @@ const CopyAssetCard = ({ asset, onDelete, onToggleFavorite }: CopyAssetCardProps
               复用参数
             </Button>
             <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500" onClick={() => onDelete(asset.id)}>
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-3.5 h-3" />
             </Button>
           </div>
         </div>

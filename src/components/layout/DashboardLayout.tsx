@@ -140,6 +140,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 {location.pathname === '/content' && (
                   <span className="text-[11px] font-medium text-slate-400">AI 营销风控安全锁已开启：自动拦截极限词</span>
                 )}
+                {location.pathname === '/asset-library' && (
+                  <span className="text-[11px] font-medium text-slate-400">统一收纳、管理全链路 AI 创作内容，实现资产标准化沉淀与高效复用</span>
+                )}
               </div>
               {isIndex && (
                 <p className="text-[10px] text-slate-400 flex items-center gap-1 font-medium">

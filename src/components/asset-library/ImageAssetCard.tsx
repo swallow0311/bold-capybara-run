@@ -1,10 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   ImageIcon, Download, RefreshCw, Trash2, Heart, 
-  Maximize2, Zap, Clock, Layers
+  Maximize2, Zap, Clock, Layers, Edit3
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
@@ -16,6 +17,8 @@ interface ImageAssetCardProps {
 }
 
 const ImageAssetCard = ({ asset, onDelete, onToggleFavorite }: ImageAssetCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all overflow-hidden">
       <div className="relative aspect-square bg-slate-100 overflow-hidden">
@@ -24,8 +27,8 @@ const ImageAssetCard = ({ asset, onDelete, onToggleFavorite }: ImageAssetCardPro
           <Button variant="secondary" size="sm" className="h-8 w-8 p-0 rounded-full" onClick={() => showSuccess("查看高清原图")}>
             <Maximize2 className="w-4 h-4" />
           </Button>
-          <Button variant="secondary" size="sm" className="h-8 w-8 p-0 rounded-full" onClick={() => showSuccess("开始 AI 重绘二次创作")}>
-            <RefreshCw className="w-4 h-4" />
+          <Button variant="secondary" size="sm" className="h-8 w-8 p-0 rounded-full" onClick={() => navigate('/image-design')}>
+            <Edit3 className="w-4 h-4" />
           </Button>
         </div>
         <Badge className="absolute top-3 left-3 bg-black/50 text-white border-none text-[9px] backdrop-blur-md">

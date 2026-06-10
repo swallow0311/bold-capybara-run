@@ -82,10 +82,9 @@ const AssetLibrary = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // 过滤逻辑
-  const filteredAssets = useMemo(() => {
+  // 基础过滤逻辑（不含类型过滤，用于计算各页签数量）
+  const baseFilteredAssets = useMemo(() => {
     return assets.filter(a => {
-      const matchesTab = a.type === activeTab;
       const matchesSearch = !searchQuery || 
         (a.product?.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (a.content?.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -94,9 +93,21 @@ const AssetLibrary = () => {
         (statusFilter === 'favorite' && a.status === '已收藏') ||
         (statusFilter === 'used' && a.usage !== '未使用');
       
-      return matchesTab && matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus;
     });
-  }, [assets, activeTab, searchQuery, statusFilter]);
+  }, [assets, searchQuery, statusFilter]);
+
+  // 最终展示列表（含类型过滤）
+  const filteredAssets = useMemo(() => {
+    return baseFilteredAssets.filter(a => a.type === activeTab);
+  }, [baseFilteredAssets, activeTab]);
+
+  // 计算各页签数量
+  const counts = useMemo(() => ({
+    copy: baseFilteredAssets.filter(a => a.type === 'copy').length,
+    image: baseFilteredAssets.filter(a => a.type === 'image').length,
+    video: baseFilteredAssets.filter(a => a.type === 'video').length,
+  }), [baseFilteredAssets]);
 
   const handleDelete = (id: string) => {
     if (window.confirm("确定要删除该素材吗？删除后将无法找回。")) {
@@ -129,53 +140,49 @@ const AssetLibrary = () => {
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-left animate-in fade-in duration-500">
         
-        {/* 顶部标题与全局操作 */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">AIGC 数字素材资产库</h1>
-            <p className="text-slate-500 text-xs mt-0.5">统一收纳、管理全链路 AI 创作内容，实现资产标准化沉淀与高效复用</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => showSuccess("正在准备全量素材导出包...")}>
-              <Download className="w-3.5 h-3.5 mr-1.5" /> 批量导出
-            </Button>
-            <Button className="bg-rose-400 hover:bg-rose-500 text-white text-xs h-9 shadow-lg shadow-rose-100" onClick={() => showSuccess("正在同步最新创作记录...")}>
-              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> 同步创作记录
-            </Button>
-          </div>
-        </div>
-
         {/* 筛选与搜索栏 */}
         <Card className="border-none shadow-sm bg-white">
-          <CardContent className="p-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-4 flex-1 w-full">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                <Input 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="搜索商品名称、内容关键词、类目..." 
-                  className="pl-9 text-xs h-9 bg-slate-50/50 border-slate-200 focus:bg-white transition-all"
-                />
+          <CardContent className="p-4 space-y-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-4 flex-1 w-full">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <Input 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="搜索商品名称、内容关键词、类目..." 
+                    className="pl-9 text-xs h-9 bg-slate-50/50 border-slate-200 focus:bg-white transition-all"
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[140px] h-9 text-xs bg-slate-50">
+                    <SelectValue placeholder="素材状态" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部素材</SelectItem>
+                    <SelectItem value="favorite">我的收藏</SelectItem>
+                    <SelectItem value="used">已复用/编辑</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="ghost" size="sm" className="h-9 text-xs text-slate-500" onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}>重置</Button>
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px] h-9 text-xs bg-slate-50">
-                  <SelectValue placeholder="素材状态" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部素材</SelectItem>
-                  <SelectItem value="favorite">我的收藏</SelectItem>
-                  <SelectItem value="used">已复用/编辑</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="ghost" size="sm" className="h-9 text-xs text-slate-500" onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}>重置</Button>
+
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => showSuccess("正在准备全量素材导出包...")}>
+                  <Download className="w-3.5 h-3.5 mr-1.5" /> 批量导出
+                </Button>
+                <Button className="bg-rose-400 hover:bg-rose-500 text-white text-xs h-9 shadow-lg shadow-rose-100" onClick={() => showSuccess("正在同步最新创作记录...")}>
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> 同步创作记录
+                </Button>
+              </div>
             </div>
 
-            <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
+            {/* 页签切换栏 - 移动至搜索框下方 */}
+            <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
               {[
-                { id: 'copy', label: '文案素材', icon: FileText },
-                { id: 'image', label: '图片素材', icon: ImageIcon },
-                { id: 'video', label: '视频素材', icon: VideoIcon }
+                { id: 'copy', label: '文案素材', icon: FileText, count: counts.copy },
+                { id: 'image', label: '图片素材', icon: ImageIcon, count: counts.image },
+                { id: 'video', label: '视频素材', icon: VideoIcon, count: counts.video }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -187,6 +194,12 @@ const AssetLibrary = () => {
                 >
                   <tab.icon className="w-3.5 h-3.5" />
                   {tab.label}
+                  <span className={cn(
+                    "ml-1 px-1.5 py-0.5 rounded-full text-[9px]",
+                    activeTab === tab.id ? "bg-rose-50 text-rose-600" : "bg-slate-200 text-slate-500"
+                  )}>
+                    {tab.count}
+                  </span>
                 </button>
               ))}
             </div>
