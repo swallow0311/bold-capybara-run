@@ -197,14 +197,10 @@ const AlertRecords = () => {
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-slate-800 text-xs text-left animate-in fade-in duration-500">
         
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">预警记录中心</h1>
-            <p className="text-xs text-slate-500 mt-1">实时追踪全链路预警状态流转，确保风险闭环处理</p>
-          </div>
-          <Button variant="outline" size="sm" className="h-9 text-xs border-slate-200" onClick={() => showSuccess("正在导出预警分析报告...")}>
-            <Download className="w-3.5 h-3.5 mr-1.5" /> 导出报告
-          </Button>
+        {/* 页面标题栏 */}
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-xl font-bold text-slate-900">预警记录</h1>
+          <span className="text-xs text-slate-400">实时追踪全链路预警状态流转，确保风险闭环处理</span>
         </div>
 
         {/* 筛选工具栏 */}
