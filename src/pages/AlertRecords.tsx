@@ -197,12 +197,6 @@ const AlertRecords = () => {
     <DashboardLayout>
       <div className="space-y-6 max-w-[1600px] mx-auto pb-24 text-slate-800 text-xs text-left animate-in fade-in duration-500">
         
-        {/* 页面标题栏 */}
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-xl font-bold text-slate-900">预警记录</h1>
-          <span className="text-xs text-slate-400">实时追踪全链路预警状态流转，确保风险闭环处理</span>
-        </div>
-
         {/* 筛选工具栏 */}
         <Card className="border-none shadow-sm bg-white">
           <CardContent className="p-4 flex flex-wrap items-center gap-4">
