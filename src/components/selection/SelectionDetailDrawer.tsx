@@ -3,145 +3,203 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import { 
   TrendingUp, MessageSquare, Zap, ArrowRight, 
   ShieldAlert, ShoppingBag, BarChart3, Send,
-  CheckCircle2, AlertCircle, Lightbulb
+  CheckCircle2, AlertCircle, Lightbulb, RefreshCw,
+  Eye, FileText, HelpCircle, ShieldCheck
 } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 import { cn } from "@/lib/utils";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 interface SelectionDetailDrawerProps {
   item: any;
   onClose: () => void;
 }
 
+const COLORS = ['#f5756c', '#fca39d', '#fedcd9', '#94a3b8'];
+
 const SelectionDetailDrawer = ({ item, onClose }: SelectionDetailDrawerProps) => {
   if (!item) return null;
 
-  const handlePush = (module: string) => {
-    showSuccess(`商品档案已成功推送至 ${module} 模块，相关分析任务已自动排队。`);
-  };
+  const nlpData = [
+    { name: '好评', value: 88 },
+    { name: '中性', value: 7 },
+    { name: '差评', value: 5 },
+  ];
+
+  const painPoints = [
+    { name: '包装渗漏', val: 45 },
+    { name: '物流慢', val: 25 },
+    { name: '肤感油腻', val: 20 },
+    { name: '价格贵', val: 10 },
+  ];
 
   return (
     <Sheet open={!!item} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl p-0 flex flex-col text-left">
+      <SheetContent side="right" className="w-full sm:max-w-3xl p-0 flex flex-col text-left">
         <SheetHeader className="p-6 border-b border-slate-100 shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-rose-500" />
-              <SheetTitle>AI 选品深度拆解报告</SheetTitle>
+            <div className="flex items-center gap-3">
+              <img src={item.img} className="w-12 h-12 rounded-xl object-cover border border-slate-100" alt="" />
+              <div>
+                <SheetTitle className="text-base font-black text-slate-800">{item.title}</SheetTitle>
+                <div className="flex gap-2 mt-1">
+                  <Badge className="bg-rose-50 text-rose-600 border-none text-[10px]">潜力分 {item.score}</Badge>
+                  <Badge variant="outline" className="text-[10px] border-slate-200">{item.category}</Badge>
+                </div>
+              </div>
             </div>
-            <Badge className="bg-rose-50 text-rose-600 border-rose-100">潜力得分 {item.score}</Badge>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-8 text-[10px] border-slate-200">加入监控</Button>
+              <Button className="bg-rose-400 hover:bg-rose-500 text-white h-8 text-[10px] font-bold">批量生成素材</Button>
+            </div>
           </div>
-          <SheetDescription>基于多维数据流生成的结构化市场机会分析报告。</SheetDescription>
         </SheetHeader>
 
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-8">
-            {/* 1. 商品概览 */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                <ShoppingBag className="w-4 h-4 text-rose-400" /> 核心机会点
+            
+            {/* 1. 商品基础与竞品对比 */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">建议零售价</span>
+                <p className="text-xl font-black text-slate-800">{item.price}</p>
+                <p className="text-[9px] text-slate-400">毛利空间: <span className="text-emerald-500 font-bold">{item.profit}</span></p>
               </div>
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
-                <h3 className="text-sm font-black text-slate-800">{item.name}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">{item.opportunity}</p>
-                <div className="flex flex-wrap gap-2">
-                  {item.tags.map((tag: string) => (
-                    <Badge key={tag} variant="secondary" className="bg-white text-slate-500 border-slate-200 text-[10px]">{tag}</Badge>
-                  ))}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">预估月销量</span>
+                <p className="text-xl font-black text-slate-800">{item.estSales}</p>
+                <p className="text-[9px] text-slate-400">热度指数: <span className="text-rose-500 font-bold">{item.heat}</span></p>
+              </div>
+              <div className="p-4 bg-rose-50/30 rounded-2xl border border-rose-100 space-y-1">
+                <span className="text-[10px] text-rose-400 font-bold uppercase">竞品核心数据</span>
+                <p className="text-xl font-black text-rose-600">{item.compData.price}</p>
+                <p className="text-[9px] text-rose-400">竞品月销: <span className="font-bold">{item.compData.sales}</span></p>
+              </div>
+            </div>
+
+            {/* 2. NLP 评价分析卡片 */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                  <MessageSquare className="w-4 h-4 text-rose-400" /> NLP 评价深度洞察
+                </div>
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] text-rose-500" onClick={() => showSuccess("正在重新拉取全网评价进行语义聚类...")}>
+                  <RefreshCw className="w-3 h-3 mr-1" /> 重新分析
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* 情感分布 */}
+                <Card className="border-none shadow-sm bg-slate-50/50">
+                  <CardHeader className="p-4 pb-0"><CardTitle className="text-[11px] font-bold text-slate-500">情感分布 (Sentiment)</CardTitle></CardHeader>
+                  <CardContent className="p-4 h-[160px] flex items-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={nlpData} innerRadius={35} outerRadius={50} paddingAngle={5} dataKey="value">
+                          {nlpData.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="space-y-1 ml-4">
+                      {nlpData.map((d, i) => (
+                        <div key={d.name} className="flex items-center gap-2 text-[10px]">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i] }} />
+                          <span className="text-slate-500">{d.name}</span>
+                          <span className="font-bold text-slate-700">{d.value}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 核心痛点归因 */}
+                <Card className="border-none shadow-sm bg-slate-50/50">
+                  <CardHeader className="p-4 pb-0"><CardTitle className="text-[11px] font-bold text-slate-500">核心痛点归因 (Pain Points)</CardTitle></CardHeader>
+                  <CardContent className="p-4 h-[160px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={painPoints} layout="vertical">
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" tick={{ fontSize: 9 }} axisLine={false} tickLine={false} width={60} />
+                        <Tooltip />
+                        <Bar dataKey="val" fill="#fca39d" radius={[0, 4, 4, 0]} barSize={12} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* TOP 卖点 */}
+                <div className="space-y-3">
+                  <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> 智能提炼 TOP 卖点
+                  </span>
+                  <div className="space-y-2">
+                    {['30% 酵母精粹', '28天显著淡纹', '无敏配方', '真空泵头设计'].map(p => (
+                      <div key={p} className="flex items-center justify-between p-2.5 bg-white border border-slate-100 rounded-xl text-[11px]">
+                        <span className="font-medium text-slate-700">{p}</span>
+                        <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px]">高频提及</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 用户问答 */}
+                <div className="space-y-3">
+                  <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                    <HelpCircle className="w-3.5 h-3.5 text-blue-500" /> 高频用户问答 (Q&A)
+                  </span>
+                  <div className="space-y-2">
+                    {[
+                      { q: '敏感肌可以用吗？', a: 'AI 建议：强调无敏配方与实测报告' },
+                      { q: '白天可以用吗？', a: 'AI 建议：说明无光敏成分，全天可用' }
+                    ].map((qa, i) => (
+                      <div key={i} className="p-2.5 bg-white border border-slate-100 rounded-xl space-y-1">
+                        <p className="text-[11px] font-bold text-slate-800">Q: {qa.q}</p>
+                        <p className="text-[10px] text-slate-400">A: {qa.a}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* 2. 竞品优劣势拆解 */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                <TrendingUp className="w-4 h-4 text-rose-400" /> 竞品优劣势拆解 (聚类分析)
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-emerald-50/30 border border-emerald-100 rounded-xl space-y-2">
-                  <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> 竞品核心优势
-                  </div>
-                  <ul className="text-[10px] text-emerald-600/80 space-y-1.5 list-disc pl-4">
-                    <li>品牌背书极强，用户信任度高</li>
-                    <li>营销预算充足，全网声量覆盖广</li>
-                    <li>物流时效稳定，次日达覆盖率 80%</li>
-                  </ul>
+            {/* 3. 合规风险提示 */}
+            <div className="p-4 bg-rose-50/50 border border-rose-100 rounded-2xl space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-rose-700">
+                  <ShieldAlert className="w-4 h-4" /> 合规风险与 AI 修复建议
                 </div>
-                <div className="p-4 bg-rose-50/30 border border-rose-100 rounded-xl space-y-2">
-                  <div className="flex items-center gap-1.5 text-rose-700 font-bold text-[11px]">
-                    <AlertCircle className="w-3.5 h-3.5" /> 竞品薄弱环节 (机会)
+                <Badge className="bg-rose-100 text-rose-700 border-none text-[9px]">中风险</Badge>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 text-[11px]">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-slate-700 font-bold">检测到违规点：竞品文案包含“全网第一”极限词</p>
+                    <p className="text-slate-500 leading-relaxed">
+                      AI 修复建议：建议将“第一”修改为“核心主打”或“口碑之选”，已自动为您在 AIGC 模块中规避此类词汇。
+                    </p>
                   </div>
-                  <ul className="text-[10px] text-rose-600/80 space-y-1.5 list-disc pl-4">
-                    <li>包装设计陈旧，不符合 Z 世代审美</li>
-                    <li>成分浓度标注模糊，存在信任缺口</li>
-                    <li>售后响应慢，差评处理率低于 40%</li>
-                  </ul>
                 </div>
               </div>
             </div>
 
-            {/* 3. 差异化运营建议 */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                <Lightbulb className="w-4 h-4 text-rose-400" /> 差异化运营机会建议
-              </div>
-              <div className="space-y-3">
-                {[
-                  { label: '产品端', content: '强化“真空泵头”与“高活性多肽”心智，主打成分透明化。' },
-                  { label: '营销端', content: '利用 AIGC 生成针对“敏感肌”痛点的对比视频，突出即时退红效果。' },
-                  { label: '价格端', content: '建议定价在 249-289 元区间，避开 199 元红海价格战。' }
-                ].map((tip, i) => (
-                  <div key={i} className="flex gap-3 p-3 bg-white border border-slate-100 rounded-xl shadow-sm">
-                    <Badge className="h-5 bg-slate-800 text-white border-none text-[9px] shrink-0">{tip.label}</Badge>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">{tip.content}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 4. 风险归因 */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                <ShieldAlert className="w-4 h-4 text-rose-400" /> 负面风险归因预警
-              </div>
-              <div className="p-4 bg-rose-50/50 border border-rose-100 rounded-xl">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-bold text-rose-700">潜在差评风险点</span>
-                  <Badge variant="outline" className="text-[9px] border-rose-200 text-rose-600">中风险</Badge>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[10px]">
-                    <span className="text-slate-500">过敏反应风险</span>
-                    <span className="font-bold text-rose-600">15%</span>
-                  </div>
-                  <Progress value={15} className="h-1 bg-rose-100" />
-                  <p className="text-[9px] text-slate-400 mt-1">※ 基于同类成分竞品 NLP 评价聚类分析得出</p>
-                </div>
-              </div>
-            </div>
           </div>
         </ScrollArea>
 
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50 shrink-0">
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              className="flex-1 h-10 text-xs border-slate-200"
-              onClick={() => handlePush('评价 NLP')}
-            >
-              <MessageSquare className="w-3.5 h-3.5 mr-1.5 text-blue-500" /> 推送至 NLP 分析
-            </Button>
-            <Button 
-              className="flex-1 h-10 text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold"
-              onClick={() => handlePush('AIGC 内容工厂')}
-            >
-              <Zap className="w-3.5 h-3.5 mr-1.5" /> 推送至 AIGC 生成
-            </Button>
-          </div>
+        <div className="p-6 border-t border-slate-100 bg-slate-50/50 shrink-0 flex gap-3">
+          <Button variant="outline" className="flex-1 h-10 text-xs border-slate-200">
+            <Eye className="w-3.5 h-3.5 mr-1.5" /> 查看竞品素材
+          </Button>
+          <Button className="flex-1 h-10 text-xs bg-rose-400 hover:bg-rose-500 text-white font-bold">
+            <Send className="w-3.5 h-3.5 mr-1.5" /> 推送至 AIGC 批量生产
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
