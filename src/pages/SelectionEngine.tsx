@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -26,9 +27,9 @@ import DiagnosisDetailDrawer from '@/components/selection/DiagnosisDetailDrawer'
 
 // 模拟蓝海选品数据
 const BLUE_OCEAN_DATA = [
-  { id: 'SEL-001', img: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=100', title: '多肽紧致修护眼霜', category: '眼部护理', score: 92, growth: '+45%', comp: '低', sales: '1.2w+', profit: '45%', risk: '低', gap: '大' },
-  { id: 'SEL-002', img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100', title: '氨基酸温和洁面乳', category: '面部清洁', score: 65, growth: '+12%', comp: '极高', sales: '5.5w+', profit: '15%', risk: '低', gap: '小' },
-  { id: 'SEL-003', img: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=100', title: '植物精粹防晒喷雾', category: '防晒隔离', score: 42, growth: '-5%', comp: '中', sales: '2000+', profit: '30%', risk: '中', gap: '中' },
+  { id: 'SEL-001', img: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=100', title: '多肽紧致修护眼霜', category: '眼部护理', score: 92, growth: '+45%', comp: '低', sales: '1.2w+', profit: '45%', risk: '低', gap: '大', price: '¥299', estSales: '1.2w+', heat: 850, compData: { price: '¥350', sales: '8000' } },
+  { id: 'SEL-002', img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100', title: '氨基酸温和洁面乳', category: '面部清洁', score: 65, growth: '+12%', comp: '极高', sales: '5.5w+', profit: '15%', risk: '低', gap: '小', price: '¥89', estSales: '5.5w+', heat: 920, compData: { price: '¥79', sales: '12w+' } },
+  { id: 'SEL-003', img: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=100', title: '植物精粹防晒喷雾', category: '防晒隔离', score: 42, growth: '-5%', comp: '中', sales: '2000+', profit: '30%', risk: '中', gap: '中', price: '¥129', estSales: '2000+', heat: 310, compData: { price: '¥119', sales: '5000' } },
 ];
 
 // 模拟竞品对标数据
@@ -114,11 +115,27 @@ const SelectionEngine = () => {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-[10px] text-slate-400 font-bold uppercase">好评率阈值</Label>
-                  <Select defaultValue="85"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="85">85% 以上</SelectItem><SelectItem value="90">90% 以上</SelectItem></SelectContent></Select>
+                  <Select defaultValue="85">
+                    <SelectTrigger className="h-8 text-xs bg-slate-50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="85">85% 以上</SelectItem>
+                      <SelectItem value="90">90% 以上</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-[10px] text-slate-400 font-bold uppercase">竞争压力</Label>
-                  <Select defaultValue="low"><SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="low">仅看低竞争</SelectItem><SelectItem value="mid">中低竞争</SelectItem></SelectContent></Select>
+                  <Select defaultValue="low">
+                    <SelectTrigger className="h-8 text-xs bg-slate-50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">仅看低竞争</SelectItem>
+                      <SelectItem value="mid">中低竞争</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex items-end">
                   <Button className="w-full h-8 text-xs bg-rose-400 hover:bg-rose-500 text-white">应用筛选匹配货源</Button>
@@ -205,7 +222,7 @@ const SelectionEngine = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {COMPETITOR_DATA.map((comp) => (
                 <Card key={comp.id} className="border-none shadow-sm bg-white group hover:ring-2 hover:ring-rose-100 transition-all">
-                  <CardHeader className="pb-3 border-b border-slate-50 flex flex-row items-center justify-between">
+                  <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 font-bold text-xs">竞</div>
                       <CardTitle className="text-xs font-bold">{comp.name}</CardTitle>
