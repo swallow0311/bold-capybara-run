@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { 
   AlertTriangle, Bell, ShieldAlert, MessageSquare, 
   ShoppingBag, Mail, Smartphone, Save, RotateCcw,
@@ -207,8 +208,7 @@ const AlertSettings = () => {
                 <CardHeader className="pb-3 border-b border-slate-100">
                   <CardTitle className="text-sm font-bold flex items-center gap-2 text-amber-600">
                     <ShieldCheck className="w-4 h-4" /> 合规预警设置
-                  </CardTitle>
-                </CardHeader>
+                  </CardTitle>                </CardHeader>
                 <CardContent className="p-5 space-y-4">
                   <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100">
                     <div className="space-y-0.5">
