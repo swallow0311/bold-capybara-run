@@ -4,15 +4,28 @@ import {
   LayoutDashboard, Search, PenTool, BarChart3, Settings, 
   Bell, Sparkles, ChevronDown, ChevronRight, FileText, 
   ImageIcon, VideoIcon, FolderOpen, ShieldAlert, ShoppingBag, 
-  Link2, Cpu, ArrowLeft, Calendar, AlertTriangle, ListTodo
+  Link2, Cpu, ArrowLeft, Calendar, AlertTriangle, ListTodo,
+  Zap, ShieldCheck, Coins, TrendingUp
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import NotificationPopover from './NotificationPopover';
 
 const menuItems = [
-  { name: '核心看板', sub: '数据统计与ROI指标', icon: LayoutDashboard, path: '/' },
-  { name: '商品管理', sub: '店铺SPU/SKU一体化管控', icon: ShoppingBag, path: '/products' },
-  { name: 'AI选品', sub: '全网爆款趋势挖掘', icon: Search, path: '/selection' },
+  { name: '核心看板', sub: '全域数据概览', icon: LayoutDashboard, path: '/' },
+  { 
+    name: '智能选品', 
+    sub: '趋势挖掘与蓝海筛选', 
+    icon: Search, 
+    path: '/selection',
+    isParent: true,
+    children: [
+      { name: '趋势挖掘', path: '/selection', icon: TrendingUp },
+      { name: '蓝海筛选', path: '/selection', icon: Zap },
+      { name: '风险筛查', path: '/risk-screening', icon: ShieldCheck },
+      { name: '智能定价', path: '/smart-pricing', icon: Coins },
+    ]
+  },
+  { name: '商品管理', sub: '全渠道主档管控', icon: ShoppingBag, path: '/products' },
   { 
     name: 'AIGC内容工厂', 
     sub: '多版本内容智能产出', 
@@ -27,10 +40,10 @@ const menuItems = [
       { name: '合规质检', path: '/compliance-qa', icon: ShieldAlert },
     ]
   },
-  { name: '评价NLP分析', sub: '用户口碑与痛点洞察', icon: BarChart3, path: '/sentiment' },
+  { name: '评价NLP分析', sub: '口碑与痛点洞察', icon: BarChart3, path: '/sentiment' },
   { 
     name: '系统设置', 
-    sub: '开放接口与大模型配置', 
+    sub: '接口与模型配置', 
     icon: Settings, 
     path: '/settings/api',
     isParent: true,
@@ -45,8 +58,9 @@ const menuItems = [
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const [isAIGCOpen, setIsAIGCOpen] = useState(true);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(true);
+  const [isSelectionOpen, setIsSelectionOpen] = useState(true);
+  const [isAIGCOpen, setIsAIGCOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const isIndex = location.pathname === '/';
   const isProductSubPage = location.pathname === '/products/create' || location.pathname.startsWith('/products/edit') || location.pathname.startsWith('/products/view');
@@ -66,10 +80,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             if (item.isParent) {
-              const isAigcMenu = item.name === 'AIGC内容工厂';
-              const isOpen = isAigcMenu ? isAIGCOpen : isSettingsOpen;
-              const setIsOpen = isAigcMenu ? setIsAIGCOpen : setIsSettingsOpen;
+              const isOpen = item.name === '智能选品' ? isSelectionOpen : 
+                             item.name === 'AIGC内容工厂' ? isAIGCOpen : isSettingsOpen;
+              const setIsOpen = item.name === '智能选品' ? setIsSelectionOpen : 
+                                item.name === 'AIGC内容工厂' ? setIsAIGCOpen : setIsSettingsOpen;
               const hasActiveChild = item.children?.some(child => location.pathname === child.path);
+              
               return (
                 <div key={item.name} className="space-y-1">
                   <button onClick={() => setIsOpen(!isOpen)} className={cn("w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 group text-slate-600 hover:bg-white/40 hover:text-slate-900", hasActiveChild && "bg-white/25 text-rose-800 font-bold")}>
@@ -122,10 +138,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 <h2 className="text-sm font-bold text-slate-800">
                   {isIndex ? '智能运营中台核心看板' : 
                    location.pathname === '/products' ? '商品管理' : 
-                   location.pathname === '/products/create' ? '新建商品' :
-                   location.pathname.startsWith('/products/edit') ? '编辑商品' :
-                   location.pathname.startsWith('/products/view') ? '商品详情' :
-                   location.pathname === '/selection' ? 'AI选品' :
+                   location.pathname === '/selection' ? '智能选品' :
+                   location.pathname === '/risk-screening' ? '风险筛查' :
+                   location.pathname === '/smart-pricing' ? '智能定价' :
                    location.pathname === '/content' ? '文案生成' :
                    location.pathname === '/image-design' ? '图片设计' :
                    location.pathname === '/video-creation' ? '视频创作' :
@@ -137,12 +152,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                    location.pathname === '/settings/alerts' ? '预警设置' : 
                    location.pathname === '/settings/alerts/records' ? '预警记录' : '系统中心'}
                 </h2>
-                {location.pathname === '/content' && (
-                  <span className="text-[11px] font-medium text-slate-400">AI 营销风控安全锁已开启：自动拦截极限词</span>
-                )}
-                {location.pathname === '/asset-library' && (
-                  <span className="text-[11px] font-medium text-slate-400">统一收纳、管理全链路 AI 创作内容，实现资产标准化沉淀与高效复用</span>
-                )}
               </div>
               {isIndex && (
                 <p className="text-[10px] text-slate-400 flex items-center gap-1 font-medium">

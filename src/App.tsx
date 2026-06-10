@@ -9,6 +9,8 @@ import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
 import ViewProduct from "./pages/ViewProduct";
 import SelectionEngine from "./pages/SelectionEngine";
+import RiskScreening from "./pages/RiskScreening";
+import SmartPricing from "./pages/SmartPricing";
 import ContentFactory from "./pages/ContentFactory";
 import ImageDesign from "./pages/ImageDesign";
 import VideoCreation from "./pages/VideoCreation";
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/products/edit/:id" element={<EditProduct />} />
           <Route path="/products/view/:id" element={<ViewProduct />} />
           <Route path="/selection" element={<SelectionEngine />} />
+          <Route path="/risk-screening" element={<RiskScreening />} />
+          <Route path="/smart-pricing" element={<SmartPricing />} />
           <Route path="/content" element={<ContentFactory />} />
           <Route path="/image-design" element={<ImageDesign />} />
           <Route path="/video-creation" element={<VideoCreation />} />
