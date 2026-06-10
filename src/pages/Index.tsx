@@ -2,6 +2,7 @@ import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   TrendingUp, 
   FileText, 
@@ -43,7 +44,7 @@ const Index = () => {
     { date: '周四', 文案数: 42, 图片数: 25, 视频数: 12 },
     { date: '周五', 文案数: 56, 图片数: 30, 视频数: 15 },
     { date: '周六', 文案数: 18, 图片数: 8, 视频数: 4 },
-    { date: '周日', 文案数: 22, 图片数: 10, 视频数: 5 },
+    { date: '周日', 文案数: 22, 图片数: 10, 5: 5 },
   ];
 
   // 3. 实时智能行动流与运营建议
