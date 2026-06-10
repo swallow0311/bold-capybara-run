@@ -1,13 +1,13 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadialBarChart, RadialBar } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, LabelList } from 'recharts';
 import { PenTool, CheckCircle2, Zap, Coins } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-const radialData = [
-  { name: '短视频', value: 500, fill: '#fedcd9' },
-  { name: '详情页', value: 1500, fill: '#fca39d' },
-  { name: '商品标题', value: 1280, fill: '#f5756c' },
+const pieData = [
+  { name: '商品标题', value: 1280, color: '#f5756c' },
+  { name: '详情页', value: 1500, color: '#fca39d' },
+  { name: '短视频', value: 500, color: '#fedcd9' },
 ];
 
 const compareData = [
@@ -24,7 +24,6 @@ const AigcSection = () => {
         <h2 className="text-lg font-bold text-slate-800">AIGC 内容生产效能</h2>
       </div>
 
-      {/* 生产效能 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           { label: '今日生成总量', value: '3,280 条', icon: PenTool, color: 'text-indigo-500' },
@@ -44,7 +43,6 @@ const AigcSection = () => {
         ))}
       </div>
 
-      {/* 内容分布 & 效果对比 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
@@ -52,15 +50,20 @@ const AigcSection = () => {
           </CardHeader>
           <CardContent className="p-4 h-[240px] flex flex-col items-center">
             <ResponsiveContainer width="100%" height="100%">
-              <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="100%" barSize={15} data={radialData}>
-                <RadialBar background dataKey="value" />
+              <PieChart>
+                <Pie data={pieData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                  {pieData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                </Pie>
                 <Tooltip />
-              </RadialBarChart>
+              </PieChart>
             </ResponsiveContainer>
-            <div className="grid grid-cols-3 gap-4 w-full text-center mt-2">
-              <div><p className="text-[10px] font-bold text-rose-500">1,280</p><p className="text-[8px] text-slate-400">标题</p></div>
-              <div><p className="text-[10px] font-bold text-rose-400">1,500</p><p className="text-[8px] text-slate-400">详情页</p></div>
-              <div><p className="text-[10px] font-bold text-rose-200">500</p><p className="text-[8px] text-slate-400">短视频</p></div>
+            <div className="flex justify-center gap-4 w-full mt-2">
+              {pieData.map(item => (
+                <div key={item.name} className="text-center">
+                  <p className="text-[10px] font-bold text-slate-700">{item.value}</p>
+                  <p className="text-[8px] text-slate-400">{item.name}</p>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -71,36 +74,33 @@ const AigcSection = () => {
           </CardHeader>
           <CardContent className="p-4 h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={compareData}>
+              <BarChart data={compareData} margin={{ top: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
-                <Bar dataKey="AI内容" fill="#f5756c" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="人工内容" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="AI内容" fill="#f5756c" radius={[4, 4, 0, 0]}>
+                  <LabelList dataKey="AI内容" position="top" style={{ fontSize: '10px', fontWeight: 'bold', fill: '#f5756c' }} />
+                </Bar>
+                <Bar dataKey="人工内容" fill="#94a3b8" radius={[4, 4, 0, 0]}>
+                  <LabelList dataKey="人工内容" position="top" style={{ fontSize: '10px', fontWeight: 'bold', fill: '#94a3b8' }} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      {/* 流程转化漏斗 */}
       <Card className="border-none shadow-sm bg-white">
         <CardHeader className="pb-2 border-b border-slate-50">
           <CardTitle className="text-xs font-bold text-slate-500">内容生产全链路转化漏斗</CardTitle>
         </CardHeader>
         <CardContent className="p-8">
           <div className="flex flex-col items-center gap-1">
-            {[
-              { label: '内容生成', val: '100%', width: 'w-full', color: 'bg-rose-400' },
-              { label: '智能采纳', val: '76%', width: 'w-[76%]', color: 'bg-rose-300' },
-              { label: '合规审核', val: '72%', width: 'w-[72%]', color: 'bg-rose-200' },
-              { label: '一键上架', val: '68%', width: 'w-[68%]', color: 'bg-rose-100' },
-            ].map((step, i) => (
+            {[{ label: '内容生成', val: '100%', width: 'w-full', color: 'bg-rose-400' }, { label: '智能采纳', val: '76%', width: 'w-[76%]', color: 'bg-rose-300' }, { label: '合规审核', val: '72%', width: 'w-[72%]', color: 'bg-rose-200' }, { label: '一键上架', val: '68%', width: 'w-[68%]', color: 'bg-rose-100' }].map((step, i) => (
               <div key={i} className={cn("h-10 flex items-center justify-between px-6 text-white font-bold text-xs rounded-lg shadow-sm", step.width, step.color)}>
-                <span>{step.label}</span>
-                <span>{step.val}</span>
+                <span>{step.label}</span><span>{step.val}</span>
               </div>
             ))}
           </div>

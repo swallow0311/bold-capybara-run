@@ -3,17 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Sparkles, Flame, ArrowUpRight, Plus } from 'lucide-react';
+import { Sparkles, Plus } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 const trendData = [
-  { name: '5/14', heat: 400 },
-  { name: '5/15', heat: 300 },
-  { name: '5/16', heat: 600 },
-  { name: '5/17', heat: 800 },
-  { name: '5/18', heat: 500 },
-  { name: '5/19', heat: 900 },
-  { name: '5/20', heat: 1200 },
+  { name: '5/14', heat: 400 }, { name: '5/15', heat: 300 }, { name: '5/16', heat: 600 },
+  { name: '5/17', heat: 800 }, { name: '5/18', heat: 500 }, { name: '5/19', heat: 900 }, { name: '5/20', heat: 1200 },
 ];
 
 const SelectionSection = () => {
@@ -24,7 +19,6 @@ const SelectionSection = () => {
         <h2 className="text-lg font-bold text-slate-800">AI 选品效能中心</h2>
       </div>
 
-      {/* 效能总览 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           { label: '推荐命中率', value: '85%', desc: 'AI推荐后产生销量的比例' },
@@ -41,7 +35,6 @@ const SelectionSection = () => {
         ))}
       </div>
 
-      {/* 商品推荐池 */}
       <Card className="border-none shadow-sm bg-white overflow-hidden">
         <CardHeader className="pb-3 border-b border-slate-50 flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -82,7 +75,6 @@ const SelectionSection = () => {
         </CardContent>
       </Card>
 
-      {/* 趋势洞察 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
@@ -103,20 +95,22 @@ const SelectionSection = () => {
 
         <Card className="border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
-            <CardTitle className="text-xs font-bold text-slate-500">搜索关键词热度词云</CardTitle>
+            <CardTitle className="text-xs font-bold text-slate-500">搜索关键词热度分布 (出现次数)</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-3 justify-center items-center min-h-[150px]">
               {[
-                { text: '早C晚A', size: 'text-xl', color: 'text-amber-600 font-black' },
-                { text: '敏感肌修护', size: 'text-lg', color: 'text-amber-500 font-bold' },
-                { text: '多肽抗老', size: 'text-base', color: 'text-slate-600' },
-                { text: '平价替代', size: 'text-sm', color: 'text-slate-400' },
-                { text: '防晒喷雾', size: 'text-lg', color: 'text-amber-400 font-bold' },
-                { text: '水光感', size: 'text-base', color: 'text-slate-500' },
-                { text: '国潮美妆', size: 'text-sm', color: 'text-slate-400' },
+                { text: '早C晚A', count: 12450, color: 'bg-amber-100 text-amber-700' },
+                { text: '敏感肌修护', count: 8900, color: 'bg-amber-50 text-amber-600' },
+                { text: '多肽抗老', count: 5600, color: 'bg-slate-100 text-slate-600' },
+                { text: '防晒喷雾', count: 7200, color: 'bg-amber-50 text-amber-600' },
+                { text: '水光感', count: 4300, color: 'bg-slate-50 text-slate-500' },
+                { text: '国潮美妆', count: 3100, color: 'bg-slate-50 text-slate-400' },
               ].map((w, i) => (
-                <span key={i} className={cn(w.size, w.color, "cursor-pointer hover:scale-110 transition-transform")}>{w.text}</span>
+                <div key={i} className={cn("px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-sm border border-slate-100 transition-transform hover:scale-105 cursor-default", w.color)}>
+                  <span className="text-xs font-bold">{w.text}</span>
+                  <span className="text-[10px] opacity-60 font-mono">{w.count.toLocaleString()}</span>
+                </div>
               ))}
             </div>
           </CardContent>

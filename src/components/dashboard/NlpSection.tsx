@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
@@ -15,10 +16,12 @@ const sentimentData = [
 
 const trendData = Array.from({ length: 30 }).map((_, i) => ({
   day: i + 1,
-  score: 85 + Math.random() * 10,
+  "满意度评分": (85 + Math.random() * 10).toFixed(1),
 }));
 
 const NlpSection = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-2">
@@ -26,7 +29,6 @@ const NlpSection = () => {
         <h2 className="text-lg font-bold text-slate-800">评价 NLP 深度洞察</h2>
       </div>
 
-      {/* 情感总览 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           { label: '综合满意度', value: '4.6 星', icon: Star, color: 'text-amber-400' },
@@ -46,7 +48,6 @@ const NlpSection = () => {
         ))}
       </div>
 
-      {/* 情感分布 & 话题挖掘 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
@@ -74,27 +75,28 @@ const NlpSection = () => {
 
         <Card className="border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
-            <CardTitle className="text-xs font-bold text-slate-500">高频话题词云 (情感色标)</CardTitle>
+            <CardTitle className="text-xs font-bold text-slate-500">高频话题分布 (出现次数)</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-2 justify-center items-center min-h-[150px]">
               {[
-                { text: '吸收快', color: 'text-emerald-500 font-bold' },
-                { text: '包装精美', color: 'text-emerald-400' },
-                { text: '过敏红肿', color: 'text-rose-500 font-black' },
-                { text: '物流给力', color: 'text-emerald-500' },
-                { text: '泵头难按', color: 'text-rose-400 font-bold' },
-                { text: '味道淡', color: 'text-slate-400' },
-                { text: '正品保障', color: 'text-emerald-600 font-bold' },
+                { text: '吸收快', count: 850, color: 'bg-emerald-50 text-emerald-700' },
+                { text: '包装精美', count: 620, color: 'bg-emerald-50 text-emerald-600' },
+                { text: '过敏红肿', count: 120, color: 'bg-rose-50 text-rose-700' },
+                { text: '物流给力', count: 540, color: 'bg-emerald-50 text-emerald-600' },
+                { text: '泵头难按', count: 85, color: 'bg-rose-50 text-rose-600' },
+                { text: '正品保障', count: 980, color: 'bg-emerald-100 text-emerald-800' },
               ].map((w, i) => (
-                <span key={i} className={cn("text-xs", w.color)}>{w.text}</span>
+                <div key={i} className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-slate-100 shadow-sm", w.color)}>
+                  <span className="text-[11px] font-bold">{w.text}</span>
+                  <span className="text-[9px] opacity-60 font-mono">{w.count}</span>
+                </div>
               ))}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 问题诊断矩阵 */}
       <Card className="border-none shadow-sm bg-white">
         <CardHeader className="pb-2 border-b border-slate-50">
           <CardTitle className="text-xs font-bold text-slate-500">负面问题诊断矩阵</CardTitle>
@@ -110,7 +112,7 @@ const NlpSection = () => {
               <div key={i} className="space-y-2 text-left">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-slate-700 text-xs">{item.label} ({item.val}%)</span>
-                  <span className="text-[10px] text-rose-500 font-bold">查看详情 ↘</span>
+                  <button onClick={() => navigate('/sentiment')} className="text-[10px] text-rose-500 font-bold hover:underline">查看详情 ↘</button>
                 </div>
                 <Progress value={item.val} className="h-1.5" />
                 <p className="text-[10px] text-slate-400">{item.desc}</p>
@@ -120,7 +122,6 @@ const NlpSection = () => {
         </CardContent>
       </Card>
 
-      {/* 趋势曲线 & 预警列表 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 border-none shadow-sm bg-white">
           <CardHeader className="pb-2 border-b border-slate-50">
@@ -132,8 +133,8 @@ const NlpSection = () => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="day" hide />
                 <YAxis domain={[0, 100]} hide />
-                <Tooltip />
-                <Line type="monotone" dataKey="score" stroke="#10b981" strokeWidth={2} dot={false} />
+                <Tooltip formatter={(value) => [`${value}`, '满意度评分']} />
+                <Line type="monotone" dataKey="满意度评分" stroke="#10b981" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -146,17 +147,11 @@ const NlpSection = () => {
           <CardContent className="p-0">
             <Table>
               <TableBody>
-                {[
-                  { name: '御龄紧致面霜', risk: '过敏激增', status: '处理中' },
-                  { name: '水光唇蜜 01#', risk: '色差争议', status: '待介入' },
-                  { name: '多肽精华液', risk: '包装破损', status: '已解决' },
-                ].map((item, i) => (
+                {[{ name: '御龄紧致面霜', risk: '过敏激增', status: '处理中' }, { name: '水光唇蜜 01#', risk: '色差争议', status: '待介入' }, { name: '多肽精华液', risk: '包装破损', status: '已解决' }].map((item, i) => (
                   <TableRow key={i} className="text-[10px]">
                     <TableCell className="font-bold">{item.name}</TableCell>
                     <TableCell className="text-rose-500">{item.risk}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="outline" className="text-[8px] px-1 py-0">{item.status}</Badge>
-                    </TableCell>
+                    <TableCell className="text-right"><Badge variant="outline" className="text-[8px] px-1 py-0">{item.status}</Badge></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
