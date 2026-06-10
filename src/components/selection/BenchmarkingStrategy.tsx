@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Sparkles, Target, Zap, AlertCircle, Lightbulb, 
   ArrowRight, Check, ListChecks, PenTool, ImageIcon, 
-  Video, ShieldAlert, TrendingUp, Info
+  Video, ShieldAlert, TrendingUp, Info, FileText
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
