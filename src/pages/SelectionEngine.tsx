@@ -45,120 +45,6 @@ const TRENDING_PRODUCTS = [
       priceRange: '¥299 - 350', margin: 65, profit: 150000, roi: 1.5, goodTags: '温和、吸收快', 
       badTags: '包装渗漏', returnRate: 3.2, audienceMatch: '25-40岁女性', supplyStability: '优质稳定', 
       moq: 100, leadTime: 3, infringementRisk: '低', compliance: '已备案',
-      // 对比设置指标映射值
-      salesTrend: '↑ 45.2% 月度爆发', priceSegment: '¥299.00 - ¥349.00', ratingsCount: '12,840 条', 
-      publishDate: '2026-01-15', shippingMethod: '顺丰包邮/海外仓直邮', variantsCount: '3个变体(15ml/30ml/礼盒)'
-    },
-    aiReport: { feasibility: '高', suggestedPrice: '¥269 - ¥320', competition: '中低', ingredientTrends: '多肽成分在抗老赛道搜索量环比增长45%。', risks: ['包装密封性投诉率略高', '换季流量波动风险'] }
-  },
-  { 
-    rank: 2, id: 'P-002', name: '氨基酸温和洁面乳', category: '面部护肤',
-    sales: '8.5w+', heat: 8200, avgPrice: 89, ingredients: ['氨基酸'], platform: '小红书',
-    img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=100',
-    scores: { '市场热度': 85, '蓝海竞争': 40, '盈利潜力': 60, '口碑舆情': 90, '风险安全': 95 },
-    label: '热度最优',
-    isCore: false,
-    healthStatus: '健康',
-    aiSummaryTag: '平稳红海',
-    data: { 
-      totalScore: 78, tag: '红海稳健', trend: '12% 震荡前行', lifecycle: '成熟期', season: '四季', 
-      trafficSource: '搜索(60%) 笔记(30%)', competitorCount: 85, monopoly: '高', cost: 15, 
-      priceRange: '¥79 - 99', margin: 40, profit: 45000, roi: 2.8, goodTags: '不紧绷、泡沫细', 
-      badTags: '清洁力弱', returnRate: 2.5, audienceMatch: '全人群', supplyStability: '极高', 
-      moq: 500, leadTime: 5, infringementRisk: '低', compliance: '已备案',
-      salesTrend: '→ 12.1% 周期稳定', priceSegment: '¥79.00 - ¥99.00', ratingsCount: '85,400 条', 
-      publishDate: '2025-08-10', shippingMethod: '常规中通快递包邮', variantsCount: '2个变体(100g/200g)'
-    },
-    aiReport: { feasibility: '中', suggestedPrice: '¥79 - ¥99', competition: '极高', ingredientTrends: '氨基酸洁面已进入红海期。', risks: ['同质化严重', '利润空间被压缩'] }
-  },
-  { 
-    rank: 3, id: 'P-003', name: '水漾隔离防晒喷雾', category: '面部护肤',
-    sales: '5.2w+', heat: 7500, avgPrice: 129, ingredients: ['物理防晒'], platform: '抖音',
-    img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100',
-    scores: { '市场热度': 78, '蓝海竞争': 65, '盈利潜力': 85, '口碑舆情': 75, '风险安全': 80 },
-    label: '季节新品',
-    isCore: false,
-    healthStatus: '风险',
-    aiSummaryTag: '高危监控',
-    data: { 
-      totalScore: 82, tag: '季节爆品', trend: '120% 强力攀升', lifecycle: '爆发期', season: '夏季', 
-      trafficSource: '直播(50%) 视频(40%)', competitorCount: 32, monopoly: '中', cost: 28, 
-      priceRange: '¥119 - 149', margin: 55, profit: 82000, roi: 1.8, goodTags: '成膜快、不假白', 
-      badTags: '味道刺鼻', returnRate: 5.5, audienceMatch: '户外人群', supplyStability: '中等', 
-      moq: 200, leadTime: 7, infringementRisk: '中', compliance: '特证要求',
-      salesTrend: '↑ 120.4% 季节暴增', priceSegment: '¥119.00 - ¥149.00', ratingsCount: '5,210 条', 
-      publishDate: '2026-03-01', shippingMethod: '顺丰陆运包邮', variantsCount: '1个变体(150ml)'
-    },
-    aiReport: { feasibility: '高', suggestedPrice: '¥119 - ¥149', competition: '中', ingredientTrends: '防晒喷雾在户外场景搜索量激增。', risks: ['物流易燃易爆限制', '季节性强'] }
-  }
-];
-
-const STORE_DIAGNOSIS_DATA = [
-  { id: 'S-001', name: '中达酵母御龄面霜', status: '健康', traffic: '1.2w', cvr: '3.5%', sentiment: '92%', trend: 'up', profitMargin: '65%', aiSummaryTag: '高频复购' },
-  { id: 'S-002', name: '积雪草净化海泥面膜', status: '风险', traffic: '2.5k', cvr: '0.8%', sentiment: '75%', trend: 'down', profitMargin: '40%', aiSummaryTag: '包装缺陷' },
-  { id: 'S-003', name: '水漾隔离防晒乳', status: '滞销', traffic: '800', cvr: '0.2%', sentiment: '88%', trend: 'down', profitMargin: '55%', aiSummaryTag: '流量下滑' },
-];
-
-const SelectionEngine = () => {
-  const [activeTab, setActiveTab] = useState('potential');
-  
-  // 蓝海潜力选中
-  const [selectedProduct, setSelectedProduct] = useState<any>(TRENDING_PRODUCTS[0]);
-  
-  // 本店商品诊断选中与筛选状态
-  const [selectedDiagnosisProduct, setSelectedDiagnosisProduct] = useState<any>(STORE_DIAGNOSIS_DATA[0]);
-  const [diagnosisStatusFilter, setDiagnosisStatusFilter] = useState('all');
-  const [diagnosisTagFilter, setDiagnosisTagFilter] = useState('all');
-
-  // 竞品配置区解析池数据
-  const [parsedPool, setParsedPool]<dyad-write path="src/pages/SelectionEngine.tsx" description="完整输出 SelectionEngine.tsx，修正 DashboardLayout 标签闭合及所有状态定义。">
-import React, { useState, useMemo, useEffect } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Sparkles, Search, TrendingUp, Target, 
-  Filter, Download, ChevronRight, Crown,
-  Calendar, Globe, Flame, Eye,
-  LayoutGrid, List, BarChart3, Scale, Plus, Trash2,
-  RefreshCw, Heart, FileSpreadsheet, Send, AlertCircle,
-  ShieldAlert, Zap, Activity, TrendingDown, Settings2,
-  ShieldCheck, Box, Coins, Info, Check, HelpCircle, FileText, Upload, Link2
-} from 'lucide-react';
-import { showSuccess, showError } from '@/utils/toast';
-import { cn } from "@/lib/utils";
-
-// 导入子组件
-import AiAnalysisReport from '@/components/selection/AiAnalysisReport';
-import BenchmarkingRadar from '@/components/selection/BenchmarkingRadar';
-import DiagnosisReport from '@/components/selection/DiagnosisReport';
-import SelectionConfigSheet from '@/components/selection/SelectionConfigSheet';
-
-// 初始种子竞品数据
-const TRENDING_PRODUCTS = [
-  { 
-    rank: 1, id: 'P-001', name: '中达多肽紧致修护眼霜', category: '面部护肤',
-    sales: '12.8w+', heat: 9850, avgPrice: 299, ingredients: ['多肽', '酵母'], platform: '抖音',
-    img: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=100',
-    scores: { '市场热度': 95, '蓝海竞争': 88, '盈利潜力': 92, '口碑舆情': 85, '风险安全': 98 },
-    label: '综合最优',
-    isCore: true, // 核心对标对象
-    healthStatus: '健康',
-    aiSummaryTag: '高潜爆品',
-    data: { 
-      totalScore: 94, tag: '高潜爆款', trend: '45% 稳定上升', lifecycle: '增长期', season: '四季', 
-      trafficSource: '搜索(45%) 视频(35%)', competitorCount: 12, monopoly: '低', cost: 45, 
-      priceRange: '¥299 - 350', margin: 65, profit: 150000, roi: 1.5, goodTags: '温和、吸收快', 
-      badTags: '包装渗漏', returnRate: 3.2, audienceMatch: '25-40岁女性', supplyStability: '优质稳定', 
-      moq: 100, leadTime: 3, infringementRisk: '低', compliance: '已备案',
       salesTrend: '↑ 45.2% 月度爆发', priceSegment: '¥299.00 - ¥349.00', ratingsCount: '12,840 条', 
       publishDate: '2026-01-15', shippingMethod: '顺丰包邮/海外仓直邮', variantsCount: '3个变体(15ml/30ml/礼盒)'
     },
@@ -389,7 +275,6 @@ const SelectionEngine = () => {
   const handleRemoveCompare = (id: string) => {
     const list = compareList.filter(item => item.id !== id);
     setCompareList(list);
-    // 如果移除的是核心对标，则转移核心位置
     if (compareList.find(c => c.id === id)?.isCore && list.length > 0) {
       list[0].isCore = true;
       setSelectedCompareProduct(list[0]);
@@ -418,7 +303,7 @@ const SelectionEngine = () => {
                 activeTab === 'potential' ? "bg-white text-rose-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
               )}
             >
-              <Zap className="w-3.5 h-3.5" /> 蓝海潜力选品
+              <Zap className="w-3.5 h-3.5" /> AI 选品引擎
             </button>
             <button
               onClick={() => setActiveTab('benchmarking')}
@@ -930,7 +815,7 @@ const SelectionEngine = () => {
                             <Box className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
                             <div>
                               <strong className="text-slate-800 block">货源供货策略:</strong>
-                              首批起订量 MOQ 建议在 {selectedCompareProduct.data.moq} 件，保持 {selectedCompareProduct.data.leadTime} 天的极限稳产备料周期。
+                              首批起订量 MOQ 建议在 {selectedCompareProduct.data.moq} 件，保持 {selectedCompareProduct.data.leadTime} 天的极限补货备料周期。
                             </div>
                           </div>
                           <div className="flex gap-2">
