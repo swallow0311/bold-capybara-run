@@ -84,6 +84,13 @@ const ComplianceQA = () => {
     return <Badge className={cn("border-none text-[10px] font-bold", styles[status])}>{status}</Badge>;
   };
 
+  // 确保当且仅当详情数据属于当前所选页签时才做类型相关的属性提取与展示
+  const isDetailItemValid = detailItem && (
+    (activeModule === 'text' && detailItem.id.startsWith('T')) ||
+    (activeModule === 'image' && detailItem.id.startsWith('I')) ||
+    (activeModule === 'video' && detailItem.id.startsWith('V'))
+  );
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full space-y-4 relative text-left">
@@ -92,7 +99,7 @@ const ComplianceQA = () => {
         <Card className="border-none shadow-sm shrink-0">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <Tabs value={activeModule} onValueChange={setActiveModule} className="w-auto">
+              <Tabs value={activeModule} onValueChange={(val) => { setActiveModule(val); setSelectedIds([]); }} className="w-auto">
                 <TabsList className="bg-slate-100/50 p-1">
                   <TabsTrigger value="text" className="text-xs gap-2"><FileText className="w-3.5 h-3.5" />文本质检</TabsTrigger>
                   <TabsTrigger value="image" className="text-xs gap-2"><ImageIcon className="w-3.5 h-3.5" />图片质检</TabsTrigger>
@@ -260,12 +267,12 @@ const ComplianceQA = () => {
               </CardTitle>
             </CardHeader>
             <ScrollArea className="flex-1">
-              {detailItem ? (
+              {isDetailItemValid ? (
                 <div className="p-5 space-y-6 text-left">
                   {/* 预览区 */}
                   <div className="space-y-2">
                     <Label className="text-[11px] font-bold text-slate-400 uppercase">内容预览</Label>
-                    {activeModule === 'text' && (
+                    {activeModule === 'text' && detailItem.content && (
                       <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs leading-relaxed font-mono">
                         {detailItem.content.split('“').map((part: string, i: number) => {
                           if (i === 0) return part;
@@ -281,10 +288,10 @@ const ComplianceQA = () => {
                         })}
                       </div>
                     )}
-                    {activeModule === 'image' && (
+                    {activeModule === 'image' && detailItem.url && (
                       <div className="relative aspect-square bg-slate-900 rounded-xl overflow-hidden border border-slate-100">
                         <img src={detailItem.url} className="w-full h-full object-cover opacity-80" alt="preview" />
-                        {detailItem.risks.map((risk: any, idx: number) => (
+                        {detailItem.risks && detailItem.risks.map((risk: any, idx: number) => (
                           <div key={idx} className="absolute top-4 left-4 w-20 h-20 border-2 border-rose-500 bg-rose-500/20 animate-pulse flex items-center justify-center">
                             <Badge className="bg-rose-500 text-white text-[8px] absolute -top-2 -left-2">风险点</Badge>
                           </div>
@@ -297,7 +304,7 @@ const ComplianceQA = () => {
                         <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-700">
                           <div className="absolute left-[30%] w-2 h-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]" />
                         </div>
-                        {detailItem.timeNode !== '-' && (
+                        {detailItem.timeNode && detailItem.timeNode !== '-' && (
                           <Badge className="absolute bottom-4 left-4 bg-rose-500 text-white text-[9px]">{detailItem.timeNode} 违规节点</Badge>
                         )}
                       </div>
@@ -307,7 +314,7 @@ const ComplianceQA = () => {
                   {/* 风险列表 */}
                   <div className="space-y-3">
                     <Label className="text-[11px] font-bold text-slate-400 uppercase">风险点诊断报告</Label>
-                    {detailItem.risks.length > 0 ? (
+                    {detailItem.risks && detailItem.risks.length > 0 ? (
                       detailItem.risks.map((risk: any, idx: number) => (
                         <div key={idx} className="p-3 bg-rose-50/30 border border-rose-100 rounded-xl space-y-2">
                           <div className="flex justify-between items-center">
@@ -334,7 +341,7 @@ const ComplianceQA = () => {
                     )}
                   </div>
 
-                  {/* 溯源日志 */}
+                  {/* 结构化溯源信息 */}
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
                       <Info className="w-3.5 h-3.5 text-slate-400" />
@@ -348,11 +355,11 @@ const ComplianceQA = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4 opacity-40">
-                  <ShieldCheck className="w-16 h-16 text-slate-300" />
+                <div className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-4 opacity-40">
+                  <ShieldCheck className="w-16 h-16 text-slate-300 animate-pulse" />
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-slate-500">暂未选择检测项</p>
-                    <p className="text-xs text-slate-400">请从左侧列表中选择一项查看详细质检报告</p>
+                    <p className="text-sm font-bold text-slate-500">检测引擎扫描中...</p>
+                    <p className="text-xs text-slate-400">正在拉取该类型的原始诊断数据，请稍候</p>
                   </div>
                 </div>
               )}
@@ -498,7 +505,7 @@ const ComplianceQA = () => {
                         <p className="text-xs font-bold text-slate-700">{rule.label}</p>
                         <p className="text-[10px] text-slate-400 leading-normal">{rule.desc}</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch defaultChecked className="scale-75" />
                     </div>
                   ))}
                 </div>
